@@ -1,9 +1,9 @@
 const mongoose=require('mongoose');
 mongoose.connect('mongodb://127.0.0.1:27017/test');
 
- const userSchema = mongoose.Schema({
-    username:String,
+ const bookingsSchema = mongoose.Schema({
+    bookingsname:String,
     email:String,
     password:String
 })
-module.exports=mongoose.model('user',userSchema);
+module.exports=mongoose.model('bookings',bookingsSchema);
