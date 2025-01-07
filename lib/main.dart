@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:user/core/config/theme/app_theme.dart';
+import 'package:user/presentation/splash/pages/splash.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,11 +13,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme:ThemeData(
-        colorScheme:ColorScheme.fromSeed(seedColor: Colors.green),
-        useMaterial3:true,
-      ),
-      home:Container()
+      debugShowCheckedModeBanner: false,
+      theme:AppTheme.lightTheme,
+      home:const SplashPage(),
     );
 }
 }
