@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:user/presentation/intro/pages/get_started.dart';
+import 'package:user/presentation/intro/pages/get_started_screen.dart';
 
-class SplashPage extends StatelessWidget {
+class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
 
+  @override
+  State<SplashPage> createState() => _SplashPageState();
+}
+
+class _SplashPageState extends State<SplashPage> {
+  @override
+  void initState(){
+    super.initState();
+    redirect();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,6 +28,13 @@ class SplashPage extends StatelessWidget {
         ),
       )
     );
+  }
 
+  //delay the time logo view
+  Future<void>redirect() async{
+    await Future.delayed(const Duration(seconds:2));
+    Navigator.pushReplacement(context,
+    MaterialPageRoute(
+      builder: (BuildContext context) => const GetStartedScreen()));
   }
 }
