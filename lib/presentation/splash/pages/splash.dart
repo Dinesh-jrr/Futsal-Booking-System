@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:user/presentation/intro/pages/get_started.dart';
 import 'package:user/presentation/intro/pages/get_started_screen.dart';
 
 class SplashPage extends StatefulWidget {
@@ -30,6 +29,7 @@ class _SplashPageState extends State<SplashPage> {
     );
   }
 
+//comments yet to be added
   //delay the time logo view
   Future<void>redirect() async{
     await Future.delayed(const Duration(seconds:2));

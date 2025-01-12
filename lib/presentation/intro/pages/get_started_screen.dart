@@ -22,13 +22,10 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
           logo: 'assets/images/logo.png',
           title: "Welcome to FutsalApp",
           description: "Discover the best futsal courts near you!",
-          buttonText: "Next",
+          buttonText: "Get Started",
           onButtonTap: () {
             // Navigate to the next page
-            _pageController.nextPage(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-            );
+            Navigator.pushReplacementNamed(context, '/home');
           },
         ),
         GetStarted(
@@ -42,7 +39,7 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
             _pageController.nextPage(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
-            );
+            );         
           },
         ),
         GetStarted(
