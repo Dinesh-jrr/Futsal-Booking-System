@@ -151,8 +151,8 @@ class SignIn extends StatelessWidget {
                 // Handle sign-in logic
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                backgroundColor:AppColors.primary,
+                padding: const EdgeInsets.symmetric(vertical: 24.0),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
@@ -167,51 +167,63 @@ class SignIn extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: 30),
 
             // Sign in with Google button
             OutlinedButton.icon(
-              onPressed: () {
-                // Handle Google sign-in logic
-              },
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Colors.green, width: 2),
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+                onPressed: () {
+                  // Handle Google sign-in logic
+                },
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.green, width: 2),
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+                icon: Image.asset(
+                  'assets/icons/google.png',  // Update the path here
+                  height: 24,
+                ),
+                label: const Text(
+                  "Sign in with Google",
+                  style: TextStyle(
+                    fontFamily: 'Roboto',
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                  ),
                 ),
               ),
-              icon: Image.asset(
-                './assets/images/google_logo.png',
-                height: 24,
-              ),
-              label: const Text(
-                "Sign in with Google",
-                style: TextStyle(
-                  fontFamily: 'Roboto',
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
 
             // Already have an account? Sign in
             Center(
               child: TextButton(
                 onPressed: () {
                   // Navigate to sign-up page
-                },
-                child: const Text(
-                  "Don't have an account? Sign Up",
-                  style: TextStyle(
-                    fontFamily: 'Roboto',
-                    fontSize: 16,
-                    color: Colors.black,
-                  ),
+                   },
+            child: const Text.rich(
+              TextSpan(
+                text: "Don't have an account? ",
+                style: TextStyle(
+                  fontFamily: 'Roboto',
+                  fontSize: 16,
+                  color: Colors.black, // Regular text color
                 ),
+                children: [
+                  TextSpan(
+                    text: "Sign Up", // Text to color
+                    style: TextStyle(
+                      fontFamily: 'Roboto',
+                      fontSize: 16,
+                      color: AppColors.primary, // Apply primary color here
+                    ),
+                  ),
+                ],
               ),
+            ),
+          ),
             ),
           ],
         ),
