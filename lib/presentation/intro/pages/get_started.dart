@@ -51,6 +51,7 @@ class GetStarted extends StatelessWidget {
                       ),
                     ],
                   ),
+                   const SizedBox(height: 20),
                   // Text content (title and description)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -80,7 +81,7 @@ class GetStarted extends StatelessWidget {
               ),
             ),
           ),
-          
+           const SizedBox(height: 20),
           // Lower Block: Static content (button)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),

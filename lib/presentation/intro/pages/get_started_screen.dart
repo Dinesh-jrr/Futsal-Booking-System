@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:user/presentation/auth/pages/signin.dart';
+//import 'package:user/presentation/auth/pages/signup.dart';
 import 'package:user/presentation/intro/pages/get_started.dart';
 
 class GetStartedScreen extends StatefulWidget {
@@ -22,10 +24,14 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
           logo: 'assets/images/logo.png',
           title: "Welcome to FutsalApp",
           description: "Discover the best futsal courts near you!",
-          buttonText: "Get Started",
+          buttonText: "Next",
           onButtonTap: () {
             // Navigate to the next page
-            Navigator.pushReplacementNamed(context, '/home');
+             // Navigate to the next page
+            _pageController.nextPage(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            ); 
           },
         ),
         GetStarted(
@@ -50,7 +56,7 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
           buttonText: "Get Started",
           onButtonTap: () {
             // Navigate to the final page (or handle final navigation)
-            Navigator.pushNamed(context, '/login');
+            Navigator.push(context, MaterialPageRoute(builder: (BuildContext context)=>const SignIn())); 
           },
         ),
       ],
