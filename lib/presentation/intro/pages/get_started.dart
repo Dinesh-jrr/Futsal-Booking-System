@@ -98,20 +98,27 @@ class GetStarted extends StatelessWidget {
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: onButtonTap, // On tap will trigger navigation
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: Text(
-                      buttonText,
-                      style: const TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                  ),
+                  child:  
+            // Next Button
+            ElevatedButton(
+              onPressed: onButtonTap,
+              style: ElevatedButton.styleFrom(
+                backgroundColor:AppColors.primary,
+                padding: const EdgeInsets.symmetric(vertical: 24.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+              child: const Text(
+                "Next",
+                style: TextStyle(
+                  fontFamily: 'Roboto',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
                 ),
               ],
             ),

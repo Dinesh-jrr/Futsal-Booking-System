@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:user/core/config/theme/app_colors.dart';
+import 'package:user/presentation/auth/pages/signup.dart';
 
 class SignIn extends StatelessWidget {
   const SignIn({super.key});
@@ -12,6 +13,7 @@ class SignIn extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const SizedBox(height:40,),
             // Logo at the top
             Center(
               child: Container(
@@ -202,6 +204,10 @@ class SignIn extends StatelessWidget {
               child: TextButton(
                 onPressed: () {
                   // Navigate to sign-up page
+                   Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (BuildContext contexts) => const Signup()),
+                    );
                    },
             child: const Text.rich(
               TextSpan(
