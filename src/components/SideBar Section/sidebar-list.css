@@ -1,0 +1,43 @@
+.listItem {
+    margin: 1rem 0;
+    list-style: none; /* Space between list items */
+}
+
+/* Link Style */
+.menuLink {
+    display: flex; /* Flex layout for icon and text */
+    align-items: center; /* Center align icon and text vertically */
+    justify-content: flex-start; /* Align items to the left */
+    text-decoration: none; /* Remove underline from links */
+    padding: 1rem 1.5rem; /* Add padding around items */
+    border-radius: 8px; /* Rounded corners */
+    background-color: transparent; /* Default background */
+    transition: all 0.3s ease; /* Smooth transitions for hover and click */
+    font-size: 20px; /* Adjust font size for better visibility */
+    font-weight: 500; /* Slightly bold text */
+    color: black; /* Light text color */
+    cursor: pointer; /* Change cursor to pointer */
+}
+
+/* Icon Style */
+.menuLink .icons {
+    font-size: 1.5rem; /* Larger icon size */
+    margin-right: 1rem; /* Space between icon and text */
+    color: inherit; /* Use same color as the text */
+}
+
+/* Hover Effect */
+.menuLink:hover {
+    background-color: #259F32; /* Highlight background on hover */
+    color: #ffffff; /* Bright text on hover */
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow effect */
+    transform: translateX(5px); /* Slide the item slightly to the right */
+}
+
+/* Active/Clicked Item */
+.menuLink.active {
+    background-color: #1abc9c; /* Distinct color for active item */
+    color: #ffffff; /* Bright text for active item */
+    font-weight: 600; /* Make it slightly bolder */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); /* Slightly stronger shadow */
+}
