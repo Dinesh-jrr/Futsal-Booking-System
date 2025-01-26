@@ -1,9 +1,93 @@
 import 'package:flutter/material.dart';
 import 'package:user/core/config/theme/app_colors.dart';
 import 'package:user/presentation/auth/pages/signup.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert'; // To handle JSON response
 
-class SignIn extends StatelessWidget {
+class SignIn extends StatefulWidget {
   const SignIn({super.key});
+
+  @override
+  State<SignIn> createState() => _SignInState();
+}
+
+class _SignInState extends State<SignIn> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  Future<void> _signIn() async {
+    final String email = _emailController.text;
+    final String password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      // Handle empty fields
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please fill in both fields")),
+      );
+      return;
+    }
+
+    try {
+      // Send POST request to login API
+      final response = await http.post(
+        Uri.parse('http://localhost:5000/api/users/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'email': email,
+          'password': password,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // Parse the response to get the token
+        final Map<String, dynamic> responseBody = json.decode(response.body);
+
+        if (responseBody.containsKey('token')) {
+          final String token = responseBody['token']; // Get the token from the response
+
+          // Store the token in shared preferences
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('auth_token', token);
+
+          // Navigate to home screen after successful login (or main app screen)
+          Navigator.pushReplacementNamed(context, '/home');
+        } else {
+          // Handle case when the token is not found
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Login failed: No token found")),
+          );
+        }
+      } else {
+        // Handle server error or incorrect credentials
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Login failed: Invalid credentials")),
+        );
+      }
+    } catch (e) {
+       print("Error: $e");
+      // Handle network or other errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Login failed: Network error")),
+      );
+    }
+  }
+
+  Future<void> _checkSession() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('auth_token');
+
+    if (token != null) {
+      // Token found, navigate to the home screen
+      Navigator.pushReplacementNamed(context, '/home');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _checkSession(); // Check session on screen load
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +97,7 @@ class SignIn extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height:40,),
+            const SizedBox(height: 40),
             // Logo at the top
             Center(
               child: Container(
@@ -32,7 +116,7 @@ class SignIn extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // Create Account text
+            // Welcome text
             const Center(
               child: Text(
                 "Welcome !",
@@ -45,88 +129,83 @@ class SignIn extends StatelessWidget {
             ),
             const SizedBox(height: 15),
             const Center(
-              child:  Text(
+              child: Text(
                 "Sign in to your account",
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black
+                  color: Colors.black,
                 ),
               ),
             ),
-            const SizedBox(height:20,),
+            const SizedBox(height: 20),
 
             // Email input field
-          const Text(
-                "Email",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+            const Text(
+              "Email",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
               ),
+            ),
             const SizedBox(height: 8),
             TextField(
-                decoration: InputDecoration(
-                   prefixIcon: const Icon(Icons.email, color: Colors.green),
-                  hintText: 'Enter your email',
-                  contentPadding: const EdgeInsets.symmetric(vertical: 20),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0), // Optional: Rounded corners
-                    borderSide: const BorderSide(color: Colors.green, width: 1.5), // Stroke width and color
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(color: Colors.green, width: 1.5),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(color: Colors.green, width: 1.5),
-                  ),
-                  //prefixIcon: const Icon(Icons.email, color: Colors.green),
-                  fillColor: Colors.transparent, // Ensure the background is not filled
-                  filled: false, // Disable background filling
+              controller: _emailController,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.email, color: Colors.green),
+                hintText: 'Enter your email',
+                contentPadding: const EdgeInsets.symmetric(vertical: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: const BorderSide(color: Colors.green, width: 1.5),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: const BorderSide(color: Colors.green, width: 1.5),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: const BorderSide(color: Colors.green, width: 1.5),
                 ),
               ),
+            ),
             const SizedBox(height: 25),
-
 
             // Password input field
             const Text(
-                "Password",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+              "Password",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
               ),
-            const SizedBox(height: 8,),
+            ),
+            const SizedBox(height: 8),
             TextField(
-                decoration: InputDecoration(
-                   prefixIcon: const Icon(Icons.password, color: Colors.green),
-                  hintText: 'Enter your Password',
-                  contentPadding: const EdgeInsets.symmetric(vertical: 20),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0), // Optional: Rounded corners
-                    borderSide: const BorderSide(color: AppColors.primary, width: 1.5), // Stroke width and color
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(color: AppColors.primary,width: 1.5),
-                  ),
-                  //prefixIcon: const Icon(Icons.email, color: Colors.green),
-                  fillColor: Colors.transparent, // Ensure the background is not filled
-                  filled: false, // Disable background filling
+              controller: _passwordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.password, color: Colors.green),
+                hintText: 'Enter your Password',
+                contentPadding: const EdgeInsets.symmetric(vertical: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
                 ),
               ),
+            ),
             const SizedBox(height: 8),
 
-
-             // Forgot Password link (right-aligned)
+            // Forgot Password link (right-aligned)
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -137,7 +216,6 @@ class SignIn extends StatelessWidget {
                   child: const Text(
                     "Forgot Password?",
                     style: TextStyle(
-                      fontFamily: 'Roboto',
                       fontSize: 14,
                       color: Colors.red,
                     ),
@@ -145,15 +223,13 @@ class SignIn extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height:30),
+            const SizedBox(height: 30),
 
             // Sign In button
             ElevatedButton(
-              onPressed: () {
-                // Handle sign-in logic
-              },
+              onPressed: _signIn,
               style: ElevatedButton.styleFrom(
-                backgroundColor:AppColors.primary,
+                backgroundColor: AppColors.primary,
                 padding: const EdgeInsets.symmetric(vertical: 24.0),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),
@@ -173,63 +249,65 @@ class SignIn extends StatelessWidget {
 
             // Sign in with Google button
             OutlinedButton.icon(
-                onPressed: () {
-                  // Handle Google sign-in logic
-                },
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.green, width: 2),
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                ),
-                icon: Image.asset(
-                  'assets/icons/google.png',  // Update the path here
-                  height: 24,
-                ),
-                label: const Text(
-                  "Sign in with Google",
-                  style: TextStyle(
-                    fontFamily: 'Roboto',
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green,
-                  ),
+              onPressed: () {
+                // Handle Google sign-in logic
+              },
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.green, width: 2),
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
+              icon: Image.asset(
+                'assets/icons/google.png',
+                height: 24,
+              ),
+              label: const Text(
+                "Sign in with Google",
+                style: TextStyle(
+                  fontFamily: 'Roboto',
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
+              ),
+            ),
             const SizedBox(height: 30),
 
-            // Already have an account? Sign in
+            // Already have an account? Sign up
             Center(
               child: TextButton(
                 onPressed: () {
                   // Navigate to sign-up page
-                   Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (BuildContext contexts) => const Signup()),
-                    );
-                   },
-            child: const Text.rich(
-              TextSpan(
-                text: "Don't have an account? ",
-                style: TextStyle(
-                  fontFamily: 'Roboto',
-                  fontSize: 16,
-                  color: Colors.black, // Regular text color
-                ),
-                children: [
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (BuildContext context) => const SignUp(),
+                    ),
+                  );
+                },
+                child: const Text.rich(
                   TextSpan(
-                    text: "Sign Up", // Text to color
+                    text: "Don't have an account? ",
                     style: TextStyle(
                       fontFamily: 'Roboto',
                       fontSize: 16,
-                      color: AppColors.primary, // Apply primary color here
+                      color: Colors.black,
                     ),
+                    children: [
+                      TextSpan(
+                        text: "Sign Up",
+                        style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontSize: 16,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
             ),
           ],
         ),
