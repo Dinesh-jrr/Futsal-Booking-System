@@ -3,12 +3,14 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 dotenv.config();
 connectDB();
 
 const app = express();
 app.use(bodyParser.json());
+app.use(cors());
 
 // Routes
 app.use('/api/users', userRoutes);

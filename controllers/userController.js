@@ -4,9 +4,9 @@ const bcrypt = require('bcryptjs');
 
 // Register a new user
 exports.registerUser = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, phoneNumber, password } = req.body; // Removed 'role' since it's not included in the frontend
 
-  if (!name || !email || !password || !role) {
+  if (!name || !email || !phoneNumber || !password) {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
@@ -16,7 +16,7 @@ exports.registerUser = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    const newUser = await User.create({ name, email, password, role });
+    const newUser = await User.create({ name, email, phoneNumber, password });
     res.status(201).json({ message: 'User registered successfully', user: newUser });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
