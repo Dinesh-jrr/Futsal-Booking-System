@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
       
       // Define named routes for navigation
       routes: {
-        '/home': (context) => const Homepage(), // Replace with your actual Home page
+        '/home': (context) => HomePage(), // Replace with your actual Home page
         // Add other routes here as needed
       },
 
