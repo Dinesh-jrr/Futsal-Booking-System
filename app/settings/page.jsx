@@ -1,11 +1,11 @@
 
 "use client"
-import AdminFutsalListings from "@/components/AdminFutsalListing"
+import AdminSettings from "../../components/AdminSettings";
 export default function Home() {
   return (
     <div className="p-8">
 
-      <AdminFutsalListings/>
+      <AdminSettings/>
      
     </div>
   );

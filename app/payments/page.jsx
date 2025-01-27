@@ -1,11 +1,11 @@
 
 "use client"
-import AdminFutsalListings from "@/components/AdminFutsalListing"
+import AdminPaymentListings from "@/components/AdminPaymentListing"
 export default function Home() {
   return (
     <div className="p-8">
 
-      <AdminFutsalListings/>
+      <AdminPaymentListings/>
      
     </div>
   );
