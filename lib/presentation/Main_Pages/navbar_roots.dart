@@ -28,8 +28,9 @@ class _NavbarState extends State<Navbar> {
       backgroundColor: Colors.white,
       body: _screens[_selectedIndex],
       bottomNavigationBar: Container(
-        height: 80,
+        height: 100, // Increase height of bottom container to allow more space for QR icon
         child: Stack(
+          clipBehavior: Clip.none,  // Important to allow QR icon to overflow
           children: [
             // BottomNavigationBar
             Positioned.fill(
@@ -44,6 +45,7 @@ class _NavbarState extends State<Navbar> {
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
                   ),
+                  iconSize: 28,
                   currentIndex: _selectedIndex,
                   onTap: (index) {
                     setState(() {
@@ -71,9 +73,9 @@ class _NavbarState extends State<Navbar> {
                 ),
               ),
             ),
-            // QR Icon in the middle
+            // QR Icon positioned above the BottomNavigationBar
             Positioned(
-              bottom: 15, // Adjust this value to position it correctly
+              bottom: 40, // Adjust to lift the QR icon above the nav bar
               left: MediaQuery.of(context).size.width / 2 - 30, // Center horizontally
               child: GestureDetector(
                 onTap: () {
