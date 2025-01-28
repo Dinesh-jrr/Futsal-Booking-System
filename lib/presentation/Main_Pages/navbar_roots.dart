@@ -10,59 +10,93 @@ class Navbar extends StatefulWidget {
 }
 
 class _NavbarState extends State<Navbar> {
-
-  int _selectedIndex=0;
-  final _screens=[
-    //home screen
+  int _selectedIndex = 0;
+  final _screens = [
+    // Home screen
     HomePage(),
-    //bookings screen
+    // Bookings screen
     Container(),
-    //chat screen
+    // Chat screen
     Container(),
-    //profile screen
-    Container()
+    // Profile screen
+    Container(),
   ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.white,
-        body: _screens[_selectedIndex],
-        bottomNavigationBar: Container(
-          height: 80,
-          child: BottomNavigationBar(
-            backgroundColor: Colors.white,
-            type:BottomNavigationBarType.fixed,
-            selectedItemColor: AppColors.primary,
-            unselectedItemColor: Colors.black26,
-            selectedLabelStyle: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
+      backgroundColor: Colors.white,
+      body: _screens[_selectedIndex],
+      bottomNavigationBar: Container(
+        height: 80,
+        child: Stack(
+          children: [
+            // BottomNavigationBar
+            Positioned.fill(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: BottomNavigationBar(
+                  backgroundColor: Colors.white,
+                  type: BottomNavigationBarType.fixed,
+                  selectedItemColor: AppColors.primary,
+                  unselectedItemColor: Colors.black26,
+                  selectedLabelStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                  currentIndex: _selectedIndex,
+                  onTap: (index) {
+                    setState(() {
+                      _selectedIndex = index;
+                    });
+                  },
+                  items: const [
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.home_filled),
+                      label: 'Home',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.book),
+                      label: 'Bookings',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.chat),
+                      label: 'Chat',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.account_circle),
+                      label: 'Account',
+                    ),
+                  ],
+                ),
+              ),
             ),
-              currentIndex:_selectedIndex,
-              onTap:(index){
-                setState(() {
-                  _selectedIndex=index;
-                });
-              },
-              items:const [
-                BottomNavigationBarItem(icon: Icon(Icons.home_filled),
-                label:'Home',
+            // QR Icon in the middle
+            Positioned(
+              bottom: 15, // Adjust this value to position it correctly
+              left: MediaQuery.of(context).size.width / 2 - 30, // Center horizontally
+              child: GestureDetector(
+                onTap: () {
+                  // Handle QR action
+                },
+                child: Container(
+                  height: 60,
+                  width: 60,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary, // Custom color
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.qr_code_2, // QR icon
+                    color: Colors.white,
+                    size: 30,
+                  ),
                 ),
-                BottomNavigationBarItem(icon: Icon(Icons.home_filled),
-                label:'Bookings',
-                ),
-                BottomNavigationBarItem(icon: Icon(Icons.home_filled),
-                label:'Chat',
-                ),
-                BottomNavigationBarItem(icon: Icon(Icons.home_filled),
-                label:'Account',
-                ),
-              ]
-  
+              ),
             ),
-
-            
+          ],
         ),
+      ),
     );
   }
 }
