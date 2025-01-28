@@ -1,8 +1,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:user/core/config/theme/app_theme.dart';
-import 'package:user/presentation/Main_Pages/HomePage.dart';
+import 'package:user/presentation/Main_Pages/homePage.dart';
 import 'package:user/presentation/splash/pages/splash.dart';
+import 'package:user/presentation/Main_Pages/navbar_roots.dart';
 
 
 void main() {
@@ -22,7 +23,8 @@ class MyApp extends StatelessWidget {
       
       // Define named routes for navigation
       routes: {
-        '/home': (context) => HomePage(), // Replace with your actual Home page
+        // '/navbar':(context)=> const Navbar(),
+        '/home': (context) => const Navbar(), // Replace with your actual Home page
         // Add other routes here as needed
       },
 
