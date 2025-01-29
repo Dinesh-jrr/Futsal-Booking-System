@@ -102,3 +102,6 @@ class _NavbarState extends State<Navbar> {
     );
   }
 }
+
+//colours getting updated
+//green is the color
