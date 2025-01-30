@@ -38,3 +38,5 @@ class _SplashPageState extends State<SplashPage> {
       builder: (BuildContext context) => const GetStartedScreen()));
   }
 }
+
+//splash updated
