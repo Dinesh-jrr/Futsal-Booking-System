@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'popularFutsal.dart'; // Import the Popular Futsal page
+import 'nearbyFutsal.dart';  // Import the Nearby Futsal page
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -12,6 +14,7 @@ class HomePage extends StatelessWidget {
           children: [
             // Top Header Section
             Container(
+              height: 300,
               decoration: const BoxDecoration(
                 color: Colors.green,
                 borderRadius: BorderRadius.only(
@@ -45,18 +48,18 @@ class HomePage extends StatelessWidget {
                         ],
                       ),
                       IconButton(
-                        icon: const Icon(Icons.notifications, color: Colors.white),
+                        icon: const Icon(Icons.notifications, color: Colors.white),iconSize: 40.0,
                         onPressed: () {
                           // Handle notification click
                         },
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 40),
                   // Title
                   const Center(
                     child: Text(
-                      "Find Futsal!",
+                      "Find Futsal !",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,
@@ -105,11 +108,11 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 20),
 
             // Popular Futsal Section
-            _buildFutsalSection(title: "Popular Futsal", context: context),
+            _buildFutsalSection(title: "Popular Futsal", context: context,navigateTo: const PopularFutsalPage(),),
             const SizedBox(height: 20),
 
             // Nearby Futsal Section
-            _buildFutsalSection(title: "Nearby Futsal", context: context),
+            _buildFutsalSection(title: "Nearby Futsal", context: context,navigateTo: const NearbyFutsalPage(),),
           ],
         ),
       ),
@@ -117,7 +120,7 @@ class HomePage extends StatelessWidget {
   }
 
   // Function to build the futsal section
-  Widget _buildFutsalSection({required String title, required BuildContext context}) {
+  Widget _buildFutsalSection({required String title, required BuildContext context, required Widget navigateTo}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
@@ -133,6 +136,10 @@ class HomePage extends StatelessWidget {
               TextButton(
                 onPressed: () {
                   // Handle View More navigation
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => navigateTo),
+                  );
                 },
                 child: const Text("View more", style: TextStyle(color: Colors.green)),
               ),
