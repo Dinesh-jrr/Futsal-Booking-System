@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:user/core/config/theme/app_colors.dart';
-import 'package:user/presentation/Main_Pages/HomePage.dart';
+import 'package:user/presentation/Main_Pages/HomePage/HomePage.dart';
 
 class Navbar extends StatefulWidget {
   const Navbar({super.key});

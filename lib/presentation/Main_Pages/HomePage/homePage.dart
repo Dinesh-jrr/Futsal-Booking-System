@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'popularFutsal.dart'; // Import the Popular Futsal page
-import 'nearbyFutsal.dart';  // Import the Nearby Futsal page
+import '../HomePage/popularFutsal.dart'; // Import the Popular Futsal page
+import '../HomePage/nearbyFutsal.dart'; // Import the Nearby Futsal page
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -22,7 +22,8 @@ class HomePage extends StatelessWidget {
                   bottomRight: Radius.circular(20),
                 ),
               ),
-              padding: const EdgeInsets.only(top: 50, left: 16, right: 16, bottom: 20),
+              padding: const EdgeInsets.only(
+                  top: 50, left: 16, right: 16, bottom: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -48,7 +49,9 @@ class HomePage extends StatelessWidget {
                         ],
                       ),
                       IconButton(
-                        icon: const Icon(Icons.notifications, color: Colors.white),iconSize: 40.0,
+                        icon: const Icon(Icons.notifications,
+                            color: Colors.white),
+                        iconSize: 40.0,
                         onPressed: () {
                           // Handle notification click
                         },
@@ -77,7 +80,8 @@ class HomePage extends StatelessWidget {
                             filled: true,
                             fillColor: Colors.white,
                             hintText: "Search your futsal!",
-                            prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                            prefixIcon:
+                                const Icon(Icons.search, color: Colors.grey),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(30),
                               borderSide: BorderSide.none,
@@ -94,7 +98,8 @@ class HomePage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: IconButton(
-                          icon: const Icon(Icons.filter_alt, color: Colors.green),
+                          icon:
+                              const Icon(Icons.filter_alt, color: Colors.green),
                           onPressed: () {
                             // Handle filter click
                           },
@@ -108,11 +113,19 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 20),
 
             // Popular Futsal Section
-            _buildFutsalSection(title: "Popular Futsal", context: context,navigateTo: const PopularFutsalPage(),),
+            _buildFutsalSection(
+              title: "Popular Futsal",
+              context: context,
+              navigateTo: const PopularFutsalPage(),
+            ),
             const SizedBox(height: 20),
 
             // Nearby Futsal Section
-            _buildFutsalSection(title: "Nearby Futsal", context: context,navigateTo: const NearbyFutsalPage(),),
+            _buildFutsalSection(
+              title: "Nearby Futsal",
+              context: context,
+              navigateTo: const NearbyFutsalPage(),
+            ),
           ],
         ),
       ),
@@ -120,7 +133,10 @@ class HomePage extends StatelessWidget {
   }
 
   // Function to build the futsal section
-  Widget _buildFutsalSection({required String title, required BuildContext context, required Widget navigateTo}) {
+  Widget _buildFutsalSection(
+      {required String title,
+      required BuildContext context,
+      required Widget navigateTo}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
@@ -131,7 +147,8 @@ class HomePage extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               TextButton(
                 onPressed: () {
@@ -141,18 +158,34 @@ class HomePage extends StatelessWidget {
                     MaterialPageRoute(builder: (context) => navigateTo),
                   );
                 },
-                child: const Text("View more", style: TextStyle(color: Colors.green)),
+                child: const Text("View more",
+                    style: TextStyle(color: Colors.green)),
               ),
             ],
           ),
           SizedBox(
-            height: 200, // Set height for horizontal scroll
+            height: 300, // Set height for horizontal scroll
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: [
-                FutsalCard(name: "Hariyali Futsal", location: "Satungal, KTM", price: 1200),
-                FutsalCard(name: "Green Turf", location: "Lalitpur", price: 1500),
-                FutsalCard(name: "Champion Arena", location: "Bhaktapur", price: 1300),
+                FutsalCard(
+                  name: "Hariyali Futsal",
+                  location: "Satungal, KTM",
+                  price: 1200,
+                  imageUrl: "assets/images/futsal_pitch.jpg",
+                ),
+                FutsalCard(
+                  name: "Green Turf",
+                  location: "Lalitpur",
+                  price: 1500,
+                  imageUrl: "assets/images/futsal_pitch.jpg",
+                ),
+                FutsalCard(
+                  name: "Champion Arena",
+                  location: "Bhaktapur",
+                  price: 1300,
+                  imageUrl: "assets/images/futsal_pitch.jpg",
+                ),
               ],
             ),
           ),
@@ -166,12 +199,14 @@ class FutsalCard extends StatelessWidget {
   final String name;
   final String location;
   final int price;
+  final String imageUrl;
 
   const FutsalCard({
     super.key,
     required this.name,
     required this.location,
     required this.price,
+    required this.imageUrl,
   });
 
   @override
@@ -179,34 +214,51 @@ class FutsalCard extends StatelessWidget {
     return Container(
       width: 200,
       height: 500,
+      
       margin: const EdgeInsets.only(right: 10),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.grey[300],
+        color: Colors.white,
         borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            blurRadius: 5,
+            spreadRadius: 2,
+          ),
+        ],
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min, // Prevents Column from expanding unnecessarily
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Placeholder for futsal image
-          Container(
-            height: 50,
-            width: 50,
-            color: Colors.green,
+          // Futsal Image
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset(
+              imageUrl,
+              width: double.infinity,
+              height: 120,
+              fit: BoxFit.cover,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             name,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
-          Text(location, style: TextStyle(color: Colors.grey[700])),
+          Text(location,
+              style: TextStyle(color: Colors.grey[700], fontSize: 14)),
           const SizedBox(height: 5),
-          const Text("Availability: Yes", style: TextStyle(color: Colors.green)),
-          Text("Price: NPR $price", style: const TextStyle(fontWeight: FontWeight.bold)),
+          const Text(
+            "Availability: Yes",
+            style: TextStyle(color: Colors.green, fontSize: 14),
+          ),
+          Text(
+            "Price: NPR $price",
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          ),
         ],
       ),
     );
   }
 }
-
