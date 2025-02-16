@@ -11,6 +11,11 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  table_calendar: ^3.0.9
+  google_maps_flutter: ^2.5.0
+  cached_network_image: ^3.3.0
+  geolocator: ^10.1.0
+  flutter_rating_bar: ^4.0.1
   flutter_svg: ^1.0.0  # Specify the version for SVG handling
   flutter_bloc: ^8.0.0  # Specify the version for state management
   hydrated_bloc: ^8.0.0  # Specify the version for persistence in bloc

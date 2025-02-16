@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import '../HomePage/popularFutsal.dart'; // Import the Popular Futsal page
-import '../HomePage/nearbyFutsal.dart'; // Import the Nearby Futsal page
+import 'package:user/core/config/theme/app_colors.dart';
+import '../HomePage/popularFutsal.dart';
+import '../HomePage/nearbyFutsal.dart';
+import '../HomePage/futsalDetailScreen.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -49,8 +51,7 @@ class HomePage extends StatelessWidget {
                         ],
                       ),
                       IconButton(
-                        icon: const Icon(Icons.notifications,
-                            color: Colors.white),
+                        icon: const Icon(Icons.notifications, color: Colors.white),
                         iconSize: 40.0,
                         onPressed: () {
                           // Handle notification click
@@ -80,8 +81,7 @@ class HomePage extends StatelessWidget {
                             filled: true,
                             fillColor: Colors.white,
                             hintText: "Search your futsal!",
-                            prefixIcon:
-                                const Icon(Icons.search, color: Colors.grey),
+                            prefixIcon: const Icon(Icons.search, color: Colors.grey),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(30),
                               borderSide: BorderSide.none,
@@ -98,8 +98,7 @@ class HomePage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: IconButton(
-                          icon:
-                              const Icon(Icons.filter_alt, color: Colors.green),
+                          icon: const Icon(Icons.filter_alt, color: Colors.green),
                           onPressed: () {
                             // Handle filter click
                           },
@@ -132,11 +131,11 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // Function to build the futsal section
-  Widget _buildFutsalSection(
-      {required String title,
-      required BuildContext context,
-      required Widget navigateTo}) {
+  Widget _buildFutsalSection({
+    required String title,
+    required BuildContext context,
+    required Widget navigateTo,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
@@ -147,24 +146,21 @@ class HomePage extends StatelessWidget {
             children: [
               Text(
                 title,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               TextButton(
                 onPressed: () {
-                  // Handle View More navigation
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => navigateTo),
                   );
                 },
-                child: const Text("View more",
-                    style: TextStyle(color: Colors.green)),
+                child: const Text("View more", style: TextStyle(color: Colors.green)),
               ),
             ],
           ),
           SizedBox(
-            height: 300, // Set height for horizontal scroll
+            height: 300,
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: [
@@ -173,23 +169,35 @@ class HomePage extends StatelessWidget {
                   location: "Satungal, KTM",
                   price: 1200,
                   imageUrl: "assets/images/futsal_pitch.jpg",
+                  onTap: () => _navigateToDetail(context, "Hariyali Futsal"),
                 ),
                 FutsalCard(
                   name: "Green Turf",
                   location: "Lalitpur",
                   price: 1500,
                   imageUrl: "assets/images/futsal_pitch.jpg",
+                  onTap: () => _navigateToDetail(context, "Green Turf"),
                 ),
                 FutsalCard(
                   name: "Champion Arena",
                   location: "Bhaktapur",
                   price: 1300,
                   imageUrl: "assets/images/futsal_pitch.jpg",
+                  onTap: () => _navigateToDetail(context, "Champion Arena"),
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _navigateToDetail(BuildContext context, String futsalName) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FutsalDetailScreen(futsalName: futsalName),
       ),
     );
   }
@@ -200,6 +208,7 @@ class FutsalCard extends StatelessWidget {
   final String location;
   final int price;
   final String imageUrl;
+  final VoidCallback onTap;
 
   const FutsalCard({
     super.key,
@@ -207,58 +216,98 @@ class FutsalCard extends StatelessWidget {
     required this.location,
     required this.price,
     required this.imageUrl,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 200,
-      height: 500,
-      
-      margin: const EdgeInsets.only(right: 10),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
-            blurRadius: 5,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Futsal Image
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              imageUrl,
-              width: double.infinity,
-              height: 120,
-              fit: BoxFit.cover,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 200,
+        margin: const EdgeInsets.only(right: 10),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withOpacity(0.3),
+              blurRadius: 5,
+              spreadRadius: 2,
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            name,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          Text(location,
-              style: TextStyle(color: Colors.grey[700], fontSize: 14)),
-          const SizedBox(height: 5),
-          const Text(
-            "Availability: Yes",
-            style: TextStyle(color: Colors.green, fontSize: 14),
-          ),
-          Text(
-            "Price: NPR $price",
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-          ),
-        ],
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                imageUrl,
+                width: double.infinity,
+                height: 120,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              name,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            Text(
+              location,
+              style: TextStyle(color: Colors.grey[700], fontSize: 14),
+            ),
+            const SizedBox(height: 5),
+            const Text(
+              "Availability: Yes",
+              style: TextStyle(color: Colors.green, fontSize: 14),
+            ),
+            Text(
+              "Price: NPR $price",
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
+
+
+//google map implementation
+ // Widget _buildLocation() {
+  //   return Container(
+  //     padding: const EdgeInsets.all(16),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         const Text(
+  //           'Location',
+  //           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+  //         ),
+  //         const SizedBox(height: 8),
+  //         SizedBox(
+  //           height: 200,
+  //           child: GoogleMap(
+  //             initialCameraPosition: CameraPosition(
+  //               target: futsalLocation,
+  //               zoom: 15,
+  //             ),
+  //             markers: {
+  //               Marker(
+  //                 markerId: const MarkerId('futsal_location'),
+  //                 position: futsalLocation,
+  //                 infoWindow: InfoWindow(title: widget.futsalName),
+  //               ),
+  //             },
+  //             onMapCreated: (controller) {
+  //               _mapController = controller;
+  //             },
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
