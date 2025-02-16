@@ -11,122 +11,128 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Top Header Section
-            Container(
-              height: 300,
-              decoration: const BoxDecoration(
-                color: Colors.green,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
+      body: CustomScrollView(
+        slivers: [
+          // SliverAppBar: Fixed header with collapsible effect
+          SliverAppBar(
+            expandedHeight: 300,
+            floating: false,
+            pinned: true,  // Keeps the header visible when scrolled
+            automaticallyImplyLeading: false,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.green,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
+                  ),
                 ),
-              ),
-              padding: const EdgeInsets.only(
-                  top: 50, left: 16, right: 16, bottom: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Row for profile and notification icons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          const CircleAvatar(
-                            backgroundColor: Colors.white,
-                            child: Icon(Icons.person, color: Colors.green),
-                          ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            "Hello, Dinesh!",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                padding: const EdgeInsets.only(
+                    top: 50, left: 16, right: 16, bottom: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Row for profile and notification icons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const CircleAvatar(
+                              backgroundColor: Colors.white,
+                              child: Icon(Icons.person, color: Colors.green),
                             ),
-                          ),
-                        ],
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.notifications, color: Colors.white),
-                        iconSize: 40.0,
-                        onPressed: () {
-                          // Handle notification click
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 40),
-                  // Title
-                  const Center(
-                    child: Text(
-                      "Find Futsal !",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  // Search Bar
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: "Search your futsal!",
-                            prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide: BorderSide.none,
+                            const SizedBox(width: 8),
+                            const Text(
+                              "Hello, Dinesh!",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Container(
-                        height: 50,
-                        width: 50,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: IconButton(
-                          icon: const Icon(Icons.filter_alt, color: Colors.green),
+                        IconButton(
+                          icon: const Icon(Icons.notifications, color: Colors.white),
+                          iconSize: 40.0,
                           onPressed: () {
-                            // Handle filter click
+                            // Handle notification click
                           },
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 40),
+                    // Title
+                    const Center(
+                      child: Text(
+                        "Find Futsal !",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 20),
+                    // Search Bar
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white,
+                              hintText: "Search your futsal!",
+                              prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(30),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Container(
+                          height: 50,
+                          width: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.filter_alt, color: Colors.green),
+                            onPressed: () {
+                              // Handle filter click
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 20),
-
-            // Popular Futsal Section
-            _buildFutsalSection(
-              title: "Popular Futsal",
-              context: context,
-              navigateTo: const PopularFutsalPage(),
-            ),
-            const SizedBox(height: 20),
-
-            // Nearby Futsal Section
-            _buildFutsalSection(
-              title: "Nearby Futsal",
-              context: context,
-              navigateTo: const NearbyFutsalPage(),
-            ),
-          ],
-        ),
+          ),
+          
+          // Content Section (Popular Futsals, Nearby Futsals, etc.)
+          SliverList(
+            delegate: SliverChildListDelegate([
+              _buildFutsalSection(
+                title: "Popular Futsal",
+                context: context,
+                navigateTo: const PopularFutsalPage(),
+              ),
+              const SizedBox(height: 20),
+              _buildFutsalSection(
+                title: "Nearby Futsal",
+                context: context,
+                navigateTo: const NearbyFutsalPage(),
+              ),
+            ]),
+          ),
+        ],
       ),
     );
   }
@@ -160,7 +166,7 @@ class HomePage extends StatelessWidget {
             ],
           ),
           SizedBox(
-            height: 300,
+            height: 250,
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: [
@@ -274,40 +280,3 @@ class FutsalCard extends StatelessWidget {
     );
   }
 }
-
-
-//google map implementation
- // Widget _buildLocation() {
-  //   return Container(
-  //     padding: const EdgeInsets.all(16),
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         const Text(
-  //           'Location',
-  //           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-  //         ),
-  //         const SizedBox(height: 8),
-  //         SizedBox(
-  //           height: 200,
-  //           child: GoogleMap(
-  //             initialCameraPosition: CameraPosition(
-  //               target: futsalLocation,
-  //               zoom: 15,
-  //             ),
-  //             markers: {
-  //               Marker(
-  //                 markerId: const MarkerId('futsal_location'),
-  //                 position: futsalLocation,
-  //                 infoWindow: InfoWindow(title: widget.futsalName),
-  //               ),
-  //             },
-  //             onMapCreated: (controller) {
-  //               _mapController = controller;
-  //             },
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
