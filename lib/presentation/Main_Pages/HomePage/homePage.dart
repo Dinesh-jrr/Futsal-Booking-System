@@ -115,16 +115,16 @@ class HomePage extends StatelessWidget {
               ),
             ),
           ),
-          
           // Content Section (Popular Futsals, Nearby Futsals, etc.)
           SliverList(
             delegate: SliverChildListDelegate([
+              const SizedBox(height:40),
               _buildFutsalSection(
                 title: "Popular Futsal",
                 context: context,
                 navigateTo: const PopularFutsalPage(),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 5),
               _buildFutsalSection(
                 title: "Nearby Futsal",
                 context: context,

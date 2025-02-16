@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       // Define named routes for navigation
       routes: {
         // '/navbar':(context)=> const Navbar(),
-        '/home': (context) => const Navbar(), // Replace with your actual Home page
+        '/home': (context) => const Navbar(), 
         // Add other routes here as needed
       },
 

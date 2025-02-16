@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:user/core/config/theme/app_colors.dart';
 import 'package:user/presentation/Main_Pages/HomePage/HomePage.dart';
+import 'package:user/presentation/Main_Pages/Bookings/bookingHistory.dart';
+import 'package:user/presentation/Main_Pages/Chats/chatListScreen.dart';
+import 'package:user/presentation/Main_Pages/Profile/profileScreen.dart';
+
 
 class Navbar extends StatefulWidget {
   const Navbar({super.key});
@@ -15,11 +19,11 @@ class _NavbarState extends State<Navbar> {
     // Home screen
     HomePage(),
     // Bookings screen
-    Container(),
+    BookingHistory(),
     // Chat screen
-    Container(),
+    ChatListScreen(),
     // Profile screen
-    Container(),
+    ProfileScreen(),
   ];
 
   @override
