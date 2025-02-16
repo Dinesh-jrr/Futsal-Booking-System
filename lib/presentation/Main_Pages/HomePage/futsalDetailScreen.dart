@@ -282,40 +282,43 @@ class _FutsalDetailScreenState extends State<FutsalDetailScreen> {
   }
 
   Widget _buildBookButton() {
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: ElevatedButton(
-              onPressed: () {
-                print("Book now pressed");
-        // Navigate to the booking details screen
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => BookNow(
-              futsalName: widget.futsalName,
-              selectedDay: _selectedDay,
-              selectedTimeSlot: _selectedTimeSlot,
-            ),
-          ),
-        );
-      },
-              style: ElevatedButton.styleFrom(
-                backgroundColor:AppColors.primary,
-                padding: const EdgeInsets.symmetric(vertical: 24.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+  return Padding(
+    padding: const EdgeInsets.all(12),
+    child: ElevatedButton(
+      onPressed: _selectedTimeSlot == null
+          ? null  // Disables the button if no time slot is selected
+          : () {
+              // Navigate to the booking details screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BookNow(
+                    futsalName: widget.futsalName,
+                    selectedDay: _selectedDay,
+                    selectedTimeSlot: _selectedTimeSlot,
+                  ),
                 ),
-              ),
-              child: const Text(
-                "Book Now",
-                style: TextStyle(
-                  fontFamily: 'Roboto',
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-    );
-  }
+              );
+            },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _selectedTimeSlot == null
+            ? Colors.grey  // Gray color when no time slot is selected
+            : AppColors.primary,  // Original color when a time slot is selected
+        padding: const EdgeInsets.symmetric(vertical: 24.0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+      ),
+      child: const Text(
+        "Book Now",
+        style: TextStyle(
+          fontFamily: 'Roboto',
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+    ),
+  );
+}
 }
