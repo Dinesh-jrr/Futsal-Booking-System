@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 const sidebarItems = [
-  { name: "Dashboard", icon: LayoutDashboard, href: "/" },
+  { name: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
   { name: "Users", icon: Users, href: "/users" },
   { name: "Futsal", icon: Dumbbell, href: "/futsal" },
   { name: "Bookings", icon: CalendarRange, href: "/bookings" },

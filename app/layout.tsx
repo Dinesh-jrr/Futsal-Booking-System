@@ -1,36 +1,33 @@
+'use client';
 import './globals.css';
-import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import NextTopLoader from 'nextjs-toploader';
-
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata: Metadata = {
-  title: 'FootLock',
-  description: 'Created by Dinesh Singh',
-};
+
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <html lang="en">
-      <body className={`${inter.className} p-4`}> 
-      <NextTopLoader />
-        <div className="flex h-[calc(100vh-2rem)] bg-background rounded-xl overflow-hidden">
-          {/* Sidebar remains static */}
-          <Sidebar />
-          {/* Main container is scrollable */}
-          <main className="flex-1 bg-white rounded-r-xl overflow-y-auto">
-            <Header/>
-            {children}
-          </main>
-        </div>
-      </body>
-    </html>
-  );
-}
+  
+    return (
+      <html lang="en">
+        <body className={`${inter.className} p-4`}>
+          <NextTopLoader />
+          <div className="flex h-[calc(100vh-2rem)] bg-background rounded-xl overflow-hidden">
+            {/* Sidebar remains static */}
+            {/* <Sidebar /> */}
+            {/* Main container is scrollable */}
+            <main className="flex-1 bg-white rounded-r-xl overflow-y-auto">
+              {/* <Header /> */}
+              {children}
+            </main>
+          </div>
+        </body>
+      </html>
+    );
+  } 
