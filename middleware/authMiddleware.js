@@ -1,18 +1,30 @@
 const jwt = require('jsonwebtoken');
 
-const protect = (req, res, next) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
-  if (!token) {
-    return res.status(401).json({ message: 'No token, authorization denied' });
-  }
+const protect = (roles = []) => {
+  return (req, res, next) => {
+    // Get token from Authorization header
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    if (!token) {
+      return res.status(401).json({ message: 'No token, authorization denied' });
+    }
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    res.status(401).json({ message: 'Token is not valid' });
-  }
+    try {
+      // Verify the token and decode it
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      
+      // Attach user data to the request object
+      req.user = decoded;
+
+      // If roles are passed in, check if the user's role matches
+      if (roles.length && !roles.includes(req.user.role)) {
+        return res.status(403).json({ message: 'Access denied: You do not have the right role' });
+      }
+
+      next();
+    } catch (error) {
+      return res.status(401).json({ message: 'Token is not valid' });
+    }
+  };
 };
 
 module.exports = protect;
