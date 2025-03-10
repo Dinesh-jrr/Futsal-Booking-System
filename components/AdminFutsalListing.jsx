@@ -1,60 +1,75 @@
-import { useState } from "react";
-
-const usersData = [
-  { id: 1, name: "John Doe", email: "john.doe@example.com", phone: "9861524192", status: "Pending" },
-  { id: 2, name: "Jane Smith", email: "jane.smith@example.com", phone: "9861524192", status: "Approved" },
-  { id: 3, name: "Mark Johnson", email: "mark.johnson@example.com", phone: "9861524192", status: "Declined" },
-  { id: 4, name: "Dinesh Singh", email: "jrdinesh1@gmail.com", phone: "9861524192", status: "Pending" },
-  { id: 5, name: "Dinesh Singh", email: "jrdinesh1@gmail.com", phone: "9861524192", status: "Pending" },
-  { id: 6, name: "Dinesh Singh", email: "jrdinesh1@gmail.com", phone: "9861524192", status: "Pending" },
-  { id: 7, name: "Dinesh Singh", email: "jrdinesh1@gmail.com", phone: "9861524192", status: "Pending" },
-  { id: 8, name: "Dinesh Singh", email: "jrdinesh1@gmail.com", phone: "9861524192", status: "Pending" },
-  { id: 9, name: "Dinesh Singh", email: "jrdinesh1@gmail.com", phone: "9861524192", status: "Pending" },
-  { id: 10, name: "Dinesh Singh", email: "jrdinesh1@gmail.com", phone: "9861524192", status: "Pending" },
-];
+'use client';
+import { useState, useEffect } from "react";
 
 export default function AdminFutsalListings() {
-  const [users, setUsers] = useState(usersData);
+  const [futsals, setFutsals] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentFutsal, setCurrentFutsal] = useState(null);
+  const [newFutsal, setNewFutsal] = useState({
+    futsalName: "",
+    location: "",
+    ownerId: "",
+    pricePerHour: 0,
+    availableTimeSlots: [],
+    contactNumber: "",
+    images: [],
+  });
 
-  // Delete user handler
-  const handleDelete = (id) => {
-    setUsers(users.filter((user) => user.id !== id));
+  const apiUrl = "http://localhost:5000/api/futsals"; // API URL for futsals
+
+  // Fetch futsals from the backend API
+  const fetchFutsals = async () => {
+    try {
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      setFutsals(data.futsals); // Assuming 'futsals' is the array of futsal objects
+    } catch (error) {
+      console.error("Error fetching futsals:", error);
+    }
+  };
+
+  // Initial fetch of futsals when component mounts
+  useEffect(() => {
+    fetchFutsals();
+  }, []);
+
+  // Add new futsal handler
+  const handleAddFutsal = async () => {
+    try {
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newFutsal),
+      });
+
+      const addedFutsal = await response.json();
+      setFutsals([...futsals, addedFutsal]); // Add the new futsal to the state
+      setNewFutsal({
+        futsalName: "",
+        location: "",
+        ownerId: "",
+        pricePerHour: 0,
+        availableTimeSlots: [],
+        contactNumber: "",
+        images: [],
+      }); // Clear the form
+    } catch (error) {
+      console.error("Error adding futsal:", error);
+    }
   };
 
   // Show update modal handler
-  const handleUpdate = (user) => {
-    setCurrentUser(user);
+  const handleUpdate = (futsal) => {
+    setCurrentFutsal(futsal);
     setShowModal(true);
   };
 
-  // Handle save update
-  const handleSaveUpdate = () => {
-    setUsers(
-      users.map((user) =>
-        user.id === currentUser.id ? { ...user, ...currentUser } : user
-      )
-    );
-    setShowModal(false);
-  };
-
-  // Add user handler (example)
-  const handleAddUser = () => {
-    const newUser = {
-      id: users.length + 1,
-      name: "New User",
-      email: "new.user@example.com",
-      phone: "1234567890",
-      status: "Pending",
-    };
-    setUsers([...users, newUser]);
-  };
-
   // View details handler
-  const handleViewDetails = (user) => {
-    setCurrentUser(user);
+  const handleViewDetails = (futsal) => {
+    setCurrentFutsal(futsal);
     setShowDetailsModal(true);
   };
 
@@ -65,49 +80,43 @@ export default function AdminFutsalListings() {
           Futsal Management
         </h1>
         <button
-          onClick={handleAddUser}
+          onClick={() => setShowModal(true)} // Show the Add Futsal form
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
-          Add User
+          Add Futsal
         </button>
       </div>
+
       <div className="overflow-x-auto">
-        {/* Make the table body scrollable with max-height */}
         <div className="max-h-96 overflow-y-auto">
           <table className="w-full border-collapse border border-gray-300">
             <thead>
               <tr className="bg-gray-200">
-                <th className="border border-gray-300 px-4 py-2 text-black">ID</th>
+                <th className="border border-gray-300 px-4 py-2 text-black">S.N</th>
                 <th className="border border-gray-300 px-4 py-2 text-black">Name</th>
-                <th className="border border-gray-300 px-4 py-2 text-black">Email</th>
-                <th className="border border-gray-300 px-4 py-2 text-black">Phone</th>
-                <th className="border border-gray-300 px-4 py-2 text-black">Status</th>
+                <th className="border border-gray-300 px-4 py-2 text-black">Location</th>
+                <th className="border border-gray-300 px-4 py-2 text-black">Price Per Hour</th>
+                <th className="border border-gray-300 px-4 py-2 text-black">Available Time Slots</th>
                 <th className="border border-gray-300 px-4 py-2 text-black">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-100">
-                  <td className="border border-gray-300 px-4 py-2 text-black">{user.id}</td>
-                  <td className="border border-gray-300 px-4 py-2 text-black">{user.name}</td>
-                  <td className="border border-gray-300 px-4 py-2 text-black">{user.email}</td>
-                  <td className="border border-gray-300 px-4 py-2 text-black">{user.phone}</td>
-                  <td className="border border-gray-300 px-4 py-2 text-black">{user.status}</td>
+              {futsals.map((futsal,index) => (
+                <tr key={futsal._id} className="hover:bg-gray-100">
+                  <td className="border border-gray-300 px-4 py-2 text-black">{index + 1}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-black">{futsal.futsalName}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-black">{futsal.location}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-black">{futsal.pricePerHour}</td>
+                  <td className="border border-gray-300 px-4 py-2 text-black">{futsal.availableTimeSlots.join(", ")}</td>
                   <td className="border border-gray-300 px-4 py-2 text-black">
                     <button
-                      onClick={() => handleUpdate(user)}
+                      onClick={() => handleUpdate(futsal)}
                       className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 mr-2"
                     >
                       Update
                     </button>
                     <button
-                      onClick={() => handleDelete(user.id)}
-                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 mr-2"
-                    >
-                      Delete
-                    </button>
-                    <button
-                      onClick={() => handleViewDetails(user)}
+                      onClick={() => handleViewDetails(futsal)}
                       className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
                     >
                       View Details
@@ -120,70 +129,77 @@ export default function AdminFutsalListings() {
         </div>
       </div>
 
-      {/* Update Modal */}
-      {showModal && currentUser && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      {/* Add Futsal Modal */}
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 text-black">
           <div className="bg-white rounded p-6 w-96 shadow-lg">
-            <h2 className="text-xl font-semibold mb-4 text-black">Update User</h2>
-            <div className="space-y-4">
+            <h2 className="text-xl font-semibold mb-4">Add New Futsal</h2>
+            <div className="space-y-4 text-black">
               <div>
                 <label className="block text-sm font-medium text-black">Name</label>
                 <input
                   type="text"
-                  value={currentUser.name}
-                  onChange={(e) =>
-                    setCurrentUser({ ...currentUser, name: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded px-3 py-2"
+                  value={newFutsal.futsalName}
+                  onChange={(e) => setNewFutsal({ ...newFutsal, futsalName: e.target.value })}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-black"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-black">Email</label>
-                <input
-                  type="email"
-                  value={currentUser.email}
-                  onChange={(e) =>
-                    setCurrentUser({ ...currentUser, email: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-black">Phone</label>
+                <label className="block text-sm font-medium text-black">Location</label>
                 <input
                   type="text"
-                  value={currentUser.phone}
-                  onChange={(e) =>
-                    setCurrentUser({ ...currentUser, phone: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded px-3 py-2"
+                  value={newFutsal.location}
+                  onChange={(e) => setNewFutsal({ ...newFutsal, location: e.target.value })}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-black"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-black">Status</label>
-                <select
-                  value={currentUser.status}
-                  onChange={(e) =>
-                    setCurrentUser({ ...currentUser, status: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                >
-                  <option value="Pending">Pending</option>
-                  <option value="Approved">Approved</option>
-                  <option value="Declined">Declined</option>
-                </select>
+                <label className="block text-sm font-medium text-black">Price Per Hour</label>
+                <input
+                  type="number"
+                  value={newFutsal.pricePerHour}
+                  onChange={(e) => setNewFutsal({ ...newFutsal, pricePerHour: e.target.value })}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-black"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-black">Available Time Slots</label>
+                <input
+                  type="text"
+                  value={newFutsal.availableTimeSlots.join(", ")}
+                  onChange={(e) => setNewFutsal({ ...newFutsal, availableTimeSlots: e.target.value.split(",") })}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-black"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-black">Contact Number</label>
+                <input
+                  type="text"
+                  value={newFutsal.contactNumber}
+                  onChange={(e) => setNewFutsal({ ...newFutsal, contactNumber: e.target.value })}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-black"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-black">Images</label>
+                <input
+                  type="text"
+                  value={newFutsal.images.join(", ")}
+                  onChange={(e) => setNewFutsal({ ...newFutsal, images: e.target.value.split(",") })}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-black"
+                />
               </div>
             </div>
             <div className="mt-6 flex justify-end space-x-4">
               <button
                 onClick={() => setShowModal(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 text-black"
               >
                 Cancel
               </button>
               <button
-                onClick={handleSaveUpdate}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                onClick={handleAddFutsal}
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-black"
               >
                 Save
               </button>
@@ -192,23 +208,31 @@ export default function AdminFutsalListings() {
         </div>
       )}
 
-      {/* View Details Modal */}
-      {showDetailsModal && currentUser && (
+      {/* View Futsal Details Modal */}
+      {showDetailsModal && currentFutsal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded p-6 w-96 shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">User Details</h2>
+            <h2 className="text-xl font-semibold mb-4">{currentFutsal.futsalName} Details</h2>
             <div className="space-y-4">
               <div>
-                <p className="font-medium text-black">Name: {currentUser.name}</p>
+                <label className="block text-sm font-medium text-black">Location</label>
+                <p>{currentFutsal.location}</p>
               </div>
               <div>
-                <p className="font-medium text-black">Email: {currentUser.email}</p>
+                <label className="block text-sm font-medium text-black">Price Per Hour</label>
+                <p>{currentFutsal.pricePerHour}</p>
               </div>
               <div>
-                <p className="font-medium text-black">Phone: {currentUser.phone}</p>
+                <label className="block text-sm font-medium text-black">Available Time Slots</label>
+                <p>{currentFutsal.availableTimeSlots.join(", ")}</p>
               </div>
               <div>
-                <p className="font-medium text-black">Status: {currentUser.status}</p>
+                <label className="block text-sm font-medium text-black">Contact Number</label>
+                <p>{currentFutsal.contactNumber}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-black">Images</label>
+                <p>{currentFutsal.images.join(", ")}</p>
               </div>
             </div>
             <div className="mt-6 flex justify-end">

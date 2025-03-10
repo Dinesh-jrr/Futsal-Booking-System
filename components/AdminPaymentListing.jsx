@@ -47,6 +47,12 @@ export default function AdminPaymentListings() {
         <h1 className="text-2xl font-semibold text-black mb-4 text-center shadow-lg p-3 rounded-lg bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
           Payments Management
         </h1>
+        <button
+          onClick={() => setShowModal(true)}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Add Payment
+        </button>
       </div>
       <div className="overflow-x-auto">
         <div className="max-h-96 overflow-y-auto">

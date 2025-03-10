@@ -1,29 +1,32 @@
-import { useState } from "react";
-
-const usersData = [
-  { id: 1, name: "John Doe", email: "john.doe@example.com", phone: "9861524192", status: "Pending" },
-  { id: 2, name: "Jane Smith", email: "jane.smith@example.com", phone: "9861524192", status: "Approved" },
-  { id: 3, name: "Mark Johnson", email: "mark.johnson@example.com", phone: "9861524192", status: "Declined" },
-  { id: 4, name: "Dinesh Singh", email: "jrdinesh1@gmail.com", phone: "9861524192", status: "Pending" },
-  { id: 4, name: "Dinesh Singh", email: "jrdinesh1@gmail.com", phone: "9861524192", status: "Pending" },
-  { id: 4, name: "Dinesh Singh", email: "jrdinesh1@gmail.com", phone: "9861524192", status: "Pending" },
-  { id: 4, name: "Dinesh Singh", email: "jrdinesh1@gmail.com", phone: "9861524192", status: "Pending" },
-  { id: 4, name: "Dinesh Singh", email: "jrdinesh1@gmail.com", phone: "9861524192", status: "Pending" },
-  { id: 4, name: "Dinesh Singh", email: "jrdinesh1@gmail.com", phone: "9861524192", status: "Pending" },
-  { id: 4, name: "Dinesh Singh", email: "jrdinesh1@gmail.com", phone: "9861524192", status: "Pending" },
-  { id: 4, name: "Dinesh Singh", email: "jrdinesh1@gmail.com", phone: "9861524192", status: "Pending" },
-  { id: 4, name: "Dinesh Singh", email: "jrdinesh1@gmail.com", phone: "9861524192", status: "Pending" },
-  { id: 4, name: "Dinesh Singh", email: "jrdinesh1@gmail.com", phone: "9861524192", status: "Pending" },
-  { id: 4, name: "Dinesh Singh", email: "jrdinesh1@gmail.com", phone: "9861524192", status: "Pending" },
-];
+'use client';
+import { useState, useEffect } from "react";
 
 export default function AdminUserListings() {
-  const [users, setUsers] = useState(usersData);
+  const [users, setUsers] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [newUserData, setNewUserData] = useState({
+    name: '',
+    email: '',
+    phoneNumber: '',
+    role: 'Pending',
+  });
+
+  useEffect(() => {
+    // Fetch initial users data from backend
+    const fetchUsers = async () => {
+      const response = await fetch("http://localhost:5000/api/users/allUsers");
+      const data = await response.json();
+      setUsers(data);
+    };
+    fetchUsers();
+  }, []);
 
   // Delete user handler
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
+    await fetch(`http://localhost:5000/api/bookings/${id}`, {
+      method: 'DELETE',
+    });
     setUsers(users.filter((user) => user.id !== id));
   };
 
@@ -34,60 +37,89 @@ export default function AdminUserListings() {
   };
 
   // Handle save update
-  const handleSaveUpdate = () => {
-    setUsers(
-      users.map((user) =>
-        user.id === currentUser.id ? { ...user, ...currentUser } : user
-      )
-    );
+  const handleSaveUpdate = async () => {
+    await fetch(`http://localhost:5000/api/bookings/${currentUser.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(currentUser),
+    });
+
+    setUsers(users.map((user) =>
+      user.id === currentUser.id ? { ...user, ...currentUser } : user
+    ));
     setShowModal(false);
   };
 
-  // Add user handler (example)
-  const handleAddUser = () => {
-    const newUser = {
-      id: users.length + 1,
-      name: "New User",
-      email: "new.user@example.com",
-      phone: "1234567890",
-      status: "Pending",
-    };
-    setUsers([...users, newUser]);
+  // Add user handler
+  const handleAddUser = async () => {
+    const response = await fetch("http://localhost:5000/api/users/register", {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newUserData),
+    });
+
+    if (response.ok) {
+      const addedUser = await response.json();
+      setUsers([...users, addedUser]);  // Add the new user to the list
+      setShowModal(false);  // Close the modal after adding
+      setNewUserData({
+        name: '',
+        email: '',
+        phoneNumber: '',
+        role: 'Pending',  // Reset the form after adding
+      });
+    } else {
+      alert("Error adding user. Please try again.");
+    }
+  };
+
+  // Handle form change for new user
+  const handleNewUserChange = (e) => {
+    setNewUserData({
+      ...newUserData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // View user details handler
+  const handleViewDetails = (user) => {
+    setCurrentUser(user);  // Set the current user to be viewed in the modal
+    setShowModal(true);  // Show modal with user details
   };
 
   return (
     <div className="p-4">
       <div className="mb-4 flex justify-between items-center">
-        {/* <h1 className="text-xl font-semibold">User Listings</h1> */}
-        <h1 className="text-2xl font-semibold text-gray-800 mb-4 text-center shadow-lg p-3 rounded-lg bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
-  User Management
-</h1>
+        <h1 className="text-2xl font-semibold text-gray-800 mb-4 text-center shadow-lg p-3 rounded-lg bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-black">
+          User Management
+        </h1>
         <button
-          onClick={handleAddUser}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          onClick={() => setShowModal(true)}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-black"
         >
           Add User
         </button>
       </div>
-      <table className="w-full border-collapse border border-gray-300">
+
+      <table className="w-full border-collapse border border-gray-300 text-black">
         <thead>
           <tr className="bg-gray-200">
-            <th className="border border-gray-300 px-4 py-2 text-black">ID</th>
+            <th className="border border-gray-300 px-4 py-2 text-black">Serial No</th>
             <th className="border border-gray-300 px-4 py-2 text-black">Name</th>
             <th className="border border-gray-300 px-4 py-2 text-black">Email</th>
             <th className="border border-gray-300 px-4 py-2 text-black">Phone</th>
-            <th className="border border-gray-300 px-4 py-2 text-black">Status</th>
+            <th className="border border-gray-300 px-4 py-2 text-black">Role</th>
             <th className="border border-gray-300 px-4 py-2 text-black">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
-            <tr key={user.id} className="hover:bg-gray-100">
-              <td className="border border-gray-300 px-4 py-2 text-black">{user.id}</td>
+          {users.map((user, index) => (
+            <tr key={user.id} className="hover:bg-gray-100 text-black">
+              <td className="border border-gray-300 px-4 py-2 text-black">{index + 1}</td>
               <td className="border border-gray-300 px-4 py-2 text-black">{user.name}</td>
               <td className="border border-gray-300 px-4 py-2 text-black">{user.email}</td>
-              <td className="border border-gray-300 px-4 py-2 text-black">{user.phone}</td>
-              <td className="border border-gray-300 px-4 py-2 text-black">{user.status}</td>
+              <td className="border border-gray-300 px-4 py-2 text-black">{user.phoneNumber}</td>
+              <td className="border border-gray-300 px-4 py-2 text-black">{user.role}</td>
               <td className="border border-gray-300 px-4 py-2 text-black">
                 <button
                   onClick={() => handleUpdate(user)}
@@ -96,10 +128,10 @@ export default function AdminUserListings() {
                   Update
                 </button>
                 <button
-                  onClick={() => handleDelete(user.id)}
-                  className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                  onClick={() => handleViewDetails(user)}
+                  className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
                 >
-                  Delete
+                  View Details
                 </button>
               </td>
             </tr>
@@ -107,73 +139,92 @@ export default function AdminUserListings() {
         </tbody>
       </table>
 
-      {/* Update Modal */}
-      {showModal && currentUser && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      {/* Add User Modal */}
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 text-black">
           <div className="bg-white rounded p-6 w-96 shadow-lg">
-            <h2 className="text-xl font-semibold mb-4 text-black">Update User</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-black">Name</label>
-                <input
-                  type="text"
-                  value={currentUser.name}
-                  onChange={(e) =>
-                    setCurrentUser({ ...currentUser, name: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                />
+            <h2 className="text-xl font-semibold mb-4 text-black">
+              {currentUser ? "User Details" : "Add New User"}
+            </h2>
+
+            {currentUser ? (
+              <div className="space-y-4">
+                <div>
+                  <p><strong>Name:</strong> {currentUser.name}</p>
+                </div>
+                <div>
+                  <p><strong>Email:</strong> {currentUser.email}</p>
+                </div>
+                <div>
+                  <p><strong>Phone:</strong> {currentUser.phoneNumber}</p>
+                </div>
+                <div>
+                  <p><strong>Role:</strong> {currentUser.role}</p>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-black">Email</label>
-                <input
-                  type="email"
-                  value={currentUser.email}
-                  onChange={(e) =>
-                    setCurrentUser({ ...currentUser, email: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                />
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-black">Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={newUserData.name}
+                    onChange={handleNewUserChange}
+                    className="w-full border border-gray-300 rounded px-3 py-2 text-black"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-black">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={newUserData.email}
+                    onChange={handleNewUserChange}
+                    className="w-full border border-gray-300 rounded px-3 py-2 text-black"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-black">Phone</label>
+                  <input
+                    type="text"
+                    name="phoneNumber"
+                    value={newUserData.phoneNumber}
+                    onChange={handleNewUserChange}
+                    className="w-full border border-gray-300 rounded px-3 py-2 text-black"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-black">Status</label>
+                  <select
+                    name="status"
+                    value={newUserData.status}
+                    onChange={handleNewUserChange}
+                    className="w-full border border-gray-300 rounded px-3 py-2 text-black"
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Declined">Declined</option>
+                  </select>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-black">Phone</label>
-                <input
-                  type="text"
-                  value={currentUser.phone}
-                  onChange={(e) =>
-                    setCurrentUser({ ...currentUser, phone: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-black">Status</label>
-                <select
-                  value={currentUser.status}
-                  onChange={(e) =>
-                    setCurrentUser({ ...currentUser, status: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                >
-                  <option value="Pending">Pending</option>
-                  <option value="Approved">Approved</option>
-                  <option value="Declined">Declined</option>
-                </select>
-              </div>
-            </div>
-            <div className="mt-6 flex justify-end space-x-4">
+            )}
+
+            <div className="mt-6 flex justify-end space-x-4 text-black">
               <button
                 onClick={() => setShowModal(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 text-black"
               >
                 Cancel
               </button>
-              <button
-                onClick={handleSaveUpdate}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-              >
-                Save
-              </button>
+              {!currentUser && (
+                <button
+                  onClick={handleAddUser}
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-black"
+                >
+                  Save
+                </button>
+              )}
             </div>
           </div>
         </div>

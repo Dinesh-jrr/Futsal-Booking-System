@@ -9,18 +9,21 @@ import Link from "next/link";
 export default function RegisterPage() {
   const router = useRouter();
   const [error, setError] = useState("");
+  const [role, setRole] = useState("user"); // Default role is 'user'
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    
+
     try {
-      const res = await fetch("/api/auth/register", {
+      const res = await fetch("http://localhost:5000/api/users/register", {
         method: "POST",
         body: JSON.stringify({
           name: formData.get("name"),
           email: formData.get("email"),
+          phoneNumber: formData.get("phoneNumber"),
           password: formData.get("password"),
+          role:"futsalOwner", // Use the role state here
         }),
         headers: {
           "Content-Type": "application/json",
@@ -47,7 +50,7 @@ export default function RegisterPage() {
           <Button
             variant="outline"
             onClick={() => router.push("/")} // Navigates back to the previous page
-           className="px-4 py-2 text-white border border-gray-300 hover:bg-green-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="px-4 py-2 text-white border border-gray-300 hover:bg-green-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
           >
             Back
           </Button>
@@ -69,7 +72,7 @@ export default function RegisterPage() {
                 type="text"
                 required
                 placeholder="Full name"
-                 className="bg-white border-2 border-green-500 rounded-md p-4 w-full focus:outline-none focus:ring-2 focus:ring-green-500 text-black"
+                className="bg-white border-2 border-green-500 rounded-md p-4 w-full focus:outline-none focus:ring-2 focus:ring-green-500 text-black"
               />
             </div>
             <div>
@@ -80,7 +83,17 @@ export default function RegisterPage() {
                 autoComplete="email"
                 required
                 placeholder="Email address"
-                 className="bg-white border-2 border-green-500 rounded-md p-4 w-full focus:outline-none focus:ring-2 focus:ring-green-500 text-black"
+                className="bg-white border-2 border-green-500 rounded-md p-4 w-full focus:outline-none focus:ring-2 focus:ring-green-500 text-black"
+              />
+            </div>
+            <div>
+              <Input
+                id="phoneNumber"
+                name="phoneNumber"
+                type="text"
+                required
+                placeholder="Phone number"
+                className="bg-white border-2 border-green-500 rounded-md p-4 w-full focus:outline-none focus:ring-2 focus:ring-green-500 text-black"
               />
             </div>
             <div>
@@ -91,8 +104,24 @@ export default function RegisterPage() {
                 autoComplete="new-password"
                 required
                 placeholder="Password"
-                 className="bg-white border-2 border-green-500 rounded-md p-4 w-full focus:outline-none focus:ring-2 focus:ring-green-500 text-black"
+                className="bg-white border-2 border-green-500 rounded-md p-4 w-full focus:outline-none focus:ring-2 focus:ring-green-500 text-black"
               />
+            </div>
+            {/* Optional: Role Selection */}
+            <div className="flex flex-col space-y-2">
+              <label htmlFor="role" className="text-sm font-semibold text-gray-600">
+                You are signing up as futsal owner
+              </label>
+              {/* <select
+                id="role"
+                name="role"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="bg-white border-2 border-green-500 rounded-md p-4 w-full focus:outline-none focus:ring-2 focus:ring-green-500 text-black"
+              >
+                <option value="admin">Admin</option>
+                <option value="futsal_owner">Futsal Owner</option>
+              </select> */}
             </div>
           </div>
 

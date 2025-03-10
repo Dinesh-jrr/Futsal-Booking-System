@@ -1,6 +1,7 @@
+'use client';
 import Header from "@/components/Header";
 import UsersTable from "@/components/UsersTable";
-import AdminBookingListing from "@/components/AdminBookingListing";
+import FutsalListings from "@/components/FutsalListings";
 
 export default function Home() {
   return (
@@ -48,8 +49,8 @@ export default function Home() {
       </div>
 
       {/* Tables Below */}
-      <AdminBookingListing/>
-      
+      <UsersTable />
+      <FutsalListings />
     </div>
   );
 }
