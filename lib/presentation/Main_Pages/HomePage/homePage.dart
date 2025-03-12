@@ -37,14 +37,14 @@ class HomePage extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
+                        const Row(
                           children: [
-                            const CircleAvatar(
+                            CircleAvatar(
                               backgroundColor: Colors.white,
                               child: Icon(Icons.person, color: Colors.green),
                             ),
-                            const SizedBox(width: 8),
-                            const Text(
+                            SizedBox(width: 8),
+                            Text(
                               "Hello, Dinesh!",
                               style: TextStyle(
                                 color: Colors.white,
@@ -238,6 +238,7 @@ class FutsalCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
+              // ignore: deprecated_member_use
               color: AppColors.primary.withOpacity(0.3),
               blurRadius: 5,
               spreadRadius: 2,

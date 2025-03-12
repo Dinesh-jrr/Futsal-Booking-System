@@ -75,11 +75,11 @@ class BookNow extends StatelessWidget {
   final String? selectedTimeSlot;
 
   const BookNow({
-    Key? key,
+    super.key,
     required this.futsalName,
     required this.selectedDay,
     required this.selectedTimeSlot,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +88,7 @@ class BookNow extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Booking Details"),
+        title: const Text("Booking Details"),
         backgroundColor: Colors.green,
         elevation: 0,
       ),
@@ -106,13 +106,13 @@ class BookNow extends StatelessWidget {
                   subtitle: 'Date: ${selectedDay.toLocal().toString().split(' ')[0]}',
                   content: 'Time: $selectedTimeSlot',
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 _buildSectionHeader('Cost Breakdown'),
                 _buildCostCard(
                   totalCost: totalCost,
                   advancePayment: advancePayment,
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 _buildSectionHeader('Payment'),
                 _buildPaymentConfirmation(context, advancePayment),
               ],
@@ -128,7 +128,7 @@ class BookNow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Text(
         title,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.bold,
           color: Colors.green,
@@ -148,11 +148,11 @@ class BookNow extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            SizedBox(height: 8),
-            Text(subtitle, style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text(content, style: TextStyle(fontSize: 16)),
+            Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text(subtitle, style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 8),
+            Text(content, style: const TextStyle(fontSize: 16)),
           ],
         ),
       ),
@@ -171,9 +171,9 @@ class BookNow extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text('Total Cost: NPR ${totalCost.toStringAsFixed(2)}', style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('Advance Payment (20%): NPR ${advancePayment.toStringAsFixed(2)}', style: TextStyle(fontSize: 16)),
+            Text('Total Cost: NPR ${totalCost.toStringAsFixed(2)}', style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 8),
+            Text('Advance Payment (20%): NPR ${advancePayment.toStringAsFixed(2)}', style: const TextStyle(fontSize: 16)),
           ],
         ),
       ),
@@ -191,10 +191,10 @@ class BookNow extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text('You are paying', style: TextStyle(fontSize: 16)),
-            SizedBox(height: 8),
-            Text('NPR ${advancePayment.toStringAsFixed(2)}', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            SizedBox(height: 16),
+            const Text('You are paying', style: TextStyle(fontSize: 16)),
+            const SizedBox(height: 8),
+            Text('NPR ${advancePayment.toStringAsFixed(2)}', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(

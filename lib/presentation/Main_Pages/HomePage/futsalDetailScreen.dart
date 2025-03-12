@@ -9,9 +9,9 @@ class FutsalDetailScreen extends StatefulWidget {
   final String futsalName;
 
   const FutsalDetailScreen({
-    Key? key,
+    super.key,
     required this.futsalName,
-  }) : super(key: key);
+  });
 
   @override
   State<FutsalDetailScreen> createState() => _FutsalDetailScreenState();

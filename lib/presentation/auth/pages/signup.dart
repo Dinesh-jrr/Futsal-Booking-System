@@ -8,6 +8,7 @@ class SignUp extends StatefulWidget {
   const SignUp({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _SignUpState createState() => _SignUpState();
 }
 
@@ -67,7 +68,8 @@ class _SignUpState extends State<SignUp> {
 
  Future<void> _handleSignUp(BuildContext context) async {
   if (_formKey.currentState?.validate() ?? false) {
-    final url = 'http://localhost:5000/api/users/register'; // Replace with your backend endpoint
+    // ignore: prefer_const_declarations
+    final url = 'http://localhost:5000/api/users/register'; 
     final response = await http.post(
       Uri.parse(url),
       headers: {'Content-Type': 'application/json'},
@@ -78,11 +80,13 @@ class _SignUpState extends State<SignUp> {
         'password': _passwordController.text,
       }),
     );
-
+     // ignore: avoid_print
     print("Response status: ${response.statusCode}");  // Debug print
+    // ignore: avoid_print
     print("Response body: ${response.body}");  // Debug print
 
     if (response.statusCode == 201) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Successfully signed up!'),
@@ -92,11 +96,13 @@ class _SignUpState extends State<SignUp> {
 
       Future.delayed(const Duration(seconds: 2), () {
         Navigator.pushReplacement(
+          // ignore: use_build_context_synchronously
           context,
           MaterialPageRoute(builder: (BuildContext context) => const SignIn()),
         );
       });
     } else {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to sign up: ${json.decode(response.body)['message']}'),

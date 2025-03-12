@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:user/core/config/theme/app_colors.dart';
 import 'package:user/presentation/auth/pages/signup.dart';
@@ -65,7 +67,7 @@ class _SignInState extends State<SignIn> {
         );
       }
     } catch (e) {
-       print("Error: $e");
+       //print("Error: $e");
       // Handle network or other errors
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Login failed: Network error")),

@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'chatScreen.dart';
 
 class ChatListScreen extends StatelessWidget {
+  const ChatListScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text("Chats"),
+        title: const Text("Chats"),
         centerTitle: true,
         backgroundColor: Colors.green,
         elevation: 0,
@@ -19,14 +21,14 @@ class ChatListScreen extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ChatScreen()),
+                MaterialPageRoute(builder: (context) => const ChatScreen()),
               );
             },
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: ListTile(
-                contentPadding: EdgeInsets.symmetric(horizontal: 20.0),
-                leading: CircleAvatar(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20.0),
+                leading: const CircleAvatar(
                   backgroundColor: Colors.green,
                   radius: 30,
                   child: Icon(
@@ -37,7 +39,7 @@ class ChatListScreen extends StatelessWidget {
                 ),
                 title: Text(
                   'User ${index + 1}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
@@ -50,12 +52,12 @@ class ChatListScreen extends StatelessWidget {
                 trailing: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
+                    const Text(
                       '2:45 PM',
                       style: TextStyle(color: Colors.grey),
                     ),
                     if (index % 2 == 0)
-                      CircleAvatar(
+                      const CircleAvatar(
                         radius: 10,
                         backgroundColor: Colors.blue,
                         child: Text(

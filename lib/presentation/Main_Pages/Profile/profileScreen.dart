@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text('Profile'),
+        title: const Text('Profile'),
         centerTitle: true,
         backgroundColor: Colors.green,
         elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.settings),
+            icon: const Icon(Icons.settings),
             onPressed: () {
               // Navigate to settings
             },
@@ -28,7 +30,7 @@ class ProfileScreen extends StatelessWidget {
               Center(
                 child: Stack(
                   children: [
-                    CircleAvatar(
+                    const CircleAvatar(
                       radius: 80,
                       backgroundColor: Colors.green,
                       backgroundImage: AssetImage('assets/images/futsal_pitch.jpg'), // Replace with a dynamic image from user's profile
@@ -40,7 +42,7 @@ class ProfileScreen extends StatelessWidget {
                         radius: 25,
                         backgroundColor: Colors.green,
                         child: IconButton(
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.edit,
                             color: Colors.white,
                             size: 20,
@@ -54,10 +56,10 @@ class ProfileScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
               // User Information Section
-              Text(
+              const Text(
                 'John Doe',
                 style: TextStyle(
                   fontSize: 24,
@@ -65,7 +67,7 @@ class ProfileScreen extends StatelessWidget {
                   color: Colors.black87,
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Text(
                 'jrdinesh1@email.com',
                 style: TextStyle(
@@ -73,7 +75,7 @@ class ProfileScreen extends StatelessWidget {
                   color: Colors.grey[600],
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
               // Edit Profile Button
               ElevatedButton(
@@ -82,72 +84,72 @@ class ProfileScreen extends StatelessWidget {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
-                  padding: EdgeInsets.symmetric(horizontal: 60, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                child: Text(
+                child: const Text(
                   'Edit Profile',
                   style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
               // Settings Section
               ListTile(
-                leading: Icon(Icons.notifications, color: Colors.green),
-                title: Text(
+                leading: const Icon(Icons.notifications, color: Colors.green),
+                title: const Text(
                   'Notifications',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+                trailing: const Icon(Icons.arrow_forward_ios, color: Colors.grey),
                 onTap: () {
                   // Navigate to notifications settings
                 },
               ),
-              Divider(),
+              const Divider(),
 
               ListTile(
-                leading: Icon(Icons.lock, color: Colors.green),
-                title: Text(
+                leading: const Icon(Icons.lock, color: Colors.green),
+                title: const Text(
                   'Privacy',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+                trailing: const Icon(Icons.arrow_forward_ios, color: Colors.grey),
                 onTap: () {
                   // Navigate to privacy settings
                 },
               ),
-              Divider(),
+              const Divider(),
 
               ListTile(
-                leading: Icon(Icons.language, color: Colors.green),
-                title: Text(
+                leading: const Icon(Icons.language, color: Colors.green),
+                title: const Text(
                   'Language',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+                trailing: const Icon(Icons.arrow_forward_ios, color: Colors.grey),
                 onTap: () {
                   // Navigate to language settings
                 },
               ),
-              Divider(),
+              const Divider(),
 
               // Logout Button
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
               ElevatedButton(
                 onPressed: () {
                   // Implement logout functionality
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
-                  padding: EdgeInsets.symmetric(horizontal: 60, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                child: Text(
+                child: const Text(
                   'Logout',
                   style: TextStyle(fontSize: 18, color: Colors.white),
                 ),

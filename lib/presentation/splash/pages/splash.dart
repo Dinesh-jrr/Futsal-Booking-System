@@ -33,6 +33,7 @@ class _SplashPageState extends State<SplashPage> {
   //delay the time logo view
   Future<void>redirect() async{
     await Future.delayed(const Duration(seconds:2));
+    // ignore: use_build_context_synchronously
     Navigator.pushReplacement(context,
     MaterialPageRoute(
       builder: (BuildContext context) => const GetStartedScreen()));

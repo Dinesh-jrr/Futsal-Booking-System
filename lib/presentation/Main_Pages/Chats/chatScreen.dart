@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
+  const ChatScreen({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _ChatScreenState createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
 
   // Sample messages
   List<Map<String, String>> messages = [
@@ -20,12 +23,12 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Chat with Futsal Owner"),
+        title: const Text("Chat with Futsal Owner"),
         backgroundColor: Colors.green,
         elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.info_outline),
+            icon: const Icon(Icons.info_outline),
             onPressed: () {
               // Optionally show more info about the futsal owner
             },
@@ -44,9 +47,9 @@ class _ChatScreenState extends State<ChatScreen> {
                       ? Alignment.centerRight
                       : Alignment.centerLeft,
                   child: Padding(
-                    padding: EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(8.0),
                     child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                       decoration: BoxDecoration(
                         color: message['sender'] == 'user'
                             ? Colors.green
@@ -82,12 +85,12 @@ class _ChatScreenState extends State<ChatScreen> {
                         borderRadius: BorderRadius.circular(30),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                     ),
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.send),
+                  icon: const Icon(Icons.send),
                   onPressed: () {
                     if (_controller.text.isNotEmpty) {
                       setState(() {

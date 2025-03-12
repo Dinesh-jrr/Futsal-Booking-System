@@ -1,3 +1,6 @@
+
+// ignore_for_file: constant_identifier_names
+
 const String ARGS_KEY_CONFIG = 'config';
 const String ARGS_KEY_PAYMENT = 'payment';
 const String METHOD_CHANNEL_NAME = 'flutter_sdk_channel';

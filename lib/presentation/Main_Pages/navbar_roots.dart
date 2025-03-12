@@ -17,13 +17,13 @@ class _NavbarState extends State<Navbar> {
   int _selectedIndex = 0;
   final _screens = [
     // Home screen
-    HomePage(),
+    const HomePage(),
     // Bookings screen
-    BookingHistory(),
+    const BookingHistory(),
     // Chat screen
-    ChatListScreen(),
+    const ChatListScreen(),
     // Profile screen
-    ProfileScreen(),
+    const ProfileScreen(),
   ];
 
   @override
@@ -31,7 +31,7 @@ class _NavbarState extends State<Navbar> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: _screens[_selectedIndex],
-      bottomNavigationBar: Container(
+      bottomNavigationBar: SizedBox(
         height: 100, // Increase height of bottom container to allow more space for QR icon
         child: Stack(
           clipBehavior: Clip.none,  // Important to allow QR icon to overflow
@@ -88,7 +88,7 @@ class _NavbarState extends State<Navbar> {
                 child: Container(
                   height: 60,
                   width: 60,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: AppColors.primary, // Custom color
                     shape: BoxShape.circle,
                   ),

@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 class BookingDetails extends StatelessWidget {
   final Map<String, String> booking;
 
-  BookingDetails({required this.booking});
+  const BookingDetails({super.key, required this.booking});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Booking Details'),
+        title: const Text('Booking Details'),
         backgroundColor: Colors.green,
       ),
       body: Padding(
@@ -19,21 +19,21 @@ class BookingDetails extends StatelessWidget {
           children: [
             Text(
               'Match Title: ${booking['title']}',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 20),
-            Text('Date: ${booking['date']}', style: TextStyle(fontSize: 18)),
-            Text('Time: ${booking['time']}', style: TextStyle(fontSize: 18)),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
+            Text('Date: ${booking['date']}', style: const TextStyle(fontSize: 18)),
+            Text('Time: ${booking['time']}', style: const TextStyle(fontSize: 18)),
+            const SizedBox(height: 20),
             Chip(
               label: Text(
                 booking['status']!,
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
               ),
               backgroundColor: _getStatusColor(booking['status']!),
             ),
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               'More details about the match can go here...',
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),

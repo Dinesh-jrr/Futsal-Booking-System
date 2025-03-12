@@ -16,7 +16,7 @@ dependencies:
   cached_network_image: ^3.3.0
 
   esewa_flutter_sdk:
-    path: C:/Users/97798/OneDrive/Desktop/Futsal Booking System/User/external_sdk/esewa_sdk/esewa_flutter_sdk/esewa_flutter_sdk
+    path: C:/Futsal Booking System/User/external_sdk/esewa_sdk/esewa_flutter_sdk/esewa_flutter_sdk
   geolocator: ^10.1.0
   flutter_rating_bar: ^4.0.1
   flutter_svg: ^1.0.0  # Specify the version for SVG handling

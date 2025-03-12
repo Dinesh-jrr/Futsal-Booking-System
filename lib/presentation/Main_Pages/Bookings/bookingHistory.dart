@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+// ignore: depend_on_referenced_packages
 import 'package:intl/intl.dart';
 import 'bookingDetails.dart';
 
 class BookingHistory extends StatefulWidget {
+  const BookingHistory({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _BookingHistoryState createState() => _BookingHistoryState();
 }
 
@@ -47,7 +51,7 @@ class _BookingHistoryState extends State<BookingHistory> {
       case 'Today':
         return now;
       case '1 Week':
-        return now.subtract(Duration(days: 7));
+        return now.subtract(const Duration(days: 7));
       case '1 Month':
         return DateTime(now.year, now.month - 1, now.day);
       case '1 Year':
@@ -73,7 +77,7 @@ class _BookingHistoryState extends State<BookingHistory> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Booking History'),
+        title: const Text('Booking History'),
         centerTitle: true,
         backgroundColor: Colors.green,
       ),
@@ -115,7 +119,7 @@ class _BookingHistoryState extends State<BookingHistory> {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               // Booking List
               Expanded(
                 child: ListView.builder(
@@ -123,14 +127,14 @@ class _BookingHistoryState extends State<BookingHistory> {
                   itemBuilder: (context, index) {
                     Map<String, String> booking = filteredBookings[index];
                     return Card(
-                      margin: EdgeInsets.symmetric(vertical: 10.0),
+                      margin: const EdgeInsets.symmetric(vertical: 10.0),
                       elevation: 8.0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15.0),
                       ),
                       color: Colors.white,
                       child: ListTile(
-                        contentPadding: EdgeInsets.all(20.0),
+                        contentPadding: const EdgeInsets.all(20.0),
                         title: Text(
                           booking['title']!,
                           style: TextStyle(
@@ -146,7 +150,7 @@ class _BookingHistoryState extends State<BookingHistory> {
                         trailing: Chip(
                           label: Text(
                             booking['status']!,
-                            style: TextStyle(color: Colors.white),
+                            style: const TextStyle(color: Colors.white),
                           ),
                           backgroundColor: _getStatusColor(booking['status']!),
                         ),
@@ -181,21 +185,21 @@ class _BookingHistoryState extends State<BookingHistory> {
   }) {
     return Container(
       width: 150,
-      padding: EdgeInsets.symmetric(horizontal: 10.0),
+      padding: const EdgeInsets.symmetric(horizontal: 10.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8.0),
         border: Border.all(color: Colors.green, width: 1.5),
-        boxShadow: [BoxShadow(color: Colors.green, blurRadius: 5.0)],
+        boxShadow: const [BoxShadow(color: Colors.green, blurRadius: 5.0)],
       ),
       child: DropdownButton<String>(
         value: value,
         onChanged: onChanged,
         isExpanded: true,
-        underline: SizedBox(),
+        underline: const SizedBox(),
         items: items.map<DropdownMenuItem<String>>((String item) {
           return DropdownMenuItem<String>(
             value: item,
-            child: Text(item, style: TextStyle(color: Colors.black)),
+            child: Text(item, style: const TextStyle(color: Colors.black)),
           );
         }).toList(),
       ),
