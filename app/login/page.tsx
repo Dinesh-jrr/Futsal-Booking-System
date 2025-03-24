@@ -18,9 +18,9 @@ export default function LoginPage() {
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-
+  
     setIsLoading(true); // Start loading state
-
+  
     try {
       // Use NextAuth's signIn method to authenticate the user
       const res = await signIn("credentials", {
@@ -28,27 +28,35 @@ export default function LoginPage() {
         email,
         password,
       });
-      console.log(res)
-     // After signIn call:
-        if (res?.error) {
-          setError(res.error);
+  
+      console.log(res);
+      
+      if (res?.error) {
+        setError(res.error);
+      } else {
+        // Get the session to access the user role
+        const session = await getSession();
+        //@ts-ignore
+        const role = session?.user?.role;
+  
+        if (role === "admin") {
+          router.push("/admin");
+        } else if (role === "futsal_owner") {
+          router.push("/dashboard");
+        } else if (role === "user") {
+          setError("Invalid login for this platform.");
+          return; // Stop further execution
         } else {
-          // Get the session to access the user role
-          const session = await getSession();
-          //@ts-ignore
-          if (session?.user?.role === "admin") {
-            router.push("/admin");
-          } else {
-            router.push("/dashboard");
-          }
+          setError("Unknown role. Contact support.");
         }
+      }
     } catch (error) {
       console.error(error);
       setError("Something went wrong");
     } finally {
       setIsLoading(false); // End loading state
     }
-  };
+  };  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-gray-800">

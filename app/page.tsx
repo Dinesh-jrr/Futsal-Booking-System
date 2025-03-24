@@ -8,7 +8,7 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
       {/* Header Section */}
-      <header className="container mx-auto px-6 py-8">
+      <header className="container mx-auto px-6 py-8 text-white">
         <nav className="flex justify-between items-center">
           <div className="text-2xl font-bold">FootLock</div>
           <div className="space-x-4">
@@ -36,7 +36,7 @@ export default async function Home() {
             Find and book the best futsal courts in your area. Join the largest futsal community and start playing today.
           </p>
           <Link href="/signup">
-            <Button size="lg" className="bg-primary hover:bg-primary/90">
+          <Button variant="outline" className="text-white border-white hover:bg-white hover:text-gray-900">
               Get Started
             </Button>
           </Link>
@@ -108,7 +108,7 @@ export default async function Home() {
 
         {/* Footer Copyright */}
         <div className="mt-12 border-t border-gray-700 pt-6 text-center text-sm text-gray-500">
-          <p>© 2025 FutsalLock. All rights reserved.</p>
+          <p>© 2025 FootLock. All rights reserved.</p>
         </div>
       </footer>
     </div>

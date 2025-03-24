@@ -210,10 +210,10 @@ export default function AdminFutsalListings() {
 
       {/* View Futsal Details Modal */}
       {showDetailsModal && currentFutsal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 text-black">
           <div className="bg-white rounded p-6 w-96 shadow-lg">
             <h2 className="text-xl font-semibold mb-4">{currentFutsal.futsalName} Details</h2>
-            <div className="space-y-4">
+            <div className="space-y-4 text-black">
               <div>
                 <label className="block text-sm font-medium text-black">Location</label>
                 <p>{currentFutsal.location}</p>
@@ -235,10 +235,10 @@ export default function AdminFutsalListings() {
                 <p>{currentFutsal.images.join(", ")}</p>
               </div>
             </div>
-            <div className="mt-6 flex justify-end">
+            <div className="mt-6 flex justify-end text-black">
               <button
                 onClick={() => setShowDetailsModal(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 text-black"
               >
                 Close
               </button>
