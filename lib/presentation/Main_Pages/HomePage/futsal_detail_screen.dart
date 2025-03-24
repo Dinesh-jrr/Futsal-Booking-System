@@ -3,7 +3,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:user/core/config/theme/app_colors.dart';
-import 'package:user/presentation/Main_Pages/HomePage/bookNow.dart';
+import 'package:user/presentation/Main_Pages/HomePage/book_now.dart';
 
 class FutsalDetailScreen extends StatefulWidget {
   final String futsalName;

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:user/core/config/theme/app_colors.dart';
-import '../HomePage/popularFutsal.dart';
-import '../HomePage/nearbyFutsal.dart';
-import '../HomePage/futsalDetailScreen.dart';
+import '../HomePage/popular_futsal.dart';
+import '../HomePage/nearby_futsal.dart';
+import '../HomePage/futsal_detail_screen.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

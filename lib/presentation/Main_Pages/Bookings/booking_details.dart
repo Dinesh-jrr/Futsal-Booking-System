@@ -4,6 +4,7 @@ class BookingDetails extends StatelessWidget {
   final Map<String, String> booking;
 
   const BookingDetails({super.key, required this.booking});
+  //the main page starts here for booking details
 
   @override
   Widget build(BuildContext context) {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../HomePage/futsalDetailScreen.dart';
+import '../HomePage/futsal_detail_screen.dart';
 
 class PopularFutsalPage extends StatelessWidget {
   const PopularFutsalPage({super.key});

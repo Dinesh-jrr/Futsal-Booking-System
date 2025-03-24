@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 // ignore: depend_on_referenced_packages
 import 'package:intl/intl.dart';
-import 'bookingDetails.dart';
+import 'booking_details.dart';
 
 class BookingHistory extends StatefulWidget {
   const BookingHistory({super.key});

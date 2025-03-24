@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:user/core/config/theme/app_colors.dart';
-import 'package:user/presentation/Main_Pages/HomePage/HomePage.dart';
-import 'package:user/presentation/Main_Pages/Bookings/bookingHistory.dart';
-import 'package:user/presentation/Main_Pages/Chats/chatListScreen.dart';
-import 'package:user/presentation/Main_Pages/Profile/profileScreen.dart';
+import 'package:user/presentation/Main_Pages/HomePage/home_page.dart';
+import 'package:user/presentation/Main_Pages/Bookings/booking_history.dart';
+import 'package:user/presentation/Main_Pages/Chats/chat_list_screen.dart';
+import 'package:user/presentation/Main_Pages/Profile/profile_screen.dart';
 
 
 class Navbar extends StatefulWidget {
