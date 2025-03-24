@@ -1,4 +1,5 @@
 // components/Header.js
+import Link from "next/link";
 import { Search, Bell, MessageSquare } from "lucide-react";
 
 export default function Header() {
@@ -22,11 +23,17 @@ export default function Header() {
 
       {/* Right Section */}
       <div className="flex items-center space-x-4">
+        <Link href="/messages">
         <MessageSquare className="text-gray-600 hover:text-gray-800 cursor-pointer" />
+        </Link>
+        <Link href="/notifications">
         <Bell className="text-gray-600 hover:text-gray-800 cursor-pointer" />
+        </Link>
+        <Link href="/profile">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500 text-white font-bold">
           FL
         </div>
+        </Link>
       </div>
     </header>
   );
