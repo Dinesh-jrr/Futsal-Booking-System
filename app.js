@@ -3,7 +3,8 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
-const futsalRoutes=require('./routes/futsalRoutes')
+const futsalRoutes=require('./routes/futsalRoutes');
+const paymentRoutes=require('./routes/paymentRoutes');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
@@ -25,5 +26,8 @@ app.use('/api', bookingRoutes);
 //futsal routes
 app.use('/api',futsalRoutes);
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+//payments routes
+app.use('/api',paymentRoutes);
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT,'0.0.0.0', () => console.log(`Server running on port ${PORT}`));

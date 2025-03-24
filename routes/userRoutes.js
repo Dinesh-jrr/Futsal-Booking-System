@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
-router.get('/me', protect, getCurrentUser);
+router.get('/me', protect(), getCurrentUser);
 // Get all users (protected and only for admin)
 router.get('/allUsers',getAllUsers);
 

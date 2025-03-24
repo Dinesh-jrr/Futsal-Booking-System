@@ -8,6 +8,7 @@ const {
   deleteFutsal,
 } = require('../controllers/futsalController');
 
+
 const router = express.Router();
 
 // Create a new futsal

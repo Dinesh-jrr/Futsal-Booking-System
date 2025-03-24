@@ -1,7 +1,9 @@
 const jwt = require('jsonwebtoken');
 
 const protect = (roles = []) => {
+  console.log("requesting /me")
   return (req, res, next) => {
+    console.log("requesting /me/ in middleware")
     // Get token from Authorization header
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {

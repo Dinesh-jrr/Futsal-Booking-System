@@ -78,6 +78,7 @@ exports.loginUser = async (req, res) => {
 
 // Get current user
 exports.getCurrentUser = async (req, res) => {
+  console.log("requesting /me")
   try {
     const user = await User.findById(req.user.id).select('-password');
     res.json(user);

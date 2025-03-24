@@ -3,8 +3,10 @@ const Futsal = require('../models/futsals');
 
 // Create a new booking
 exports.createBooking = async (req, res) => {
+  console.log("here booking");
   try {
     const { futsalName, selectedDay, selectedTimeSlot, totalCost, advancePayment, userId } = req.body;
+
 
     const newBooking = new Booking({
       futsalName,
