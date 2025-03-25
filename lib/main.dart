@@ -28,7 +28,12 @@ class MyApp extends StatelessWidget {
         // Add other routes here as needed
       },
 
-      // Optionally, you can use onGenerateRoute for dynamic route handling
+      
+    );
+  }
+}
+
+// Optionally, you can use onGenerateRoute for dynamic route handling
       // onGenerateRoute: (settings) {
       //   switch (settings.name) {
       //     case '/home':
@@ -37,6 +42,4 @@ class MyApp extends StatelessWidget {
       //       return MaterialPageRoute(builder: (context) => const SplashPage());
       //   }
       // },
-    );
-  }
-}
+      //comments added 
