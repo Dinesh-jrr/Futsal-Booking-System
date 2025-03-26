@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'chat_screen.dart';
 
+//implement the logic for chat system
+
 class ChatListScreen extends StatelessWidget {
   const ChatListScreen({super.key});
 
