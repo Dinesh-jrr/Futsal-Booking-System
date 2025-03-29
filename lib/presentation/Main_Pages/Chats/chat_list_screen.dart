@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'chat_screen.dart';
 
 //implement the logic for chat system
+//using socket.io in flutter 
 
 class ChatListScreen extends StatelessWidget {
   const ChatListScreen({super.key});
