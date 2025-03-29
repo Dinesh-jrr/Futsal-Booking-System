@@ -8,19 +8,18 @@ const paymentRoutes=require('./routes/paymentRoutes');
 const chatRoutes=require('./routes/chatRoutes');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const http = require('http');
 
 //real-time chat sysstem(circuit.io)
 // import {Server} from 'socket.io';
-const Server=require('socket.io');
+const socketIo =require('socket.io');
 
 dotenv.config();
 console.log('Mongo URI:', process.env.MONGO_URI);
 connectDB();
 
 const app = express();
-//for the socket
-const server= new Server(app);
-const io = new Server(server);
+const server = http.createServer(app);
 app.use(bodyParser.json());
 app.use(cors());
 
@@ -40,6 +39,28 @@ app.use('/api',paymentRoutes);
 //chat routes
 app.use('/api/chat',chatRoutes);
 
+//real time chat(socket.io)
+const io = new socketIo.Server(server, {
+  cors: {
+    origin: '*', // You can specify frontend URL here for better security
+    methods: ['GET', 'POST'],
+  },
+});
+
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
+
+  // Listen for incoming chat messages
+  socket.on('chat message', (msg) => {
+    console.log('Message received:', msg);
+    io.emit('chat message', msg); // Broadcast the message to all clients
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
+
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT,'0.0.0.0', () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT,'0.0.0.0', () => console.log(`Server running on port ${PORT}`));
