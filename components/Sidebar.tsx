@@ -62,7 +62,7 @@ export default function Sidebar() {
           {sidebarItems.map(
             (item) =>
               (!item.onlyAdmin || userisAdmin) && (
-                <Link
+                <a
                   key={item.name}
                   href={userisAdmin ? item.adminhref : item.href}
                   className={cn(
@@ -74,7 +74,7 @@ export default function Sidebar() {
                   <span className={cn("transition-all duration-300", isCollapsed && "hidden")}>
                     {item.name}
                   </span>
-                </Link>
+                </a>
               )
           )}
         </div>

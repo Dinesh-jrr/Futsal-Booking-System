@@ -1,58 +1,85 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import socket from '../../socket';
+import { Conversation, Message } from '../../types/next-auth';
 
-// Interfaces
-interface Conversation {
-  id: number;
-  name: string;
-  lastMessage: string;
-}
-
-interface Message {
-  sender: string;
-  content: string;
-  timestamp: string;
-}
-
-// Dummy data
 const conversations: Conversation[] = [
-  { id: 1, name: "Alex", lastMessage: "Don't forget our meeting at 3 PM." },
-  { id: 2, name: "Jordan", lastMessage: "The latest changes have been pushed." },
+  { id: 1, name: 'Alex', lastMessage: "Don't forget our meeting at 3 PM." },
+  { id: 2, name: 'Jordan', lastMessage: 'The latest changes have been pushed.' },
 ];
 
 const chatHistory: Record<number, Message[]> = {
   1: [
-    { sender: "Alex", content: "Hey, are you free at 3?", timestamp: "10:00 AM" },
-    { sender: "You", content: "Yes, I am. See you then!", timestamp: "10:02 AM" },
+    { sender: 'Alex', content: 'Hey, are you free at 3?', timestamp: '10:00 AM' },
+    { sender: 'You', content: 'Yes, I am. See you then!', timestamp: '10:02 AM' },
   ],
   2: [
-    { sender: "Jordan", content: "I just pushed the new updates.", timestamp: "9:30 AM" },
-    { sender: "You", content: "Great, I'll check them out.", timestamp: "9:33 AM" },
+    { sender: 'Jordan', content: 'I just pushed the new updates.', timestamp: '9:30 AM' },
+    { sender: 'You', content: "Great, I'll check them out.", timestamp: '9:33 AM' },
   ],
 };
 
 export default function MessagesPage() {
   const router = useRouter();
-  const [selectedConversation, setSelectedConversation] = useState<Conversation>(conversations[0]);
-  const [messages, setMessages] = useState<Message[]>(chatHistory[conversations[0].id] || []);
-  const [newMessage, setNewMessage] = useState<string>("");
+  const { data: session, status } = useSession();
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState<string>('');
   const [isTyping, setIsTyping] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (status === 'loading') return;
+
+    const userId = session?.user?.id;
+    if (userId) {
+      if (!socket.connected) {
+        socket.connect();
+      }
+      socket.emit('join', userId);
+
+      socket.on('newMessage', (message: Message) => {
+        setMessages((prev) => [...prev, message]);
+      });
+    }
+
+    return () => {
+      socket.off('newMessage');
+    };
+  }, [session, status]);
 
   const handleConversationSelect = (conv: Conversation) => {
     setSelectedConversation(conv);
     setMessages(chatHistory[conv.id] || []);
-    setNewMessage("");
+    setNewMessage('');
     setIsTyping(false);
   };
 
   const handleSendMessage = () => {
-    if (!newMessage.trim()) return;
-    const timestamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    const updatedMessages = [...messages, { sender: "You", content: newMessage, timestamp }];
-    setMessages(updatedMessages);
-    setNewMessage("");
+    if (!newMessage.trim() || !selectedConversation) return;
+
+    const timestamp = new Date().toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    const messageData: Message = {
+      sender: 'You',
+      content: newMessage,
+      timestamp,
+    };
+
+    setMessages((prev) => [...prev, messageData]);
+
+    socket.emit('sendMessage', {
+      senderId: session?.user?.id,
+      receiverId: selectedConversation.id,
+      message: newMessage,
+    });
+
+    setNewMessage('');
     setIsTyping(false);
   };
 
@@ -78,7 +105,7 @@ export default function MessagesPage() {
             key={conv.id}
             onClick={() => handleConversationSelect(conv)}
             className={`p-3 rounded-lg cursor-pointer border ${
-              selectedConversation.id === conv.id ? "border-green-500" : "border-gray-300"
+              selectedConversation && selectedConversation.id === conv.id ? "border-green-500" : "border-gray-300"
             }`}
           >
             <h3 className="font-semibold text-gray-800">{conv.name}</h3>
@@ -91,7 +118,7 @@ export default function MessagesPage() {
       <div className="flex-1 bg-white rounded-xl shadow-lg ml-4 flex flex-col">
         {/* Chat Header */}
         <div className="p-4 border-b border-gray-300 flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-900">{selectedConversation.name}</h2>
+          <h2 className="text-xl font-bold text-gray-900">{selectedConversation && selectedConversation.name}</h2>
         </div>
 
         {/* Chat Messages */}
@@ -111,7 +138,9 @@ export default function MessagesPage() {
           ))}
 
           {isTyping && (
-            <div className="text-sm italic text-gray-500">{selectedConversation.name} is typing...</div>
+            <div className="text-sm italic text-gray-500">
+              {selectedConversation && selectedConversation.name} is typing...
+            </div>
           )}
         </div>
 

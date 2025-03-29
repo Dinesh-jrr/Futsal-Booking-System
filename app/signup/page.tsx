@@ -23,7 +23,7 @@ export default function RegisterPage() {
           email: formData.get("email"),
           phoneNumber: formData.get("phoneNumber"),
           password: formData.get("password"),
-          role:"futsalOwner", // Use the role state here
+          role:"futsal_owner", // Use the role state here
         }),
         headers: {
           "Content-Type": "application/json",

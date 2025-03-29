@@ -1,14 +1,19 @@
 // components/Header.js
+'use client';
 import Link from "next/link";
 import { Search, Bell, MessageSquare } from "lucide-react";
+import { useSession } from "next-auth/react";
+
 
 export default function Header() {
+  const {data:session}=useSession();
+  const userRole=session?.user?.role;
   return (
     <header className="sticky top-0 z-10 flex items-center justify-between bg-white px-6 py-4 shadow-md">
       {/* Left Section */}
       <div>
         <h1 className="text-2xl font-semibold text-gray-800">Welcome to FootLock</h1>
-        <p className="text-gray-500">Hello Dinesh, Welcome back!</p>
+        <p className="text-gray-500">Hello {session?.user?.name || 'Guest'}, Welcome back!</p>
       </div>
 
       {/* Middle Section */}
@@ -23,17 +28,24 @@ export default function Header() {
 
       {/* Right Section */}
       <div className="flex items-center space-x-4">
-        <Link href="/messages">
-        <MessageSquare className="text-gray-600 hover:text-gray-800 cursor-pointer" />
-        </Link>
-        <Link href="/notifications">
+      {userRole === 'admin' && (
+          <a href="/reviews">
+            <MessageSquare className="text-gray-600 hover:text-gray-800 cursor-pointer" />
+          </a>
+        )}
+        {userRole === 'futsal_owner' && (
+          <a href="dashboard/messages">
+            <MessageSquare className="text-gray-600 hover:text-gray-800 cursor-pointer" />
+          </a>
+        )}
+        <a href="/notifications">
         <Bell className="text-gray-600 hover:text-gray-800 cursor-pointer" />
-        </Link>
-        <Link href="/profile">
+        </a>
+        <a href="/profile">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500 text-white font-bold">
           FL
         </div>
-        </Link>
+        </a>
       </div>
     </header>
   );

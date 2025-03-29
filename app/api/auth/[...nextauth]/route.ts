@@ -20,6 +20,7 @@ interface JWT extends Record<string, unknown> {
 // Define the session shape (this is the session data available in the app)
 interface SessionType {
   user: UserType;
+  id:string;
 }
 
 const handler = NextAuth({
