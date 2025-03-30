@@ -7,7 +7,7 @@ class SocketService {
   SocketService(this.userId);
 
   void initSocket() {
-    socket = IO.io('http://localhost:5000', <String, dynamic>{
+    socket = IO.io('http://192.168.1.4:5000', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
     });

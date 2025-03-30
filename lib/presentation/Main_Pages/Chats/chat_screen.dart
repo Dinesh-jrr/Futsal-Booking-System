@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import '../../../services/socket_service.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -21,6 +23,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   late SocketService socketService;
 
+  final String backendURL = 'http://192.168.1.4:5000';
   List<Map<String, String>> messages = [];
 
   @override
@@ -29,15 +32,58 @@ class _ChatScreenState extends State<ChatScreen> {
     socketService = SocketService(widget.playerId);
     socketService.initSocket();
 
+    _loadChatHistory();
+    _markMessagesAsRead();
+
     socketService.onMessage((data) {
       setState(() {
         messages.add({
-          'sender': 'owner',
+          'sender': widget.receiverId,
           'text': data['content'] ?? '',
           'timestamp': _formattedTime(),
         });
       });
     });
+  }
+
+  Future<void> _loadChatHistory() async {
+    try {
+      final res = await http.get(Uri.parse(
+        '$backendURL/api/chat/chat-history?userId1=${widget.playerId}&userId2=${widget.receiverId}',
+      ));
+
+      if (res.statusCode == 200) {
+        final List history = json.decode(res.body)['data'];
+        setState(() {
+          messages = history.map<Map<String, String>>((msg) {
+            return {
+              'sender': msg['sender']['_id'],
+              'text': msg['message'],
+              'timestamp': msg['createdAt'],
+            };
+          }).toList();
+        });
+      } else {
+        print("Failed to load chat history: ${res.statusCode}");
+      }
+    } catch (e) {
+      print("Error loading chat history: $e");
+    }
+  }
+
+  Future<void> _markMessagesAsRead() async {
+    try {
+      await http.post(
+        Uri.parse('$backendURL/api/chat/mark-read'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'senderId': widget.receiverId,
+          'receiverId': widget.playerId,
+        }),
+      );
+    } catch (e) {
+      print("Error marking messages as read: $e");
+    }
   }
 
   void _sendMessage() {
@@ -46,7 +92,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     setState(() {
       messages.add({
-        'sender': 'user',
+        'sender': widget.playerId,
         'text': text,
         'timestamp': _formattedTime(),
       });
@@ -54,6 +100,17 @@ class _ChatScreenState extends State<ChatScreen> {
 
     socketService.sendMessage(widget.receiverId, text);
     _controller.clear();
+
+    // Save to DB
+    http.post(
+      Uri.parse('$backendURL/api/chat/send'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'senderId': widget.playerId,
+        'receiverId': widget.receiverId,
+        'message': text,
+      }),
+    );
   }
 
   String _formattedTime() {
@@ -80,7 +137,7 @@ class _ChatScreenState extends State<ChatScreen> {
               child: Icon(Icons.person, color: Colors.green),
             ),
             const SizedBox(width: 10),
-            const Text("Futsal Owner"),
+            Text(widget.receiverName),
           ],
         ),
         backgroundColor: Colors.green,
@@ -95,16 +152,18 @@ class _ChatScreenState extends State<ChatScreen> {
               itemCount: messages.length,
               itemBuilder: (context, index) {
                 var message = messages[messages.length - 1 - index];
-                bool isMe = message['sender'] == 'user';
+                bool isMe = message['sender'] == widget.playerId;
 
                 return Align(
                   alignment:
                       isMe ? Alignment.centerRight : Alignment.centerLeft,
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+                    constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.75),
                     child: Container(
                       margin: const EdgeInsets.symmetric(vertical: 6),
-                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                      padding:
+                          const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
                       decoration: BoxDecoration(
                         color: isMe ? Colors.green[400] : Colors.white,
                         borderRadius: BorderRadius.only(
@@ -136,7 +195,13 @@ class _ChatScreenState extends State<ChatScreen> {
                           Align(
                             alignment: Alignment.bottomRight,
                             child: Text(
-                              message['timestamp'] ?? '',
+                              message['timestamp'] != null
+                                  ? DateTime.tryParse(message['timestamp']!)
+                                          ?.toLocal()
+                                          .toString()
+                                          .substring(11, 16) ??
+                                      ''
+                                  : '',
                               style: TextStyle(
                                 color: isMe ? Colors.white70 : Colors.grey,
                                 fontSize: 11,
