@@ -34,7 +34,7 @@ export default function Header() {
           </a>
         )}
         {userRole === 'futsal_owner' && (
-          <a href="dashboard/messages">
+          <a href="/dashboard/messages">
             <MessageSquare className="text-gray-600 hover:text-gray-800 cursor-pointer" />
           </a>
         )}
