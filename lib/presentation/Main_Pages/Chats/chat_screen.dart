@@ -3,9 +3,15 @@ import '../../../services/socket_service.dart';
 
 class ChatScreen extends StatefulWidget {
   final String playerId;
-  final String adminId;
+  final String receiverId;
+  final String receiverName;
 
-  const ChatScreen({super.key, required this.playerId, required this.adminId});
+  const ChatScreen({
+    super.key,
+    required this.playerId,
+    required this.receiverId,
+    required this.receiverName,
+  });
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -46,7 +52,7 @@ class _ChatScreenState extends State<ChatScreen> {
       });
     });
 
-    socketService.sendMessage(widget.adminId, text);
+    socketService.sendMessage(widget.receiverId, text);
     _controller.clear();
   }
 
