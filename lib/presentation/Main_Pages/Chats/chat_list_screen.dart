@@ -13,7 +13,7 @@ class ChatListScreen extends StatefulWidget {
 
 class _ChatListScreenState extends State<ChatListScreen> {
   String? playerId;
-  final String backendURL = 'http://192.168.1.4:5000';
+  final String backendURL = 'http://192.168.1.3:5000';
   bool isLoading = true;
   List<Map<String, dynamic>> conversations = [];
 

@@ -145,7 +145,7 @@ class Esewa {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
     final response = await http.get(
-      Uri.parse('http://192.168.1.4:5000/api/users/me'),
+      Uri.parse('http://192.168.1.3:5000/api/users/me'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization':
@@ -156,7 +156,7 @@ class Esewa {
     final Map<String, dynamic> responseBody = json.decode(response.body);
     final String userId = responseBody['_id'];
 
-    final url = Uri.parse("http://192.168.1.4:5000/api/bookings");
+    final url = Uri.parse("http://192.168.1.3:5000/api/bookings");
     try {
       final response = await http.post(
         url,
@@ -198,11 +198,11 @@ class Esewa {
   /// payment process needs to be implemented correctly and the backend needs to be added
   Future<void> savePaymentHistory(
       BuildContext context, EsewaPaymentSuccessResult result) async {
-    final url = Uri.parse("http://10.22.21.41:5000/api/savePaymentHistory");
+    final url = Uri.parse("http://192.168.1.3:5000/api/savePaymentHistory");
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
     final response = await http.get(
-      Uri.parse('http://10.22.21.41:5000/api/users/me'),
+      Uri.parse('http://192.168.1.3:5000/api/users/me'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization':

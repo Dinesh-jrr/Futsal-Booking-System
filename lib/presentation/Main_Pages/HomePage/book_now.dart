@@ -222,7 +222,7 @@ class BookNow extends StatelessWidget {
                 print("calling/users/me");
 
               final response = await http.get(
-                Uri.parse('http://192.168.1.2:5000/api/users/me'),
+                Uri.parse('http://192.168.1.3:5000/api/users/me'),
                 headers: {
                   'Content-Type': 'application/json',
                   'Authorization': 'Bearer ${token ?? ''}',  // Use empty string if token is null
