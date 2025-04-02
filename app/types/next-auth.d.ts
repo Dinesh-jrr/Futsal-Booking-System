@@ -1,7 +1,7 @@
 // types/next-auth.d.ts
 
 export interface Conversation {
-    id: number;
+    id: String;
     name: string;
     lastMessage: string;
   }
