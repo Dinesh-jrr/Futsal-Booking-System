@@ -3,64 +3,100 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
-const futsalRoutes=require('./routes/futsalRoutes');
-const paymentRoutes=require('./routes/paymentRoutes');
-const chatRoutes=require('./routes/chatRoutes');
+const futsalRoutes = require('./routes/futsalRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const http = require('http');
+const socketIo = require('socket.io');
 
-//real-time chat sysstem(circuit.io)
-// import {Server} from 'socket.io';
-const socketIo =require('socket.io');
-
+// Load environment variables
 dotenv.config();
-console.log('Mongo URI:', process.env.MONGO_URI);
+
+// Connect to database
 connectDB();
 
+// Create Express app and HTTP server
 const app = express();
 const server = http.createServer(app);
+
+// Middleware
 app.use(bodyParser.json());
 app.use(cors());
 
-// Routes
-//user routes
+// API Routes
 app.use('/api/users', userRoutes);
-
-//bookings routes
 app.use('/api', bookingRoutes);
+app.use('/api', futsalRoutes);
+app.use('/api', paymentRoutes);
+app.use('/api/chat', chatRoutes);
 
-//futsal routes
-app.use('/api',futsalRoutes);
-
-//payments routes
-app.use('/api',paymentRoutes);
-
-//chat routes
-app.use('/api/chat',chatRoutes);
-
-//real time chat(socket.io)
+// Socket.IO setup
 const io = new socketIo.Server(server, {
   cors: {
-    origin: '*', // You can specify frontend URL here for better security
+    origin: '*', // Replace with your frontend domain in production
     methods: ['GET', 'POST'],
   },
 });
 
-io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
+// User ID to socket ID mapping
+const users = {};
 
-  // Listen for incoming chat messages
-  socket.on('chat message', (msg) => {
-    console.log('Message received:', msg);
-    io.emit('chat message', msg); // Broadcast the message to all clients
+io.on('connection', (socket) => {
+  console.log('⚡ User connected:', socket.id);
+
+  // Client notifies server it's ready
+  socket.on('client_ready', (msg) => {
+    console.log('✅ Client Ready:', msg);
+  });
+
+  // Join user-specific room using their userId
+  socket.on('join', (userId) => {
+    users[userId] = socket.id;
+    socket.join(userId); // allows targeted messaging
+    console.log(`📥 User ${userId} joined room ${userId}`);
+  });
+
+  // Handle sending messages
+  socket.on('sendMessage', ({ senderId, receiverId, message }) => {
+    console.log(`📨 Message from ${senderId} to ${receiverId}: ${message}`);
+
+    const timestamp = new Date().toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    const messageData = {
+      sender: 'Them', // Change based on backend user mapping
+      content: message,
+      timestamp,
+    };
+
+    // Emit to specific receiver if they're connected
+    if (users[receiverId]) {
+      io.to(users[receiverId]).emit('newMessage', messageData);
+      console.log(`📤 Message sent to ${receiverId}`);
+    } else {
+      console.log(`❌ User ${receiverId} not connected`);
+    }
   });
 
   socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
+    console.log('❎ User disconnected:', socket.id);
+
+    // Clean up user from map
+    for (const userId in users) {
+      if (users[userId] === socket.id) {
+        delete users[userId];
+        break;
+      }
+    }
   });
 });
 
+//setting up notification feature in system
 
+// Start server
 const PORT = process.env.PORT || 5000;
-server.listen(PORT,'0.0.0.0', () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server running on port ${PORT}`));

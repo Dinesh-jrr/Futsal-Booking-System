@@ -4,12 +4,12 @@ const chatSchema = new mongoose.Schema(
   {
     sender: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Reference to the User model
+      ref: "User", // Reference to sender (user or futsal_owner)
       required: true,
     },
     receiver: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Reference to the User model
+      ref: "User", // Reference to receiver (user or futsal_owner)
       required: true,
     },
     message: {
@@ -21,9 +21,14 @@ const chatSchema = new mongoose.Schema(
       default: false,
     },
   },
-  { timestamps: true } // Automatically adds createdAt and updatedAt
+  {
+    timestamps: true, // Adds createdAt and updatedAt fields
+  }
 );
 
-const chat = mongoose.models.Chat || mongoose.model("Chat", chatSchema);
+// Optional: add index for faster querying of conversations
+chatSchema.index({ sender: 1, receiver: 1, createdAt: -1 });
 
-module.exports = chat;
+const Chat = mongoose.models.Chat || mongoose.model("Chat", chatSchema);
+
+module.exports = Chat;
