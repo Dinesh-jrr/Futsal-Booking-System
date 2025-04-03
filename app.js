@@ -6,6 +6,7 @@ const bookingRoutes = require('./routes/bookingRoutes');
 const futsalRoutes = require('./routes/futsalRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const notificationRoutes=require('./routes/notificationRoutes');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const http = require('http');
@@ -31,6 +32,7 @@ app.use('/api', bookingRoutes);
 app.use('/api', futsalRoutes);
 app.use('/api', paymentRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/notification',notificationRoutes);
 
 // Socket.IO setup
 const io = new socketIo.Server(server, {
