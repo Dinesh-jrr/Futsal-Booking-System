@@ -1,39 +1,77 @@
-// app/notifications/page.tsx
 'use client';
-import { useState } from 'react';
-import { Bell } from 'lucide-react';
 
-const mockNotifications = [
-  { id: 1, message: 'Your booking for Futsal Arena is confirmed.', time: '5 mins ago' },
-  { id: 2, message: 'Opponent found for your match request!', time: '30 mins ago' },
-  { id: 3, message: 'Your payment was successful.', time: '1 hour ago' },
-];
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { Bell } from 'lucide-react';
+import { Menu } from '@headlessui/react';
+
+interface Notification {
+  id: number;
+  message: string;
+  time: string;
+}
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState(mockNotifications);
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    async function fetchNotifications() {
+      try {
+        const response = await fetch(`http://localhost:5000/api/notification/${userId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch notifications');
+        }
+        const data: Notification[] = await response.json();
+        setNotifications(data);
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchNotifications();
+  }, [userId]);
 
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex items-center gap-2">
-        <Bell className="text-green-500" />
-        <h1 className="text-2xl font-bold text-gray-800">Notifications</h1>
-      </div>
-
-      {notifications.length === 0 ? (
-        <p className="text-gray-500">No notifications available.</p>
-      ) : (
-        <div className="space-y-3">
-          {notifications.map((notif) => (
-            <div
-              key={notif.id}
-              className="p-4 bg-gray-100 border border-gray-200 rounded-xl shadow-sm hover:bg-gray-200 transition"
-            >
-              <p className="text-gray-800">{notif.message}</p>
-              <p className="text-sm text-gray-500">{notif.time}</p>
-            </div>
-          ))}
+    <div className="relative p-6">
+      <Menu as="div" className="relative inline-block text-left">
+        <div>
+          <Menu.Button className="flex items-center gap-2 focus:outline-none">
+            <Bell className="text-green-500" />
+            <span className="text-2xl font-bold text-gray-800">Notifications</span>
+          </Menu.Button>
         </div>
-      )}
+        <Menu.Items className="absolute right-0 mt-2 w-80 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+          {loading ? (
+            <div className="p-4 text-gray-500">Loading notifications...</div>
+          ) : notifications.length === 0 ? (
+            <div className="p-4 text-gray-500">No notifications available.</div>
+          ) : (
+            <div className="p-1">
+              {notifications.map((notif) => (
+                <Menu.Item key={notif.id}>
+                  {({ active }) => (
+                    <div
+                      className={`p-4 ${
+                        active ? 'bg-gray-100' : 'bg-white'
+                      } border-b border-gray-200 last:border-none`}
+                    >
+                      <p className="text-gray-800">{notif.message}</p>
+                      <p className="text-sm text-gray-500">{notif.time}</p>
+                    </div>
+                  )}
+                </Menu.Item>
+              ))}
+            </div>
+          )}
+        </Menu.Items>
+      </Menu>
     </div>
   );
 }
