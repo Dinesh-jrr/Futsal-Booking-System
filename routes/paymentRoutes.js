@@ -2,13 +2,15 @@ const express = require("express");
 const router = express.Router();
 const paymentController = require("../controllers/paymentController");
 
-// Route to initiate eSewa payment
-router.post("/initiate", paymentController.payWithEsewa);
+// Save payment
+router.post("/create", paymentController.createPayment);
 
-// Route to handle successful payment
-router.get("/success", paymentController.paymentSuccess);
+// Update payment status
+router.patch("/payments/:transactionUuid", paymentController.updatePaymentStatus);
 
-// Route to handle failed payment
-router.get("/failure", paymentController.paymentFailure);
-// router.get("/savePaymentHistory", paymentHistoryController.createPayment);
+//get all payments
+router.get("/getAllPayments", paymentController.getAllPayments);
+
+// router.get('/payments', paymentController.getAllPayments);
+
 module.exports = router;

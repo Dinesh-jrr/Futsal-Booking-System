@@ -30,7 +30,7 @@ app.use(cors());
 app.use('/api/users', userRoutes);
 app.use('/api', bookingRoutes);
 app.use('/api', futsalRoutes);
-app.use('/api', paymentRoutes);
+app.use('/api/payment', paymentRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/notification',notificationRoutes);
 
