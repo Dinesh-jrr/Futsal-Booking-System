@@ -61,7 +61,7 @@ class ProfileScreen extends StatelessWidget {
 
               // User Information Section
               const Text(
-                'John Doe',
+                'Dinesh Singh',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
