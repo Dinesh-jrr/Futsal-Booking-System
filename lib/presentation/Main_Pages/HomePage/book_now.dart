@@ -91,7 +91,7 @@ class BookNow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double totalCost = 1000.00; // Example total cost
+    double totalCost = 10; // Example total cost
     double advancePayment = totalCost * 0.2;
 
     return Scaffold(
@@ -177,7 +177,7 @@ class BookNow extends StatelessWidget {
           children: [
             Text('Total Cost: NPR ${totalCost.toStringAsFixed(2)}', style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 8),
-            Text('Advance Payment (20%): NPR ${advancePayment.toStringAsFixed(2)}', style: const TextStyle(fontSize: 16)),
+            Text('Advance Payment (1%): NPR ${advancePayment.toStringAsFixed(2)}', style: const TextStyle(fontSize: 16)),
           ],
         ),
       ),
@@ -222,7 +222,7 @@ class BookNow extends StatelessWidget {
                 print("calling/users/me");
 
               final response = await http.get(
-                Uri.parse('http://192.168.1.3:5000/api/users/me'),
+                Uri.parse('http://192.168.1.5:5000/api/users/me'),
                 headers: {
                   'Content-Type': 'application/json',
                   'Authorization': 'Bearer ${token ?? ''}',  // Use empty string if token is null

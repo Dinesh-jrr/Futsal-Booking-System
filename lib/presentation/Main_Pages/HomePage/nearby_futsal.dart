@@ -25,7 +25,7 @@ class NearbyFutsalPage extends StatelessWidget {
           FutsalCard(
             name: "Dreamer's Futsal",
             location: "Satungal, KTM",
-            price: 1200,
+            price: 10,
             availability: "Yes",
             imageUrl: "assets/images/futsal_pitch.jpg",
             onTap: () => _navigateToDetail(context, "Dreamer's Futsal"),

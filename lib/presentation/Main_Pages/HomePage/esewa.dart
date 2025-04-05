@@ -8,6 +8,7 @@ import 'package:esewa_flutter_sdk/esewa_payment_success_result.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:player/common/esewa.dart';
+import 'package:player/presentation/Main_Pages/HomePage/booking_success.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Esewa {
@@ -15,7 +16,7 @@ class Esewa {
   final DateTime selectedDay;
   final String? selectedTimeSlot;
   final double advancePayment;
-  final String bookingId;
+  late String bookingId; // late so we can set after booking creation
   final double totalCost;
   final String userId;
 
@@ -29,13 +30,11 @@ class Esewa {
     required this.userId,
   });
 
-  /// Starts the eSewa payment process.
   void pay(BuildContext context) {
     try {
       EsewaFlutterSdk.initPayment(
         esewaConfig: EsewaConfig(
-          environment:
-              Environment.test, // Switch to Environment.live in production
+          environment: Environment.test,
           clientId: kEsewaClientId,
           secretId: kEsewaSecretKey,
         ),
@@ -43,43 +42,39 @@ class Esewa {
           productId: "futsal-${DateTime.now().millisecondsSinceEpoch}",
           productName: futsalName,
           productPrice: advancePayment.toStringAsFixed(2),
-          callbackUrl: '', // Optionally provide a callback URL
+          callbackUrl: '',
         ),
-        onPaymentSuccess: (EsewaPaymentSuccessResult result) {
-          debugPrint('Payment Success, Ref ID: ${result.refId}');
+        onPaymentSuccess: (EsewaPaymentSuccessResult result) async {
+          debugPrint('✅ Payment Success, Ref ID: ${result.refId}');
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text("Payment successful. Booking confirmed.")),
+            const SnackBar(content: Text("Payment successful. Booking confirmed.")),
           );
-          // Verify the transaction with eSewa server
-          verifyTransaction(context, result);
+          await verifyTransaction(context, result);
         },
         onPaymentFailure: () {
-          debugPrint('Payment Failure');
+          debugPrint('❌ Payment Failure');
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Payment failed. Please try again.")),
           );
         },
         onPaymentCancellation: () {
-          debugPrint('Payment Cancelled');
+          debugPrint('⚠️ Payment Cancelled');
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Payment cancelled by user.")),
           );
         },
       );
     } catch (e) {
-      debugPrint('Exception during payment: $e');
+      debugPrint('⚠️ Exception during payment: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("An error occurred. Please try again.")),
       );
     }
   }
 
-  /// Verifies the transaction using eSewa’s verification endpoint.
-  Future<void> verifyTransaction(
-      BuildContext context, EsewaPaymentSuccessResult result) async {
-    final url = Uri.parse(
-        "https://rc.esewa.com.np/mobile/transaction?txnRefId=${result.refId}");
+  Future<void> verifyTransaction(BuildContext context, EsewaPaymentSuccessResult result) async {
+    final url = Uri.parse("https://rc.esewa.com.np/mobile/transaction?txnRefId=${result.refId}");
+
     try {
       final response = await http.get(
         url,
@@ -89,158 +84,133 @@ class Esewa {
           "Content-Type": "application/json",
         },
       );
+
       if (response.statusCode == 200) {
-        debugPrint("Verification response: ${response.body}");
+        debugPrint("🔍 Verification response: ${response.body}");
         final data = jsonDecode(response.body);
 
-        // Check if the response is a list (array)
         if (data is List && data.isNotEmpty) {
-          final transactionDetails = data[0]
-              ["transactionDetails"]; // Extract the first item if it's an array
-          if (transactionDetails is Map<String, dynamic> &&
-              transactionDetails.containsKey("status")) {
-            final status = transactionDetails["status"];
-            debugPrint("Transaction status: $status");
-            if (status == "COMPLETE") {
-              // Create the booking on success
-              await createBookings(context);
-              await savePaymentHistory(context, result);
-            } else {
-              debugPrint("Payment not complete");
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Payment verification failed.")),
-              );
-            }
+          final transactionDetails = data[0]["transactionDetails"];
+          if (transactionDetails is Map<String, dynamic> && transactionDetails["status"] == "COMPLETE") {
+            debugPrint("✅ Transaction status: COMPLETE");
+
+            await createBookings(context);
+            await savePaymentHistory(context, result);
           } else {
-            debugPrint(
-                "Error: 'transactionDetails' is not in the expected format.");
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text("Error processing transaction details.")),
-            );
+            debugPrint("❌ Payment not complete or format invalid");
           }
         } else {
-          debugPrint("Error: Response is not a valid array or empty.");
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text("Invalid response from verification.")),
-          );
+          debugPrint("❌ Invalid verification response.");
         }
       } else {
-        debugPrint("Error verifying transaction: ${response.statusCode}");
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Error verifying transaction.")),
-        );
+        debugPrint("❌ Error verifying transaction: ${response.statusCode}");
       }
     } catch (e) {
-      debugPrint("Exception verifying transaction: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Exception verifying transaction.")),
-      );
+      debugPrint("⚠️ Exception verifying transaction: $e");
     }
   }
 
-  /// Creates a new booking after payment confirmation.
   Future<void> createBookings(BuildContext context) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('auth_token');
-    final response = await http.get(
-      Uri.parse('http://192.168.1.3:5000/api/users/me'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization':
-            'Bearer ${token ?? ''}', // Use empty string if token is null
-      },
-    );
-
-    final Map<String, dynamic> responseBody = json.decode(response.body);
-    final String userId = responseBody['_id'];
-
-    final url = Uri.parse("http://192.168.1.3:5000/api/bookings");
     try {
-      final response = await http.post(
-        url,
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('auth_token');
+
+      final userResponse = await http.get(
+        Uri.parse('http://192.168.1.5:5000/api/users/me'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${token ?? ''}',
+        },
+      );
+
+      final userData = json.decode(userResponse.body);
+      final userId = userData['_id'];
+
+      final bookingResponse = await http.post(
+        Uri.parse("http://192.168.1.5:5000/api/bookings"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "futsalName": futsalName,
           "selectedDay": selectedDay.toIso8601String(),
           "selectedTimeSlot": selectedTimeSlot,
-          "status": "partiallyPaid", // Set to 'pending' initially
+          "status": "partiallyPaid",
           "totalCost": totalCost,
           "advancePayment": advancePayment,
-          
           "userId": userId,
         }),
       );
-      print(response.body);
-      if (response.statusCode == 201) {
-        debugPrint("Booking created successfully.");
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text("Booking created. Awaiting confirmation.")),
-        );
+
+      if (bookingResponse.statusCode == 201) {
+        final bookingData = json.decode(bookingResponse.body);
+        if (bookingData.containsKey('booking')) {
+          bookingId = bookingData['booking']['_id'];
+          debugPrint("✅ Booking created: $bookingId");
+        } else {
+          debugPrint("❌ 'booking' key missing in response: ${bookingResponse.body}");
+        }
       } else {
-        debugPrint("Failed to create booking: ${response.statusCode}");
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Failed to create booking.")),
-        );
+        debugPrint("❌ Booking creation failed: ${bookingResponse.statusCode}");
+        debugPrint("Response: ${bookingResponse.body}");
       }
     } catch (e) {
-      debugPrint("Exception creating booking: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("An error occurred while creating the booking.")),
-      );
+      debugPrint("⚠️ Exception creating booking: $e");
     }
   }
 
-  /// Saves the payment history to the backend. 
-  /// payment process needs to be implemented correctly and the backend needs to be added
-  Future<void> savePaymentHistory(
-      BuildContext context, EsewaPaymentSuccessResult result) async {
-    final url = Uri.parse("http://192.168.1.3:5000/api/savePaymentHistory");
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('auth_token');
-    final response = await http.get(
-      Uri.parse('http://192.168.1.3:5000/api/users/me'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization':
-            'Bearer ${token ?? ''}', // Use empty string if token is null
-      },
-    );
-
-    final Map<String, dynamic> responseBody = json.decode(response.body);
-    final String userId = responseBody['_id'];
+  Future<void> savePaymentHistory(BuildContext context, EsewaPaymentSuccessResult result) async {
     try {
-      final response = await http.post(
-        url,
+      if (bookingId.isEmpty) {
+        debugPrint("❌ Booking ID is missing. Cannot save payment.");
+        return;
+      }
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('auth_token');
+
+      final userResponse = await http.get(
+        Uri.parse('http://192.168.1.5:5000/api/users/me'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${token ?? ''}',
+        },
+      );
+
+      final userBody = json.decode(userResponse.body);
+      final userId = userBody['_id'];
+
+      final paymentResponse = await http.post(
+        Uri.parse("http://192.168.1.5:5000/api/payment/create"),
         headers: {
           "Content-Type": "application/json",
         },
-      //   user,
-      // booking,
-      // transactionUuid,
-      // amount,
-      // status,
-      // paymentGateway,
         body: jsonEncode({
           "user": userId,
+          "booking": bookingId,
           "transactionUuid": result.refId,
-          //"a": futsalName,
           "amount": advancePayment,
-          // "date": selectedDay.toIso8601String(),
-          // "timeSlot": selectedTimeSlot,
-          // "paymentMethod": "eSewa",
-          "status": "partialPayment",
+          "status": "Pending",
+          "paymentGateway": "eSewa",
         }),
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
+      if (paymentResponse.statusCode == 200 || paymentResponse.statusCode == 201) {
         debugPrint("✅ Payment history saved successfully.");
+         // ➕ Show success screen
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => BookingSuccessScreen(
+        futsalName: futsalName,
+        timeSlot: selectedTimeSlot ?? '',
+        day: selectedDay,
+        amount: advancePayment,
+        transactionId: result.refId,
+      ),
+    ),
+  );
       } else {
-        debugPrint(
-            "❌ Failed to save payment history. Status code: ${response.statusCode}");
+        debugPrint("❌ Failed to save payment. Code: ${paymentResponse.statusCode}");
+        debugPrint("Response body: ${paymentResponse.body}");
       }
     } catch (e) {
       debugPrint("⚠️ Exception while saving payment history: $e");

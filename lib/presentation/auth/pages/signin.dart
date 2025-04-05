@@ -33,7 +33,7 @@ class _SignInState extends State<SignIn> {
     try {
       // Send POST request to login API
       final response = await http.post(
-        Uri.parse('http://192.168.1.3:5000/api/users/login'),
+        Uri.parse('http://192.168.1.5:5000/api/users/login'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': email,
