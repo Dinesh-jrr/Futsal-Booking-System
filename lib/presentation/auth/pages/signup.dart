@@ -218,20 +218,20 @@ class _SignUpState extends State<SignUp> {
                   ),
                   child: const Text("Sign Up", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                 ),
-                const SizedBox(height: 20),
-                OutlinedButton.icon(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.green, width: 1.5),
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-                  ),
-                  icon: Image.asset('assets/icons/google.png', height: 24),
-                  label: const Text(
-                    "Sign in with Google",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green),
-                  ),
-                ),
+                // const SizedBox(height: 20),
+                // OutlinedButton.icon(
+                //   onPressed: () {},
+                //   style: OutlinedButton.styleFrom(
+                //     side: const BorderSide(color: Colors.green, width: 1.5),
+                //     padding: const EdgeInsets.symmetric(vertical: 16.0),
+                //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+                //   ),
+                //   icon: Image.asset('assets/icons/google.png', height: 24),
+                //   label: const Text(
+                //     "Sign in with Google",
+                //     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green),
+                //   ),
+                // ),
                 const SizedBox(height: 20),
                 Center(
                   child: TextButton(

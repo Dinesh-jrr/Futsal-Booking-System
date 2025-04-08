@@ -23,7 +23,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   late SocketService socketService;
 
-  final String backendURL = 'http://192.168.1.3:5000';
+  final String backendURL = 'http://192.168.1.5:5000';
   List<Map<String, String>> messages = [];
 
   @override

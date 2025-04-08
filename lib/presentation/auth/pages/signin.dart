@@ -6,7 +6,8 @@ import 'package:player/presentation/auth/pages/signup.dart';
 import 'package:player/presentation/auth/pages/forgot_password.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert'; // To handle JSON response
+import 'dart:convert';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({super.key});
@@ -25,7 +26,6 @@ class _SignInState extends State<SignIn> {
     final String password = _passwordController.text;
 
     if (email.isEmpty || password.isEmpty) {
-      // Handle empty fields
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please fill in both fields")),
       );
@@ -33,46 +33,31 @@ class _SignInState extends State<SignIn> {
     }
 
     try {
-      // Send POST request to login API
       final response = await http.post(
         Uri.parse('http://192.168.1.5:5000/api/users/login'),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'email': email,
-          'password': password,
-        }),
+        body: json.encode({'email': email, 'password': password}),
       );
 
-      print(response.statusCode);
       if (response.statusCode == 200) {
-        // Parse the response to get the token
         final Map<String, dynamic> responseBody = json.decode(response.body);
-
         if (responseBody.containsKey('token')) {
-          final String token =
-              responseBody['token']; // Get the token from the response
-
-          // Store the token in shared preferences
+          final String token = responseBody['token'];
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('auth_token', token);
-          print("here");
 
-          // Navigate to home screen after successful login
           Navigator.pushReplacementNamed(context, '/home');
         } else {
-          // Handle case when the token is not found
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Login failed: No token found")),
           );
         }
       } else {
-        print("ielsefblock");
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Login failed: Invalid credentials")),
         );
       }
     } catch (e) {
-      print(e);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Login failed: Network error")),
       );
@@ -82,9 +67,44 @@ class _SignInState extends State<SignIn> {
   Future<void> _checkSession() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
-
     if (token != null) {
       Navigator.pushReplacementNamed(context, '/home');
+    }
+  }
+
+  Future<void> handleGoogleLogin() async {
+    final GoogleSignIn googleSignIn = GoogleSignIn(scopes: ['email']);
+    final GoogleSignInAccount? account = await googleSignIn.signIn();
+
+    if (account != null) {
+      final String email = account.email;
+      final String name = account.displayName ?? 'Google User';
+      final String googleId = account.id;
+      final GoogleSignInAuthentication auth = await account.authentication;
+      final String? idToken = auth.idToken;
+
+      final response = await http.post(
+        Uri.parse('http://192.168.1.5:5000/api/users/google-login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          'name': name,
+          'googleId': googleId,
+          'idToken': idToken,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        final token = body['token'];
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', token);
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Google login failed: ${response.body}")),
+        );
+      }
     }
   }
 
@@ -104,51 +124,25 @@ class _SignInState extends State<SignIn> {
           children: [
             const SizedBox(height: 40),
             Center(
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.asset(
-                    './assets/images/logo.png',
-                    height: 100,
-                    fit: BoxFit.contain,
-                  ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  './assets/images/logo.png',
+                  height: 100,
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
             const SizedBox(height: 20),
             const Center(
-              child: Text(
-                "Welcome !",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
+              child: Text("Welcome !", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             ),
             const SizedBox(height: 15),
             const Center(
-              child: Text(
-                "Sign in to your account",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
+              child: Text("Sign in to your account", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             ),
             const SizedBox(height: 20),
-            const Text(
-              "Email",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
+            const Text("Email", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             TextField(
               controller: _emailController,
@@ -156,29 +150,11 @@ class _SignInState extends State<SignIn> {
                 prefixIcon: const Icon(Icons.email, color: Colors.green),
                 hintText: 'Enter your email',
                 contentPadding: const EdgeInsets.symmetric(vertical: 20),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(color: Colors.green, width: 1.5),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(color: Colors.green, width: 1.5),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(color: Colors.green, width: 1.5),
-                ),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0), borderSide: const BorderSide(color: Colors.green)),
               ),
             ),
             const SizedBox(height: 25),
-            const Text(
-              "Password",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
+            const Text("Password", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             TextField(
               controller: _passwordController,
@@ -187,28 +163,10 @@ class _SignInState extends State<SignIn> {
                 prefixIcon: const Icon(Icons.password, color: Colors.green),
                 hintText: 'Enter your Password',
                 contentPadding: const EdgeInsets.symmetric(vertical: 20),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-                ),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0), borderSide: const BorderSide(color: AppColors.primary)),
                 suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                    color: Colors.green,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _obscurePassword = !_obscurePassword;
-                    });
-                  },
+                  icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, color: Colors.green),
+                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                 ),
               ),
             ),
@@ -217,20 +175,8 @@ class _SignInState extends State<SignIn> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const ForgotPasswordPage()),
-                    );
-                  },
-                  child: const Text(
-                    "Forgot Password?",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.red,
-                    ),
-                  ),
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPasswordPage())),
+                  child: const Text("Forgot Password?", style: TextStyle(fontSize: 14, color: Colors.red)),
                 ),
               ],
             ),
@@ -240,73 +186,33 @@ class _SignInState extends State<SignIn> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 padding: const EdgeInsets.symmetric(vertical: 24.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
               ),
-              child: const Text(
-                "Sign In",
-                style: TextStyle(
-                  fontFamily: 'Roboto',
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
+              child: const Text("Sign In", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
             ),
             const SizedBox(height: 30),
             OutlinedButton.icon(
-              onPressed: () {
-                // Handle Google sign-in logic
-              },
+              onPressed: handleGoogleLogin,
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Colors.green, width: 2),
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
               ),
-              icon: Image.asset(
-                'assets/icons/google.png',
-                height: 24,
-              ),
-              label: const Text(
-                "Sign in with Google",
-                style: TextStyle(
-                  fontFamily: 'Roboto',
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                ),
-              ),
+              icon: Image.asset('assets/icons/google.png', height: 24),
+              label: const Text("Sign in with Google", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green)),
             ),
             const SizedBox(height: 30),
             Center(
               child: TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (BuildContext context) => const SignUp(),
-                    ),
-                  );
-                },
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SignUp())),
                 child: const Text.rich(
                   TextSpan(
                     text: "Don't have an account? ",
-                    style: TextStyle(
-                      fontFamily: 'Roboto',
-                      fontSize: 16,
-                      color: Colors.black,
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.black),
                     children: [
                       TextSpan(
                         text: "Sign Up",
-                        style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontSize: 16,
-                          color: AppColors.primary,
-                        ),
+                        style: TextStyle(fontSize: 16, color: AppColors.primary, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
