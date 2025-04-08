@@ -18,6 +18,7 @@ class SignIn extends StatefulWidget {
 class _SignInState extends State<SignIn> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _obscurePassword = true;
 
   Future<void> _signIn() async {
     final String email = _emailController.text;
@@ -56,14 +57,7 @@ class _SignInState extends State<SignIn> {
           await prefs.setString('auth_token', token);
           print("here");
 
-          //store the user id
-          //  final String userId = responseBody['user']['_id'];
-          // await prefs.setString('user_id', userId);
-          // //print("✅ User ID saved: $userId");
-
-          // Navigate to home screen after successful login (or main app screen)
-          // ignore: duplicate_ignore
-          // ignore: use_build_context_synchronously
+          // Navigate to home screen after successful login
           Navigator.pushReplacementNamed(context, '/home');
         } else {
           // Handle case when the token is not found
@@ -73,15 +67,12 @@ class _SignInState extends State<SignIn> {
         }
       } else {
         print("ielsefblock");
-        // Handle server error or incorrect credentials
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Login failed: Invalid credentials")),
         );
       }
     } catch (e) {
       print(e);
-      // print("Error: $e");
-      // Handle network or other errors
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Login failed: Network error")),
       );
@@ -93,7 +84,6 @@ class _SignInState extends State<SignIn> {
     String? token = prefs.getString('auth_token');
 
     if (token != null) {
-      // Token found, navigate to the home screen
       Navigator.pushReplacementNamed(context, '/home');
     }
   }
@@ -101,7 +91,7 @@ class _SignInState extends State<SignIn> {
   @override
   void initState() {
     super.initState();
-    _checkSession(); // Check session on screen load
+    _checkSession();
   }
 
   @override
@@ -113,11 +103,10 @@ class _SignInState extends State<SignIn> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: 40),
-            // Logo at the top
             Center(
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16), // Rounded border
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
@@ -130,8 +119,6 @@ class _SignInState extends State<SignIn> {
               ),
             ),
             const SizedBox(height: 20),
-
-            // Welcome text
             const Center(
               child: Text(
                 "Welcome !",
@@ -154,8 +141,6 @@ class _SignInState extends State<SignIn> {
               ),
             ),
             const SizedBox(height: 20),
-
-            // Email input field
             const Text(
               "Email",
               style: TextStyle(
@@ -186,8 +171,6 @@ class _SignInState extends State<SignIn> {
               ),
             ),
             const SizedBox(height: 25),
-
-            // Password input field
             const Text(
               "Password",
               style: TextStyle(
@@ -199,31 +182,37 @@ class _SignInState extends State<SignIn> {
             const SizedBox(height: 8),
             TextField(
               controller: _passwordController,
-              obscureText: true,
+              obscureText: _obscurePassword,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.password, color: Colors.green),
                 hintText: 'Enter your Password',
                 contentPadding: const EdgeInsets.symmetric(vertical: 20),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
-                  borderSide:
-                      const BorderSide(color: AppColors.primary, width: 1.5),
+                  borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
-                  borderSide:
-                      const BorderSide(color: AppColors.primary, width: 1.5),
+                  borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
-                  borderSide:
-                      const BorderSide(color: AppColors.primary, width: 1.5),
+                  borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                    color: Colors.green,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
                 ),
               ),
             ),
             const SizedBox(height: 8),
-
-            // Forgot Password link (right-aligned)
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -246,8 +235,6 @@ class _SignInState extends State<SignIn> {
               ],
             ),
             const SizedBox(height: 30),
-
-            // Sign In button
             ElevatedButton(
               onPressed: _signIn,
               style: ElevatedButton.styleFrom(
@@ -268,8 +255,6 @@ class _SignInState extends State<SignIn> {
               ),
             ),
             const SizedBox(height: 30),
-
-            // Sign in with Google button
             OutlinedButton.icon(
               onPressed: () {
                 // Handle Google sign-in logic
@@ -296,12 +281,9 @@ class _SignInState extends State<SignIn> {
               ),
             ),
             const SizedBox(height: 30),
-
-            // Already have an account? Sign up
             Center(
               child: TextButton(
                 onPressed: () {
-                  // Navigate to sign-up page
                   Navigator.push(
                     context,
                     MaterialPageRoute(

@@ -31,7 +31,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       isLoading = true;
     });
 
-    final url = Uri.parse('http://192.168.1.5:5000/api/users/forgot-password'); // adjust this
+    final url = Uri.parse('http://192.168.1.5:5000/api/users/forgot-password');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -43,19 +43,27 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     });
 
     if (response.statusCode == 200) {
-      Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (_) => VerifyOtpPage(email: email),
-  ),
-);
+      print("STATUS CODE: ${response.statusCode}");
+print("RESPONSE BODY: ${response.body}");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Reset link sent to your email")),
+        const SnackBar(content: Text("OTP sent to your email")),
       );
-      Navigator.pop(context);
+
+      Future.delayed(const Duration(seconds: 1), () {
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => VerifyOtpPage(email: email),
+            ),
+          );
+        }
+      });
     } else {
+      print("STATUS CODE: ${response.statusCode}");
+print("RESPONSE BODY: ${response.body}");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to send reset link")),
+        const SnackBar(content: Text("Failed to send OTP")),
       );
     }
   }
@@ -68,7 +76,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            const Text("Enter your email to receive a password reset link"),
+            const Text("Enter your email to receive a 6-digit OTP for password reset"),
             const SizedBox(height: 20),
             TextField(
               controller: _emailController,
@@ -82,7 +90,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               onPressed: isLoading ? null : sendResetLink,
               child: isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text("Send Reset Link"),
+                  : const Text("Send OTP"),
             )
           ],
         ),

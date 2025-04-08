@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:player/core/config/theme/app_colors.dart';
+import 'package:player/presentation/auth/pages/email_verify_page.dart';
 import 'package:player/presentation/auth/pages/signin.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -8,7 +9,6 @@ class SignUp extends StatefulWidget {
   const SignUp({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _SignUpState createState() => _SignUpState();
 }
 
@@ -20,31 +20,31 @@ class _SignUpState extends State<SignUp> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
 
-  // Function to validate email format
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Email is required';
     }
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\$');
     if (!emailRegex.hasMatch(value)) {
       return 'Please enter a valid email address';
     }
     return null;
   }
 
-  // Function to validate phone number
   String? _validatePhoneNumber(String? value) {
     if (value == null || value.isEmpty) {
       return 'Phone number is required';
     }
-    final phoneRegex = RegExp(r'^[0-9]{10}$');
+    final phoneRegex = RegExp(r'^[0-9]{10}\$');
     if (!phoneRegex.hasMatch(value)) {
       return 'Please enter a valid 10-digit phone number';
     }
     return null;
   }
 
-  // Function to validate password
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Password is required';
@@ -55,7 +55,6 @@ class _SignUpState extends State<SignUp> {
     return null;
   }
 
-  // Function to validate password confirmation
   String? _validateConfirmPassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please confirm your password';
@@ -66,54 +65,49 @@ class _SignUpState extends State<SignUp> {
     return null;
   }
 
- Future<void> _handleSignUp(BuildContext context) async {
-  if (_formKey.currentState?.validate() ?? false) {
-    // ignore: prefer_const_declarations
-    final url = 'http://10.22.21.41:5000/api/users/register'; 
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'name': _fullNameController.text,  // Matches 'name' field in your backend model
-        'email': _emailController.text,
-        'phoneNumber': _phoneController.text,  // Matches 'phoneNumber' in the backend model
-        'password': _passwordController.text,
-      }),
-    );
-     // ignore: avoid_print
-    print("Response status: ${response.statusCode}");  // Debug print
-    // ignore: avoid_print
-    print("Response body: ${response.body}");  // Debug print
-
-    if (response.statusCode == 201) {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Successfully signed up!'),
-          backgroundColor: Colors.green,
-        ),
+  Future<void> _handleSignUp(BuildContext context) async {
+    if (_formKey.currentState?.validate() ?? false) {
+      final url = 'http://192.168.1.5:5000/api/users/register';
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'name': _fullNameController.text,
+          'email': _emailController.text,
+          'phoneNumber': _phoneController.text,
+          'password': _passwordController.text,
+        }),
       );
 
-      Future.delayed(const Duration(seconds: 2), () {
-        Navigator.pushReplacement(
-          // ignore: use_build_context_synchronously
-          context,
-          MaterialPageRoute(builder: (BuildContext context) => const SignIn()),
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Successfully signed up!'),
+            backgroundColor: Colors.green,
+          ),
         );
-      });
-    } else {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to sign up: ${json.decode(response.body)['message']}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+
+        Future.delayed(const Duration(seconds: 2), () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => VerifyEmailOtpPage(email: _emailController.text.trim()),
+            ),
+          );
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to sign up: ${json.decode(response.body)['message']}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
-}
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -184,8 +178,17 @@ class _SignUpState extends State<SignUp> {
                 TextFormField(
                   controller: _passwordController,
                   validator: _validatePassword,
-                  obscureText: true,
-                  decoration: _inputDecoration('Enter your Password', Icons.lock),
+                  obscureText: _obscurePassword,
+                  decoration: _inputDecoration('Enter your Password', Icons.lock).copyWith(
+                    suffixIcon: IconButton(
+                      icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, color: Colors.green),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 20),
                 const Text("Confirm Password", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -193,8 +196,17 @@ class _SignUpState extends State<SignUp> {
                 TextFormField(
                   controller: _confirmPasswordController,
                   validator: _validateConfirmPassword,
-                  obscureText: true,
-                  decoration: _inputDecoration('Confirm your Password', Icons.lock),
+                  obscureText: _obscureConfirmPassword,
+                  decoration: _inputDecoration('Confirm your Password', Icons.lock).copyWith(
+                    suffixIcon: IconButton(
+                      icon: Icon(_obscureConfirmPassword ? Icons.visibility_off : Icons.visibility, color: Colors.green),
+                      onPressed: () {
+                        setState(() {
+                          _obscureConfirmPassword = !_obscureConfirmPassword;
+                        });
+                      },
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(

@@ -16,6 +16,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
   final TextEditingController _otpController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   bool isLoading = false;
+  bool obscurePassword = true;
 
   Future<void> verifyOtpAndResetPassword() async {
     final otp = _otpController.text.trim();
@@ -46,13 +47,21 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Password reset successful")),
       );
-      Navigator.pushReplacementNamed(context, '/login');
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/login');
+        }
+      });
     } else {
+      final data = json.decode(response.body);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Invalid OTP or failed to reset")),
+        SnackBar(content: Text(data['message'] ?? "Invalid OTP or failed to reset")),
       );
     }
   }
+
+  bool get isFormValid =>
+      _otpController.text.isNotEmpty && _newPasswordController.text.isNotEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -75,15 +84,27 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
             const SizedBox(height: 20),
             TextField(
               controller: _newPasswordController,
-              obscureText: true,
-              decoration: const InputDecoration(
+              obscureText: obscurePassword,
+              decoration: InputDecoration(
                 labelText: "New Password",
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(obscurePassword
+                      ? Icons.visibility
+                      : Icons.visibility_off),
+                  onPressed: () {
+                    setState(() {
+                      obscurePassword = !obscurePassword;
+                    });
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: isLoading ? null : verifyOtpAndResetPassword,
+              onPressed: isLoading || !isFormValid
+                  ? null
+                  : verifyOtpAndResetPassword,
               child: isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
                   : const Text("Reset Password"),
