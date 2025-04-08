@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:player/core/config/theme/app_colors.dart';
 import 'package:player/presentation/auth/pages/signup.dart';
+import 'package:player/presentation/auth/pages/forgot_password.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert'; // To handle JSON response
@@ -40,25 +41,25 @@ class _SignInState extends State<SignIn> {
           'password': password,
         }),
       );
-      
+
       print(response.statusCode);
       if (response.statusCode == 200) {
-        
         // Parse the response to get the token
         final Map<String, dynamic> responseBody = json.decode(response.body);
 
         if (responseBody.containsKey('token')) {
-          final String token = responseBody['token']; // Get the token from the response
+          final String token =
+              responseBody['token']; // Get the token from the response
 
           // Store the token in shared preferences
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('auth_token', token);
           print("here");
-          
-          //store the user id 
-            //  final String userId = responseBody['user']['_id'];
-            // await prefs.setString('user_id', userId);
-            // //print("✅ User ID saved: $userId");
+
+          //store the user id
+          //  final String userId = responseBody['user']['_id'];
+          // await prefs.setString('user_id', userId);
+          // //print("✅ User ID saved: $userId");
 
           // Navigate to home screen after successful login (or main app screen)
           // ignore: duplicate_ignore
@@ -90,7 +91,7 @@ class _SignInState extends State<SignIn> {
   Future<void> _checkSession() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('auth_token');
-    
+
     if (token != null) {
       // Token found, navigate to the home screen
       Navigator.pushReplacementNamed(context, '/home');
@@ -205,15 +206,18 @@ class _SignInState extends State<SignIn> {
                 contentPadding: const EdgeInsets.symmetric(vertical: 20),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                  borderSide:
+                      const BorderSide(color: AppColors.primary, width: 1.5),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                  borderSide:
+                      const BorderSide(color: AppColors.primary, width: 1.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                  borderSide:
+                      const BorderSide(color: AppColors.primary, width: 1.5),
                 ),
               ),
             ),
@@ -225,7 +229,11 @@ class _SignInState extends State<SignIn> {
               children: [
                 TextButton(
                   onPressed: () {
-                    // Handle Forgot Password logic
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ForgotPasswordPage()),
+                    );
                   },
                   child: const Text(
                     "Forgot Password?",
