@@ -1,114 +1,129 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-// import { getServerSession } from "next-auth"; // Uncomment if you plan to use sessions
-// import { redirect } from "next/navigation"; // Uncomment if you plan to handle redirection
-// import { authOptions } from "./api/auth/[...nextauth]/route"; // Uncomment if you want to use authOptions for session handling
+import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa";
 
-export default async function Home() {
+export default function Home(): JSX.Element {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
-      {/* Header Section */}
-      <header className="container mx-auto px-6 py-8 text-white">
-        <nav className="flex justify-between items-center">
-          <div className="text-2xl font-bold">FootLock</div>
-          <div className="space-x-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-emerald-900 text-white">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-gray-900/80 backdrop-blur-md shadow-md">
+        <div className="container mx-auto px-4 md:px-6 py-6 flex justify-between items-center">
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-emerald-400">
+            FootLock
+          </h1>
+          <div className="space-x-2 md:space-x-4">
             <Link href="/login">
-              <Button variant="outline" className="text-white border-white hover:bg-white hover:text-gray-900">
+              <Button
+                variant="outline"
+                className="text-white border-white hover:bg-white hover:text-gray-900 text-sm md:text-base"
+              >
                 Sign in
               </Button>
             </Link>
             <Link href="/signup">
-              <Button variant="outline" className="text-white border-white hover:bg-white hover:text-gray-900">
+              <Button
+                variant="outline"
+                className="text-white border-white hover:bg-white hover:text-gray-900 text-sm md:text-base"
+              >
                 Sign up
               </Button>
             </Link>
           </div>
-        </nav>
+        </div>
       </header>
 
-      {/* Main Section */}
-      <main className="container mx-auto px-6 py-20">
-        <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-6">
-            Book Your Perfect Futsal Match
-          </h1>
-          <p className="text-xl text-gray-300 mb-8">
-            Find and book the best futsal courts in your area. Join the largest futsal community and start playing today.
-          </p>
-          <Link href="/signup">
-          <Button variant="outline" className="text-white border-white hover:bg-white hover:text-gray-900">
-              Get Started
-            </Button>
-          </Link>
-        </div>
-
-        {/* Features Section */}
-        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-gray-800 p-6 rounded-lg">
-            <h3 className="text-xl font-semibold mb-4">Easy Booking</h3>
-            <p className="text-gray-300">
-              Book your preferred futsal court in just a few clicks, with real-time availability.
+      {/* Hero Section with Background Image */}
+      <section className="relative text-center">
+        <div className="absolute inset-0 bg-black bg-opacity-60 z-10" />
+        <div
+          className="bg-cover bg-center h-[80vh] md:h-[90vh] relative flex items-center justify-center px-6"
+          style={{
+            backgroundImage: "url('/images/court-bg.jpg')",
+          }}
+        >
+          <div className="relative z-20 max-w-2xl">
+            <h2 className="text-4xl md:text-6xl font-extrabold mb-4 leading-tight text-emerald-300">
+              Book Your Perfect Futsal Match
+            </h2>
+            <p className="text-lg md:text-xl text-gray-300 mb-6 px-2 md:px-0">
+              Discover the best futsal courts nearby. Book effortlessly. Play passionately.
             </p>
-          </div>
-          <div className="bg-gray-800 p-6 rounded-lg">
-            <h3 className="text-xl font-semibold mb-4">Chat with Players</h3>
-            <p className="text-gray-300">
-              Connect with other players, organize matches, and discuss your game strategy through our chat feature.
-            </p>
-          </div>
-          <div className="bg-gray-800 p-6 rounded-lg">
-            <h3 className="text-xl font-semibold mb-4">Opponent Finder</h3>
-            <p className="text-gray-300">
-              Find opponents of your skill level nearby to challenge and play a match with.
-            </p>
-          </div>
-          <div className="bg-gray-800 p-6 rounded-lg">
-            <h3 className="text-xl font-semibold mb-4">Seamless Payments</h3>
-            <p className="text-gray-300">
-              Easily pay for court bookings through integrated secure payment gateways.
-            </p>
-          </div>
-          <div className="bg-gray-800 p-6 rounded-lg">
-            <h3 className="text-xl font-semibold mb-4">Instant Notifications</h3>
-            <p className="text-gray-300">
-              Receive instant notifications for match updates, booking confirmations, and opponent messages.
-            </p>
+            <Link href="/signup">
+              <Button
+                variant="outline"
+                className="text-white border-white hover:bg-white hover:text-gray-900 px-6 py-3 text-base md:text-lg"
+              >
+                Get Started
+              </Button>
+            </Link>
           </div>
         </div>
-      </main>
+      </section>
 
-      {/* Footer Section */}
-      <footer className="bg-gray-900 text-gray-300 py-12 mt-20">
-        <div className="container mx-auto px-6">
-          {/* Get Connected Section */}
-          <div className="text-center mb-8">
-            <h3 className="text-2xl font-semibold mb-4">Get Connected</h3>
-            <p className="text-lg mb-4">
-              Stay connected with us through our social media channels or contact support.
-            </p>
-            <div className="space-x-6">
-              <Link href="https://facebook.com" passHref>
-                <Button variant="outline" className="text-white border-white hover:bg-white hover:text-gray-900">
-                  Facebook
-                </Button>
-              </Link>
-              <Link href="https://twitter.com" passHref>
-                <Button variant="outline" className="text-white border-white hover:bg-white hover:text-gray-900">
-                  Twitter
-                </Button>
-              </Link>
-              <Link href="https://instagram.com" passHref>
-                <Button variant="outline" className="text-white border-white hover:bg-white hover:text-gray-900">
-                  Instagram
-                </Button>
-              </Link>
+      {/* Features */}
+      <section className="container mx-auto px-4 md:px-6 py-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
+          {[
+            { title: "Easy Booking", desc: "Book courts in just a few clicks with real-time availability." },
+            { title: "Chat with Players", desc: "Coordinate with friends and opponents through built-in messaging." },
+            { title: "Opponent Finder", desc: "Match with players at your skill level in your area." },
+            { title: "Seamless Payments", desc: "Integrated, secure, and fast payment options." },
+            { title: "Instant Notifications", desc: "Get notified about matches, chats, and booking updates instantly." },
+          ].map((feature, idx) => (
+            <div
+              key={idx}
+              className="bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-2xl transition-shadow h-full"
+            >
+              <h3 className="text-lg md:text-xl font-semibold mb-2 text-emerald-300">
+                {feature.title}
+              </h3>
+              <p className="text-sm md:text-base text-gray-300">{feature.desc}</p>
             </div>
-          </div>
+          ))}
         </div>
+      </section>
 
-        {/* Footer Copyright */}
-        <div className="mt-12 border-t border-gray-700 pt-6 text-center text-sm text-gray-500">
-          <p>© 2025 FootLock. All rights reserved.</p>
+      {/* Footer */}
+      <footer className="bg-gray-900 text-gray-300 pt-12 pb-8">
+        <div className="container mx-auto px-4 md:px-6 text-center">
+          <h4 className="text-xl md:text-2xl font-semibold mb-3 text-emerald-400">
+            Get Connected
+          </h4>
+          <p className="mb-6 text-gray-400 text-sm md:text-base">
+            Follow us on social media for the latest futsal updates
+          </p>
+          <div className="flex justify-center flex-wrap gap-3 md:gap-4">
+            <Link href="https://facebook.com" passHref>
+              <Button
+                variant="outline"
+                className="flex items-center gap-2 text-white border-white hover:bg-white hover:text-gray-900"
+              >
+                <FaFacebookF /> Facebook
+              </Button>
+            </Link>
+            <Link href="https://twitter.com" passHref>
+              <Button
+                variant="outline"
+                className="flex items-center gap-2 text-white border-white hover:bg-white hover:text-gray-900"
+              >
+                <FaTwitter /> Twitter
+              </Button>
+            </Link>
+            <Link href="https://instagram.com" passHref>
+              <Button
+                variant="outline"
+                className="flex items-center gap-2 text-white border-white hover:bg-white hover:text-gray-900"
+              >
+                <FaInstagram /> Instagram
+              </Button>
+            </Link>
+          </div>
+
+          <div className="mt-10 border-t border-gray-700 pt-6 text-sm text-gray-500">
+            <p>© 2025 FootLock. All rights reserved.</p>
+          </div>
         </div>
       </footer>
     </div>

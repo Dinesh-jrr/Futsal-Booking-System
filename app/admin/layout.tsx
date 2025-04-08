@@ -6,14 +6,19 @@ import ClientOnly from '@/components/ClientOnly';
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <ClientProviders>
-      <div className="flex h-screen">
+      <div className="flex h-screen w-full overflow-hidden">
+        {/* Sidebar */}
         <ClientOnly>
           <Sidebar />
         </ClientOnly>
-        <main className="flex-1">
+
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col overflow-hidden">
           <Header />
-          {children}
-        </main>
+          <main className="flex-1 overflow-y-auto p-4 bg-gray-50">
+            {children}
+          </main>
+        </div>
       </div>
     </ClientProviders>
   );
