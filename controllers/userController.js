@@ -1,6 +1,8 @@
 const User = require('../models/user');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const nodemailer = require('nodemailer');
+const otpStore = {}; // In-memory store
 
 
 // Register a new user
@@ -102,3 +104,72 @@ exports.getAllUsers = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
+//forgot password
+exports.forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Generate OTP and expiry
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 mins
+
+    otpStore[email] = { otp, expiresAt };
+
+    // Setup nodemailer
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: 'your_email@gmail.com',
+        pass: 'your_app_password',
+      },
+    });
+
+    await transporter.sendMail({
+      to: email,
+      subject: 'Your OTP for Password Reset',
+      html: `<h2>Your OTP is ${otp}</h2><p>It is valid for 10 minutes.</p>`,
+    });
+
+    res.status(200).json({ message: 'OTP sent to email' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+//reset password 
+exports.resetPassword = async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+
+  try {
+    const record = otpStore[email];
+    if (!record) return res.status(400).json({ message: 'No OTP found' });
+
+    if (record.otp !== otp) {
+      return res.status(400).json({ message: 'Invalid OTP' });
+    }
+
+    if (Date.now() > record.expiresAt) {
+      return res.status(400).json({ message: 'OTP expired' });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Hash new password
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    // Clean up used OTP
+    delete otpStore[email];
+
+    res.status(200).json({ message: 'Password reset successful' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
