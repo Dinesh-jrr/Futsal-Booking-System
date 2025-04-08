@@ -1,32 +1,10 @@
-// app/layout.tsx (or app/layout.js for JS)
-'use client';
+// app/layout.tsx
 import './globals.css';
 
-
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
-import NextTopLoader from 'nextjs-toploader';
-import { SessionProvider } from 'next-auth/react';
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="p-4">
-        <NextTopLoader />
-        <SessionProvider>
-        <div className="flex h-[calc(100vh-2rem)] bg-background rounded-xl overflow-hidden">
-          {/* <Sidebar /> */}
-          <main className="flex-1 bg-white rounded-r-xl overflow-y-auto">
-            {/* <Header /> */}
-            {children}
-          </main>
-        </div>
-        </SessionProvider>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
