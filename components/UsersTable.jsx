@@ -36,6 +36,18 @@ export default function UsersTable() {
 
   return (
     <div className="overflow-x-auto max-h-[400px]">
+      <div className="mb-4 flex justify-between items-center px-2">
+  <h1 className="text-sm font-semibold text-gray-700 rounded-md px-3 py-1 shadow-sm bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
+    Futsal Management
+  </h1>
+  <button
+    onClick={() => setShowModal(true)}
+    className="text-xs bg-blue-500 text-white px-3 py-1.5 rounded hover:bg-blue-600 transition"
+  >
+    Add Futsal
+  </button>
+</div>
+
       <table className="w-full text-sm text-left text-gray-700 border border-gray-200 rounded-lg">
         <thead className="text-xs uppercase bg-gray-100 sticky top-0 z-10">
           <tr>
@@ -50,7 +62,7 @@ export default function UsersTable() {
         </thead>
         <tbody className="divide-y text-xs">
           {users.map((user, index) => (
-            <tr key={user.id} className="hover:bg-gray-50">
+            <tr key={user.id || index} className="hover:bg-gray-50">
               <td className="px-3 py-2">{index + 1}</td>
               <td className="px-3 py-2">{user.name}</td>
               <td className="px-3 py-2">{user.email}</td>

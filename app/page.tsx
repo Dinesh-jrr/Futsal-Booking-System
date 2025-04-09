@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa";
+const LandingImage = "url('/assets/landing_image.jpg')";
 
 export default function Home(): JSX.Element {
   return (
@@ -40,7 +41,7 @@ export default function Home(): JSX.Element {
         <div
           className="bg-cover bg-center h-[80vh] md:h-[90vh] relative flex items-center justify-center px-6"
           style={{
-            backgroundImage: "url('/images/court-bg.jpg')",
+            backgroundImage: LandingImage,
           }}
         >
           <div className="relative z-20 max-w-2xl">

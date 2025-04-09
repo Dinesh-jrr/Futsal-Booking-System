@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { useState, useEffect } from "react";
 
 export default function AdminUserListings() {
@@ -6,14 +6,13 @@ export default function AdminUserListings() {
   const [showModal, setShowModal] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [newUserData, setNewUserData] = useState({
-    name: '',
-    email: '',
-    phoneNumber: '',
-    role: 'Pending',
+    name: "",
+    email: "",
+    phoneNumber: "",
+    role: "Player",
   });
 
   useEffect(() => {
-    // Fetch initial users data from backend
     const fetchUsers = async () => {
       const response = await fetch("http://localhost:5000/api/users/allUsers");
       const data = await response.json();
@@ -22,205 +21,198 @@ export default function AdminUserListings() {
     fetchUsers();
   }, []);
 
-  // Delete user handler
-  const handleDelete = async (id) => {
-    await fetch(`http://localhost:5000/api/bookings/${id}`, {
-      method: 'DELETE',
-    });
-    setUsers(users.filter((user) => user.id !== id));
-  };
-
-  // Show update modal handler
   const handleUpdate = (user) => {
     setCurrentUser(user);
     setShowModal(true);
   };
 
-  // Handle save update
-  const handleSaveUpdate = async () => {
-    await fetch(`http://localhost:5000/api/bookings/${currentUser.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(currentUser),
-    });
-
-    setUsers(users.map((user) =>
-      user.id === currentUser.id ? { ...user, ...currentUser } : user
-    ));
-    setShowModal(false);
+  const handleViewDetails = (user) => {
+    setCurrentUser(user);
+    setShowModal(true);
   };
 
-  // Add user handler
+  const handleDeleteUser = async (id) => {
+    const confirmDelete = confirm("Are you sure you want to delete this user?");
+    if (!confirmDelete) return;
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/users/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setUsers(users.filter((user) => user._id !== id));
+      } else {
+        alert("Failed to delete user.");
+      }
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert("Something went wrong.");
+    }
+  };
+
   const handleAddUser = async () => {
     const response = await fetch("http://localhost:5000/api/users/register", {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newUserData),
     });
 
     if (response.ok) {
       const addedUser = await response.json();
-      setUsers([...users, addedUser]);  // Add the new user to the list
-      setShowModal(false);  // Close the modal after adding
-      setNewUserData({
-        name: '',
-        email: '',
-        phoneNumber: '',
-        role: 'Pending',  // Reset the form after adding
-      });
+      setUsers([...users, addedUser]);
+      setShowModal(false);
+      setNewUserData({ name: "", email: "", phoneNumber: "", role: "Player" });
     } else {
       alert("Error adding user. Please try again.");
     }
   };
 
-  // Handle form change for new user
   const handleNewUserChange = (e) => {
-    setNewUserData({
-      ...newUserData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  // View user details handler
-  const handleViewDetails = (user) => {
-    setCurrentUser(user);  // Set the current user to be viewed in the modal
-    setShowModal(true);  // Show modal with user details
+    setNewUserData({ ...newUserData, [e.target.name]: e.target.value });
   };
 
   return (
-    <div className="p-4">
-      <div className="mb-4 flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-800 mb-4 text-center shadow-lg p-3 rounded-lg bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-black">
+    <div className="p-4 text-sm">
+      <div className="mb-4 flex justify-between items-center px-2">
+        <h1 className="text-sm font-semibold text-gray-700 rounded-md px-3 py-1 shadow-sm bg-gradient-to-r from-green-400 via-green-400 to-white">
           User Management
         </h1>
         <button
-          onClick={() => setShowModal(true)}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-black"
+          onClick={() => {
+            setCurrentUser(null);
+            setShowModal(true);
+          }}
+          className="text-xs bg-primary text-black px-3 py-1.5 rounded hover:bg-primary hover:text-white transition"
         >
           Add User
         </button>
       </div>
 
-      <table className="w-full border-collapse border border-gray-300 text-black">
-        <thead>
-          <tr className="bg-gray-200">
-            <th className="border border-gray-300 px-4 py-2 text-black">Serial No</th>
-            <th className="border border-gray-300 px-4 py-2 text-black">Name</th>
-            <th className="border border-gray-300 px-4 py-2 text-black">Email</th>
-            <th className="border border-gray-300 px-4 py-2 text-black">Phone</th>
-            <th className="border border-gray-300 px-4 py-2 text-black">Role</th>
-            <th className="border border-gray-300 px-4 py-2 text-black">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user, index) => (
-            <tr key={user.id} className="hover:bg-gray-100 text-black">
-              <td className="border border-gray-300 px-4 py-2 text-black">{index + 1}</td>
-              <td className="border border-gray-300 px-4 py-2 text-black">{user.name}</td>
-              <td className="border border-gray-300 px-4 py-2 text-black">{user.email}</td>
-              <td className="border border-gray-300 px-4 py-2 text-black">{user.phoneNumber}</td>
-              <td className="border border-gray-300 px-4 py-2 text-black">{user.role}</td>
-              <td className="border border-gray-300 px-4 py-2 text-black">
-                <button
-                  onClick={() => handleUpdate(user)}
-                  className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 mr-2"
+      <div className="overflow-x-auto">
+        <div className="max-h-96 overflow-y-auto">
+          <table className="w-full text-xs text-left text-gray-700 border border-gray-200">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-3 py-2">S.N</th>
+                <th className="px-3 py-2">Name</th>
+                <th className="px-3 py-2">Email</th>
+                <th className="px-3 py-2">Phone</th>
+                <th className="px-3 py-2">Role</th>
+                <th className="px-3 py-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {users.map((user, index) => (
+                <tr
+                  key={user.id || user.email || index}
+                  className="hover:bg-gray-50"
                 >
-                  Update
-                </button>
-                <button
-                  onClick={() => handleViewDetails(user)}
-                  className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
-                >
-                  View Details
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                  <td className="px-3 py-2">{index + 1}</td>
+                  <td className="px-3 py-2">{user.name}</td>
+                  <td className="px-3 py-2">{user.email}</td>
+                  <td className="px-3 py-2">{user.phoneNumber}</td>
+                  <td className="px-3 py-2">{user.role}</td>
+                  <td className="px-3 py-2 space-x-2 text-right">
+                    <button
+                      onClick={() => handleDeleteUser(user._id)}
+                      className="bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 text-xs"
+                    >
+                      Delete
+                    </button>
 
-      {/* Add User Modal */}
+                    <button
+                      onClick={() => handleUpdate(user)}
+                      className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded hover:bg-yellow-200 text-xs"
+                    >
+                      Update
+                    </button>
+                    <button
+                      onClick={() => handleViewDetails(user)}
+                      className="bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200 text-xs"
+                    >
+                      View
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 text-black">
-          <div className="bg-white rounded p-6 w-96 shadow-lg">
-            <h2 className="text-xl font-semibold mb-4 text-black">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded p-6 w-96 shadow-lg text-sm">
+            <h2 className="text-lg font-semibold mb-4">
               {currentUser ? "User Details" : "Add New User"}
             </h2>
 
             {currentUser ? (
-              <div className="space-y-4">
-                <div>
-                  <p><strong>Name:</strong> {currentUser.name}</p>
-                </div>
-                <div>
-                  <p><strong>Email:</strong> {currentUser.email}</p>
-                </div>
-                <div>
-                  <p><strong>Phone:</strong> {currentUser.phoneNumber}</p>
-                </div>
-                <div>
-                  <p><strong>Role:</strong> {currentUser.role}</p>
-                </div>
+              <div className="space-y-2">
+                <p>
+                  <strong>Name:</strong> {currentUser.name}
+                </p>
+                <p>
+                  <strong>Email:</strong> {currentUser.email}
+                </p>
+                <p>
+                  <strong>Phone:</strong> {currentUser.phoneNumber}
+                </p>
+                <p>
+                  <strong>Role:</strong> {currentUser.role}
+                </p>
               </div>
             ) : (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-black">Name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={newUserData.name}
-                    onChange={handleNewUserChange}
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-black"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-black">Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={newUserData.email}
-                    onChange={handleNewUserChange}
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-black"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-black">Phone</label>
-                  <input
-                    type="text"
-                    name="phoneNumber"
-                    value={newUserData.phoneNumber}
-                    onChange={handleNewUserChange}
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-black"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-black">Status</label>
-                  <select
-                    name="status"
-                    value={newUserData.status}
-                    onChange={handleNewUserChange}
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-black"
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="Approved">Approved</option>
-                    <option value="Declined">Declined</option>
-                  </select>
-                </div>
+              <div className="space-y-3">
+                <input
+                  type="text"
+                  placeholder="Name"
+                  name="name"
+                  value={newUserData.name}
+                  onChange={handleNewUserChange}
+                  className="w-full border px-3 py-2 rounded"
+                />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  name="email"
+                  value={newUserData.email}
+                  onChange={handleNewUserChange}
+                  className="w-full border px-3 py-2 rounded"
+                />
+                <input
+                  type="text"
+                  placeholder="Phone Number"
+                  name="phoneNumber"
+                  value={newUserData.phoneNumber}
+                  onChange={handleNewUserChange}
+                  className="w-full border px-3 py-2 rounded"
+                />
+                <select
+                  name="role"
+                  value={newUserData.role}
+                  onChange={handleNewUserChange}
+                  className="w-full border px-3 py-2 rounded"
+                >
+                  <option value="Player">Player</option>
+                  <option value="Owner">Owner</option>
+                  <option value="Admin">Admin</option>
+                </select>
               </div>
             )}
 
-            <div className="mt-6 flex justify-end space-x-4 text-black">
+            <div className="mt-4 flex justify-end space-x-2">
               <button
                 onClick={() => setShowModal(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 text-black"
+                className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
               >
                 Cancel
               </button>
               {!currentUser && (
                 <button
                   onClick={handleAddUser}
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-black"
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                 >
                   Save
                 </button>

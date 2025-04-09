@@ -15,6 +15,7 @@ import {
 
 import { signOut } from "next-auth/react";
 import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 
 const sidebarItems = [
   { name: "Dashboard", icon: LayoutDashboard, href: "/dashboard", adminhref: "/admin", onlyAdmin: false },
@@ -28,8 +29,9 @@ const sidebarItems = [
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { data } = useSession();
+  const pathname = usePathname();
 
-  //@ts-ignore
+  // @ts-ignore
   const userisAdmin = data ? data?.user?.role === "admin" : false;
 
   const handleLogout = async () => {
@@ -59,24 +61,31 @@ export default function Sidebar() {
 
       <div className="flex flex-col flex-1 justify-between py-4">
         <div className="flex flex-col gap-2">
-          {sidebarItems.map(
-            (item) =>
+          {sidebarItems.map((item) => {
+            const itemHref = userisAdmin ? item.adminhref : item.href;
+            const isActive = pathname === itemHref;
+
+            return (
               (!item.onlyAdmin || userisAdmin) && (
-                <a
+                <Link
                   key={item.name}
-                  href={userisAdmin ? item.adminhref : item.href}
+                  href={itemHref}
                   className={cn(
-                    "flex items-center gap-3 px-4 py-2 text-black hover:bg-primary hover:text-white transition-colors",
-                    !isCollapsed && "mx-2 rounded-lg"
+                    "flex items-center gap-3 px-4 py-2 transition-colors",
+                    !isCollapsed && "mx-2 rounded-lg",
+                    isActive
+                      ? "bg-primary text-white"
+                      : "text-black hover:bg-primary hover:text-white"
                   )}
                 >
                   <item.icon className="h-5 w-5" />
                   <span className={cn("transition-all duration-300", isCollapsed && "hidden")}>
                     {item.name}
                   </span>
-                </a>
+                </Link>
               )
-          )}
+            );
+          })}
         </div>
 
         <button

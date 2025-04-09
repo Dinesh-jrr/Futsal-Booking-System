@@ -1,7 +1,7 @@
 'use client';
 import Header from "@/components/Header";
-import UsersTable from "@/components/UsersTable";
-import FutsalListings from "@/components/AdminFutsalListing";
+import AdminUserListings from "@/components/AdminUsersListing";
+import AdminFutsalListings from "@/components/AdminFutsalListing";
 import Image from "next/image";
 
 export default function Home() {
@@ -59,15 +59,13 @@ export default function Home() {
         </div>
 
         {/* Users Table */}
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h2 className="text-lg font-semibold mb-4">Registered Players</h2>
-          <UsersTable />
+        <div className="bg-white p-6 rounded-xl shadow text-black">
+          <AdminUserListings/>
         </div>
 
         {/* Futsal Listings */}
         <div className="bg-white p-6 rounded-xl shadow">
-          <h2 className="text-lg font-semibold mb-4">All Futsal Listings</h2>
-          <FutsalListings />
+          <AdminFutsalListings />
         </div>
       </div>
 
