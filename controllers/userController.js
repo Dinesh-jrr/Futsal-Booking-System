@@ -2,10 +2,9 @@ const User = require('../models/user');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
-const otpStore = {}; // In-memory store
+const EmailOtp = require('../models/emailOtp'); // MongoDB model for storing OTPs
 
-
-// Register a new user
+// Register a new user with email OTP verification
 exports.registerUser = async (req, res) => {
   const { name, email, phoneNumber, password, role } = req.body;
 
@@ -14,23 +13,65 @@ exports.registerUser = async (req, res) => {
   }
 
   try {
-    // Check if the user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Set default role to 'user' if not provided
     const userRole = role || 'user';
+    const newUser = await User.create({ name, email, phoneNumber, password, role: userRole, isVerified: false });
 
-    // Create new user
-    const newUser = await User.create({ name, email, phoneNumber, password, role: userRole });
-    res.status(201).json({ message: 'User registered successfully', user: newUser });
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    await EmailOtp.deleteMany({ email });
+    await EmailOtp.create({ email, otp, expiresAt });
+
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: 'jrdinesh1@gmail.com',
+        pass: 'fnwu dytl gzqv jlqz',
+      },
+    });
+
+    await transporter.sendMail({
+      to: email,
+      subject: 'Verify your email',
+      html: `<h2>Your OTP is: ${otp}</h2><p>This OTP is valid for 10 minutes.</p>`,
+    });
+
+    res.status(201).json({ message: 'User registered. Please verify your email using the OTP sent.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
+// Verify email OTP
+exports.verifyEmailOtp = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    const record = await EmailOtp.findOne({ email, otp });
+    if (!record) return res.status(400).json({ message: 'Invalid or expired OTP' });
+
+    if (Date.now() > record.expiresAt) {
+      await EmailOtp.deleteOne({ _id: record._id });
+      return res.status(400).json({ message: 'OTP has expired' });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.isVerified = true;
+    await user.save();
+    await EmailOtp.deleteOne({ _id: record._id });
+
+    res.status(200).json({ message: 'Email verified successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
 
 // Login a user
 exports.loginUser = async (req, res) => {
@@ -41,26 +82,20 @@ exports.loginUser = async (req, res) => {
   }
 
   try {
-    // Find the user by email
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
+    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
-    // Check if the password matches
+    if (!user.isVerified) return res.status(403).json({ message: 'Please verify your email before logging in.' });
+
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
+    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-    // Create a JWT token with the user's id and role
     const token = jwt.sign(
-      { id: user._id, role: user.role },  // Include the role in the payload
+      { id: user._id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
 
-    // Return the token and user details (without password)
     res.json({
       message: 'Login successful',
       token,
@@ -69,18 +104,16 @@ exports.loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         phoneNumber: user.phoneNumber,
-        role: user.role,  // Include role in the response
-      }
+        role: user.role,
+      },
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
-
 // Get current user
 exports.getCurrentUser = async (req, res) => {
-  console.log("requesting /me")
   try {
     const user = await User.findById(req.user.id).select('-password');
     res.json(user);
@@ -89,15 +122,9 @@ exports.getCurrentUser = async (req, res) => {
   }
 };
 
-// Get all users - This function will be added
+// Get all users
 exports.getAllUsers = async (req, res) => {
   try {
-    // Check if the user making the request is an admin
-    // if (req.user.role !== user) {
-    //   return res.status(403).json({ message: 'Access denied. Only admins can view all users.' });
-    // }
-
-    // Fetch all users except their passwords
     const users = await User.find().select('-password');
     res.json(users);
   } catch (error) {
@@ -105,7 +132,7 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-//forgot password
+// Forgot password
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
 
@@ -113,13 +140,12 @@ exports.forgotPassword = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // Generate OTP and expiry
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 mins
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-    otpStore[email] = { otp, expiresAt };
+    await EmailOtp.deleteMany({ email });
+    await EmailOtp.create({ email, otp, expiresAt });
 
-    // Setup nodemailer
     const transporter = nodemailer.createTransport({
       service: 'Gmail',
       auth: {
@@ -136,40 +162,32 @@ exports.forgotPassword = async (req, res) => {
 
     res.status(200).json({ message: 'OTP sent to email' });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
-//reset password 
+// Reset password
 exports.resetPassword = async (req, res) => {
   const { email, otp, newPassword } = req.body;
 
   try {
-    const record = otpStore[email];
-    if (!record) return res.status(400).json({ message: 'No OTP found' });
-
-    if (record.otp !== otp) {
-      return res.status(400).json({ message: 'Invalid OTP' });
-    }
+    const record = await EmailOtp.findOne({ email, otp });
+    if (!record) return res.status(400).json({ message: 'Invalid or expired OTP' });
 
     if (Date.now() > record.expiresAt) {
+      await EmailOtp.deleteOne({ _id: record._id });
       return res.status(400).json({ message: 'OTP expired' });
     }
 
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // Hash new password
     user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
-
-    // Clean up used OTP
-    delete otpStore[email];
+    await EmailOtp.deleteOne({ _id: record._id });
 
     res.status(200).json({ message: 'Password reset successful' });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
-
