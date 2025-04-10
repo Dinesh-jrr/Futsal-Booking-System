@@ -2,11 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { getSession } from "next-auth/react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,34 +17,40 @@ export default function LoginPage() {
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-  
-    setIsLoading(true); // Start loading state
-  
+
+    setIsLoading(true);
+
     try {
-      // Use NextAuth's signIn method to authenticate the user
       const res = await signIn("credentials", {
-        redirect: false, // Do not automatically redirect
+        redirect: false,
         email,
         password,
       });
-  
-      console.log(res);
-      
+
       if (res?.error) {
         setError(res.error);
       } else {
-        // Get the session to access the user role
         const session = await getSession();
         //@ts-ignore
         const role = session?.user?.role;
-  
+        //@ts-ignore
+        const ownerId = session?.user?.id;
+
         if (role === "admin") {
           router.push("/admin");
         } else if (role === "futsal_owner") {
-          router.push("/dashboard");
+          const checkRes = await fetch(
+            `http://localhost:5000/api/futsals/by-owner?ownerId=${ownerId}`
+          );
+          const futsalData = await checkRes.json();
+
+          if (checkRes.ok && futsalData?.futsalExists) {
+            router.push("/dashboard");
+          } else {
+            router.push("/createfutsal");
+          }
         } else if (role === "user") {
           setError("Invalid login for this platform.");
-          return; // Stop further execution
         } else {
           setError("Unknown role. Contact support.");
         }
@@ -54,9 +59,9 @@ export default function LoginPage() {
       console.error(error);
       setError("Something went wrong");
     } finally {
-      setIsLoading(false); // End loading state
+      setIsLoading(false);
     }
-  };  
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-gray-800">
