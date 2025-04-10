@@ -7,13 +7,13 @@ const futsalSchema = new mongoose.Schema({
     lat: { type: Number },
     lng: { type: Number }
   },
-  ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true }, // Reference to the owner
+  ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true },
   pricePerHour: { type: Number, required: true },
-  availableTimeSlots: [{ type: String, required: true }], // e.g., ["10:00 AM - 11:00 AM"]
+  availableTimeSlots: [{ type: String, required: true }],
   contactNumber: { type: String, required: true },
-  images: [{ type: String }], // Array of image URLs (e.g., UploadThing)
-  documents: [{ type: String }], // Array of document URLs
-  isApproved: { type: Boolean, default: false }, // For admin approval
+  images: [{ type: String }],       // Image URLs (from UploadThing)
+  documents: [{ type: String }],    // Document URLs (from UploadThing)
+  isApproved: { type: Boolean, default: false },
   status: {
     type: String,
     enum: ['active', 'inactive'],

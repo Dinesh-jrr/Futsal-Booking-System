@@ -150,7 +150,7 @@ exports.forgotPassword = async (req, res) => {
       service: 'Gmail',
       auth: {
         user: 'your_email@gmail.com',
-        pass: 'your_app_password',
+        pass: 'fnwu dytl gzqv jlqz',
       },
     });
 
@@ -191,3 +191,39 @@ exports.resetPassword = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
+//send otp
+// In your userController.js
+exports.sendOtpToEmail = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) return res.status(400).json({ message: "Email is required" });
+
+  try {
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 min expiry
+
+    // Delete existing OTPs for this email
+    await EmailOtp.deleteMany({ email });
+    await EmailOtp.create({ email, otp, expiresAt });
+
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: 'jrdinesh1@gmail.com',
+        pass: 'fnwu dytl gzqv jlqz', // Use App Password for Gmail
+      },
+    });
+
+    await transporter.sendMail({
+      to: email,
+      subject: 'Your OTP for Futsal Booking',
+      html: `<h2>Your OTP is: ${otp}</h2><p>This OTP is valid for 10 minutes.</p>`,
+    });
+
+    res.status(200).json({ message: "OTP sent to email successfully!" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to send OTP", error: error.message });
+  }
+};
+

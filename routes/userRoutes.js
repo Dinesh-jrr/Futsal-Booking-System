@@ -6,7 +6,8 @@ const {
   getAllUsers,
   forgotPassword,
   resetPassword,
-  verifyEmailOtp, // ✅ Add this import
+  verifyEmailOtp, 
+  sendOtpToEmail
 } = require('../controllers/userController.js');
 const protect = require('../middleware/authMiddleware.js');
 
@@ -22,5 +23,6 @@ router.post('/reset-password', resetPassword);
 
 // ✅ Add this route for verifying email during registration
 router.post('/verify-email-otp', verifyEmailOtp);
+router.post('/send-otp', sendOtpToEmail);
 
 module.exports = router;

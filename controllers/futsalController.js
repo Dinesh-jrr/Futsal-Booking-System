@@ -1,81 +1,85 @@
 const Futsal = require('../models/futsals');
-const User = require('../models/user'); // Ensure you have a user model
+const User = require('../models/user');
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 
 // Create a new futsal
 exports.createFutsal = async (req, res) => {
-    try {
-      const { futsalName, location, ownerId, pricePerHour, availableTimeSlots, contactNumber, images } = req.body;
-  
-      // Validate if ownerId is a valid ObjectId
-      if (!mongoose.Types.ObjectId.isValid(ownerId)) {
-        return res.status(400).json({ message: "Invalid owner ID format." });
-      }
-  
-      // Check if owner exists
-      const ownerExists = await User.findById(ownerId);
-      if (!ownerExists) {
-        return res.status(404).json({ message: "Owner not found." });
-      }
-  
-      // Check if the owner already has a futsal
-      const existingOwnerFutsal = await Futsal.findOne({ ownerId });
-      if (existingOwnerFutsal) {
-        return res.status(400).json({ message: "This owner already has a futsal registered." });
-      }
-  
-      // Check for duplicate futsal futsalName
-      const existingFutsal = await Futsal.findOne({ futsalName });
-      if (existingFutsal) {
-        return res.status(400).json({ message: "Futsal with this futsalName already exists." });
-      }
-  
-      const newFutsal = new Futsal({
-        futsalName,
-        location,
-        ownerId: new ObjectId(ownerId),
-        pricePerHour,
-        availableTimeSlots,
-        contactNumber,
-        images,
-      });
-  
-      const savedFutsal = await newFutsal.save();
-  
-      res.status(201).json({
-        message: 'Futsal created successfully!',
-        futsal: savedFutsal,
-      });
-    } catch (error) {
-      res.status(500).json({
-        message: 'Error creating futsal',
-        error: error.message,
-      });
+  try {
+    const {
+      futsalName,
+      location,
+      coordinates,
+      ownerId,
+      pricePerHour,
+      availableTimeSlots,
+      contactNumber,
+      images,
+      documents
+    } = req.body;
+
+    // Validate ownerId
+    if (!mongoose.Types.ObjectId.isValid(ownerId)) {
+      return res.status(400).json({ message: "Invalid owner ID format." });
     }
-  };
-  
+
+    const ownerExists = await User.findById(ownerId);
+    if (!ownerExists) {
+      return res.status(404).json({ message: "Owner not found." });
+    }
+
+    const existingOwnerFutsal = await Futsal.findOne({ ownerId });
+    if (existingOwnerFutsal) {
+      return res.status(400).json({ message: "This owner already has a futsal registered." });
+    }
+
+    const existingFutsal = await Futsal.findOne({ futsalName });
+    if (existingFutsal) {
+      return res.status(400).json({ message: "Futsal with this name already exists." });
+    }
+
+    const newFutsal = new Futsal({
+      futsalName,
+      location,
+      coordinates,
+      ownerId: new ObjectId(ownerId),
+      pricePerHour,
+      availableTimeSlots,
+      contactNumber,
+      images,
+      documents
+    });
+
+    const savedFutsal = await newFutsal.save();
+
+    res.status(201).json({
+      message: 'Futsal created successfully!',
+      futsal: savedFutsal,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error creating futsal',
+      error: error.message,
+    });
+  }
+};
 
 // Get all futsals
 exports.getAllFutsals = async (req, res) => {
-    try {
-      // Fetch all futsals and populate ownerId field with the owner information
-      const futsals = await Futsal.find(); // Populate with correct fields from User schema
-  
-      res.status(200).json({
-        message: 'All futsals retrieved successfully!',
-        futsals,
-      });
-    } catch (error) {
-      res.status(500).json({
-        message: 'Error retrieving futsals',
-        error: error.message,
-      });
-    }
-  };
-  
-  
-  
+  try {
+    const futsals = await Futsal.find();
+    res.status(200).json({
+      message: 'All futsals retrieved successfully!',
+      futsals,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error retrieving futsals',
+      error: error.message,
+    });
+  }
+};
+
 // Get a single futsal by ID
 exports.getFutsalById = async (req, res) => {
   try {
@@ -113,7 +117,6 @@ exports.updateFutsal = async (req, res) => {
       return res.status(400).json({ message: "Invalid futsal ID format." });
     }
 
-    // Ensure the owner exists if updating the ownerId
     if (updatedData.ownerId && !mongoose.Types.ObjectId.isValid(updatedData.ownerId)) {
       return res.status(400).json({ message: "Invalid owner ID format." });
     }
@@ -125,7 +128,9 @@ exports.updateFutsal = async (req, res) => {
       }
     }
 
-    const updatedFutsal = await Futsal.findByIdAndUpdate(futsalId, updatedData, { new: true }).populate('ownerId', 'futsalName email');
+    const updatedFutsal = await Futsal.findByIdAndUpdate(futsalId, updatedData, {
+      new: true,
+    }).populate('ownerId', 'name email');
 
     if (!updatedFutsal) {
       return res.status(404).json({ message: 'Futsal not found' });
@@ -145,36 +150,84 @@ exports.updateFutsal = async (req, res) => {
 
 // Delete a futsal
 exports.deleteFutsal = async (req, res) => {
-    try {
-      const futsalId = req.params.futsalId;
-    //   const userId = req.user.id;  // Assuming you have a user ID from the auth middleware
-  
-      if (!mongoose.Types.ObjectId.isValid(futsalId)) {
-        return res.status(400).json({ message: "Invalid futsal ID format." });
-      }
-  
-      const futsal = await Futsal.findById(futsalId);
-  
-      if (!futsal) {
-        return res.status(404).json({ message: 'Futsal not found' });
-      }
-  
-    //   // Check if the logged-in user is the owner of the futsal or an admin
-    //   if (futsal.ownerId.toString() !== userId && req.user.role !== 'admin') {
-    //     return res.status(403).json({ message: 'Unauthorized to delete this futsal' });
-    //   }
-  
-      const deletedFutsal = await Futsal.findByIdAndDelete(futsalId);
-  
-      res.status(200).json({
-        message: 'Futsal deleted successfully!',
-        futsal: deletedFutsal,
-      });
-    } catch (error) {
-      res.status(500).json({
-        message: 'Error deleting futsal',
-        error: error.message,
-      });
+  try {
+    const futsalId = req.params.futsalId;
+
+    if (!mongoose.Types.ObjectId.isValid(futsalId)) {
+      return res.status(400).json({ message: "Invalid futsal ID format." });
     }
-  };
-  
+
+    const futsal = await Futsal.findById(futsalId);
+    if (!futsal) {
+      return res.status(404).json({ message: 'Futsal not found' });
+    }
+
+    const deletedFutsal = await Futsal.findByIdAndDelete(futsalId);
+
+    res.status(200).json({
+      message: 'Futsal deleted successfully!',
+      futsal: deletedFutsal,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error deleting futsal',
+      error: error.message,
+    });
+  }
+};
+
+
+//approve futsal
+exports.approveFutsal = async (req, res) => {
+  try {
+    const futsalId = req.params.futsalId;
+    const { isApproved } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(futsalId)) {
+      return res.status(400).json({ message: "Invalid futsal ID format." });
+    }
+
+    const futsal = await Futsal.findById(futsalId);
+    if (!futsal) {
+      return res.status(404).json({ message: "Futsal not found" });
+    }
+
+    futsal.isApproved = isApproved;
+    await futsal.save();
+
+    res.status(200).json({
+      message: `Futsal ${isApproved ? "approved" : "rejected"} successfully.`,
+      futsal,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error updating approval status',
+      error: error.message,
+    });
+  }
+};
+
+// Check if futsal exists for an owner
+exports.checkFutsalByOwner = async (req, res) => {
+  const { ownerId } = req.query;
+
+  if (!mongoose.Types.ObjectId.isValid(ownerId)) {
+    return res.status(400).json({ message: "Invalid owner ID format." });
+  }
+
+  try {
+    const futsal = await Futsal.findOne({ ownerId });
+
+    if (futsal) {
+      return res.status(200).json({ futsalExists: true, futsal });
+    } else {
+      return res.status(200).json({ futsalExists: false });
+    }
+  } catch (error) {
+    res.status(500).json({
+      message: "Error checking futsal",
+      error: error.message,
+    });
+  }
+};
+
