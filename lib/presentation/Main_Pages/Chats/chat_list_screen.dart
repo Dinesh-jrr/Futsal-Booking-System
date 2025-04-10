@@ -95,6 +95,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
       appBar: AppBar(
         title: const Text('Chats'),
         backgroundColor: Colors.green,
+        automaticallyImplyLeading: false,
       ),
       body: conversations.isEmpty
           ? const Center(child: Text("No conversations yet"))

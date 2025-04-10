@@ -50,6 +50,7 @@ class _BookingHistoryState extends State<BookingHistory> {
         title: const Text('My Bookings'),
         centerTitle: true,
         backgroundColor: Colors.teal,
+        automaticallyImplyLeading: false,
       ),
       body: Column(
         children: [
@@ -87,7 +88,7 @@ class _BookingHistoryState extends State<BookingHistory> {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
-                        BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 3))
+                        const BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 3))
                       ],
                     ),
                     child: Row(
