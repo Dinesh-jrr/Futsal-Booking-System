@@ -24,7 +24,7 @@ const server = http.createServer(app);
 
 // Middleware
 app.use(bodyParser.json());
-app.use(cors());
+app.use(cors({ origin: "*" }));
 
 // API Routes
 app.use('/api/users', userRoutes);

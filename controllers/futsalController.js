@@ -107,7 +107,7 @@ exports.getFutsalById = async (req, res) => {
   }
 };
 
-// Update a futsal
+//Update a futsal
 exports.updateFutsal = async (req, res) => {
   try {
     const futsalId = req.params.futsalId;
@@ -181,7 +181,6 @@ exports.deleteFutsal = async (req, res) => {
 exports.approveFutsal = async (req, res) => {
   try {
     const futsalId = req.params.futsalId;
-    const { isApproved } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(futsalId)) {
       return res.status(400).json({ message: "Invalid futsal ID format." });
@@ -192,11 +191,12 @@ exports.approveFutsal = async (req, res) => {
       return res.status(404).json({ message: "Futsal not found" });
     }
 
-    futsal.isApproved = isApproved;
+    futsal.status = "approved"; // <-- update this
+    futsal.isApproved = true;   // optional, only if you use this elsewhere
     await futsal.save();
 
     res.status(200).json({
-      message: `Futsal ${isApproved ? "approved" : "rejected"} successfully.`,
+      message: "Futsal approved successfully.",
       futsal,
     });
   } catch (error) {
@@ -207,12 +207,13 @@ exports.approveFutsal = async (req, res) => {
   }
 };
 
-// Check if futsal exists for an owner
+
 exports.checkFutsalByOwner = async (req, res) => {
   const { ownerId } = req.query;
 
-  if (!mongoose.Types.ObjectId.isValid(ownerId)) {
-    return res.status(400).json({ message: "Invalid owner ID format." });
+  // ✅ Instead of validating, just check if it's present
+  if (!ownerId) {
+    return res.status(400).json({ message: "Owner ID is required." });
   }
 
   try {
@@ -230,4 +231,5 @@ exports.checkFutsalByOwner = async (req, res) => {
     });
   }
 };
+
 

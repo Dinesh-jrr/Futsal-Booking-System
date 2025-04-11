@@ -12,24 +12,26 @@ const {
 const router = express.Router();
 
 // Create a new futsal
-router.post('/futsals', createFutsal);
+router.post('/createfutsal', createFutsal);
 
 // Get all futsals
-router.get('/futsals', getAllFutsals);
+router.get('/getfutsals', getAllFutsals);
+
+//check if futsal exists
+router.get("/by-owner", checkFutsalByOwner);
 
 // Get a single futsal by ID
-router.get('/futsals/:futsalId', getFutsalById);
+router.get('/getOnefutsal/:futsalId', getFutsalById);
 
 // Update a futsal by ID
-router.put('/futsals/:futsalId', updateFutsal);
+router.put('/futsals/update:futsalId', updateFutsal);
 
 // Delete a futsal by ID
-router.delete('/futsals/:futsalId', deleteFutsal);
+router.delete('/futsals/delete:futsalId', deleteFutsal);
 
 // Admin approves or rejects futsal
 router.put('/futsals/:futsalId/approve', approveFutsal);
 
-//check if futsal exists
-router.get("/by-owner", checkFutsalByOwner);
+
 
 module.exports = router;

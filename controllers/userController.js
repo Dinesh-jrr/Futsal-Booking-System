@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const EmailOtp = require('../models/emailOtp'); // MongoDB model for storing OTPs
 
-// Register a new user with email OTP verification
+// Register a new user (without sending OTP here)
 exports.registerUser = async (req, res) => {
   const { name, email, phoneNumber, password, role } = req.body;
 
@@ -19,33 +19,23 @@ exports.registerUser = async (req, res) => {
     }
 
     const userRole = role || 'user';
-    const newUser = await User.create({ name, email, phoneNumber, password, role: userRole, isVerified: false });
-
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-    await EmailOtp.deleteMany({ email });
-    await EmailOtp.create({ email, otp, expiresAt });
-
-    const transporter = nodemailer.createTransport({
-      service: 'Gmail',
-      auth: {
-        user: 'jrdinesh1@gmail.com',
-        pass: 'fnwu dytl gzqv jlqz',
-      },
+    const newUser = await User.create({
+      name,
+      email,
+      phoneNumber,
+      password,
+      role: userRole,
+      isVerified: false,
     });
 
-    await transporter.sendMail({
-      to: email,
-      subject: 'Verify your email',
-      html: `<h2>Your OTP is: ${otp}</h2><p>This OTP is valid for 10 minutes.</p>`,
+    res.status(201).json({
+      message: 'User registered successfully. Please verify your email with the OTP.',
     });
-
-    res.status(201).json({ message: 'User registered. Please verify your email using the OTP sent.' });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
 
 // Verify email OTP
 exports.verifyEmailOtp = async (req, res) => {
@@ -56,6 +46,11 @@ exports.verifyEmailOtp = async (req, res) => {
     if (!record) return res.status(400).json({ message: 'Invalid or expired OTP' });
 
     if (Date.now() > record.expiresAt) {
+      console.log("🔍 Debug - OTP Record:", record);
+console.log("🕒 Now:", Date.now());
+console.log("📅 Expires At:", new Date(record.expiresAt).getTime());
+console.log("⏳ Diff (ms):", new Date(record.expiresAt).getTime() - Date.now());
+
       await EmailOtp.deleteOne({ _id: record._id });
       return res.status(400).json({ message: 'OTP has expired' });
     }
@@ -193,7 +188,6 @@ exports.resetPassword = async (req, res) => {
 };
 
 //send otp
-// In your userController.js
 exports.sendOtpToEmail = async (req, res) => {
   const { email } = req.body;
 

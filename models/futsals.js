@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const futsalSchema = new mongoose.Schema({
   futsalName: { type: String, required: true, unique: true },
-  location: { type: String, required: true }, // e.g., "Boudha, Kathmandu"
+  location: { type: String, required: true },
   coordinates: {
     lat: { type: Number },
     lng: { type: Number }
@@ -11,15 +11,16 @@ const futsalSchema = new mongoose.Schema({
   pricePerHour: { type: Number, required: true },
   availableTimeSlots: [{ type: String, required: true }],
   contactNumber: { type: String, required: true },
-  images: [{ type: String }],       // Image URLs (from UploadThing)
-  documents: [{ type: String }],    // Document URLs (from UploadThing)
-  isApproved: { type: Boolean, default: false },
+  images: [{ type: String }],
+  documents: [{ type: String }],
+  
+  // ✅ Replace isApproved + old status field with this:
   status: {
     type: String,
-    enum: ['active', 'inactive'],
-    default: 'active'
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
   },
+
   createdAt: { type: Date, default: Date.now }
 });
-
-module.exports = mongoose.model('futsals', futsalSchema);
+module.exports = mongoose.model('Futsal', futsalSchema);
