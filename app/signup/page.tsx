@@ -100,11 +100,11 @@ export default function RegisterPage() {
       }
   
       // Step 3: Save email to localStorage
-      // localStorage.setItem("emailToVerify", form.email);
+      // localStorage.setItem("email", form.email);
       // toast.success("OTP sent! Please verify your email.");
       // console.log("Redirecting to /verify-otp");
       router.push("/emailverify");
-      console.log("Redirected to /verify-otp");
+      console.log("Redirected to emailverify");
   
     } catch (err) {
       toast.error("Something went wrong");

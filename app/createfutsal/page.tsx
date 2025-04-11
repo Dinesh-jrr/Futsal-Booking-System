@@ -10,6 +10,7 @@ import Image from "next/image";
 import { Dialog } from "@headlessui/react";
 import { UploadButton } from "@uploadthing/react"; // Correct import for UploadButton
 import type { OurFileRouter } from "@/lib/uploadthing"; // Import the file router
+import { getSession, useSession } from "next-auth/react";
 
 const availableTimeSlots = [
   "6AM - 8AM",
@@ -23,6 +24,7 @@ const availableTimeSlots = [
 
 export default function CreateFutsalForm() {
   const router = useRouter();
+  const { data: session } = useSession();
 
   const [form, setForm] = useState({
     futsalName: "",
@@ -38,7 +40,9 @@ export default function CreateFutsalForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -64,15 +68,16 @@ export default function CreateFutsalForm() {
     try {
       const payload = {
         ...form,
+        ownerId: session?.user?.id,
         availableTimeSlots: selectedSlots,
         images: uploadedImageUrls,
         documents: uploadedDocUrls,
       };
 
-      const res = await fetch("http://localhost:5000/api/futsals", {
+      const res = await fetch("http://localhost:5000/api/createfutsal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
+        // credentials: "include",
         body: JSON.stringify(payload),
       });
 
@@ -84,7 +89,7 @@ export default function CreateFutsalForm() {
       }
 
       toast.success("Futsal submitted for review!");
-      router.push("/dashboard");
+      router.push("/futsalstatus");
     } catch (err) {
       console.error(err);
       toast.error("Something went wrong.");
@@ -111,9 +116,12 @@ export default function CreateFutsalForm() {
           Back
         </Button>
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Futsal Registration Form</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Futsal Registration Form
+          </h1>
           <p className="text-gray-500 text-sm">
-            Register your futsal to start receiving bookings. All fields are required.
+            Register your futsal to start receiving bookings. All fields are
+            required.
           </p>
         </div>
 
@@ -164,7 +172,9 @@ export default function CreateFutsalForm() {
 
         {/* Time Slots */}
         <div>
-          <label className="block mb-2 text-sm font-medium text-gray-700">Available Time Slots *</label>
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            Available Time Slots *
+          </label>
           <div className="flex flex-wrap gap-3">
             {availableTimeSlots.map((slot, i) => (
               <button
@@ -185,22 +195,28 @@ export default function CreateFutsalForm() {
 
         {/* Upload Images */}
         <div className="mb-6">
-          <label className="block mb-2 text-sm font-medium text-gray-700">Upload Futsal Images</label>
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            Upload Futsal Images
+          </label>
           <div className="flex flex-col items-center justify-center bg-gray-100 p-4 border-2 border-dashed border-gray-400 rounded-lg">
             {/* File Input to trigger the dialog */}
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={(e) => {
-                const files = e.target.files;
-                if (!files) return;
-                const fileUrls = Array.from(files).map(file => URL.createObjectURL(file));
-                setUploadedImageUrls(fileUrls);
-                toast.success("Images selected!");
+            <UploadButton<OurFileRouter, keyof OurFileRouter>
+              endpoint="futsalImageUploader"
+              appearance={{
+                button: "bg-green-600 text-white",
+                // spinner: "text-green-600",         // ✅ valid
+                allowedContent: "text-sm text-gray-500", // ✅ valid
+                container: "border-green-500",     // ✅ valid
               }}
-              className="hidden"
-              id="upload-images"
+              onClientUploadComplete={(res) => {
+                const urls = res.map((file) => file.url);
+                setUploadedImageUrls(urls);
+                toast.success("Images uploaded!");
+              }}
+              onUploadError={(error) => {
+                console.error("Image upload error:", error);
+                toast.error("Image upload failed.");
+              }}
             />
             <label
               htmlFor="upload-images"
@@ -213,23 +229,38 @@ export default function CreateFutsalForm() {
 
         {/* Upload Documents */}
         <div className="mb-6">
-          <label className="block mb-2 text-sm font-medium text-gray-700">Upload Documents</label>
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            Upload Documents
+          </label>
           <div className="flex flex-col items-center justify-center bg-gray-100 p-4 border-2 border-dashed border-gray-400 rounded-lg">
             {/* File Input to trigger the dialog */}
-            <input
-              type="file"
-              accept="application/pdf"
-              multiple
-              onChange={(e) => {
-                const files = e.target.files;
-                if (!files) return;
-                const fileUrls = Array.from(files).map(file => URL.createObjectURL(file));
-                setUploadedDocUrls(fileUrls);
-                toast.success("Documents selected!");
+            <UploadButton<OurFileRouter, keyof OurFileRouter>
+              endpoint="futsalDocumentUploader"
+              className="ut-upload-dropzone w-full border-dashed border-2 border-green-500 p-6 rounded-lg"
+              appearance={{
+                button: "bg-green-600 text-white",
+                // spinner: "text-green-600",         // ✅ valid
+                allowedContent: "text-sm text-gray-500", // ✅ valid
+                container: "border-green-500",     // ✅ valid
               }}
-              className="hidden"
-              id="upload-documents"
+  // appearance={{
+  //   button: "bg-green-600 text-white hover:bg-green-700",
+  //   // label: "text-green-700 font-medium",
+  //   allowedContent: "text-sm text-gray-500",
+  //   uploadIcon: "text-green-600",
+  //   spinner: "text-green-600", // ✅ loading indicator
+  // }}
+              onClientUploadComplete={(res) => {
+                const urls = res.map((file) => file.url);
+                setUploadedDocUrls(urls);
+                toast.success("Documents uploaded!");
+              }}
+              onUploadError={(error) => {
+                console.error("Document upload error:", error);
+                toast.error("Document upload failed.");
+              }}
             />
+
             <label
               htmlFor="upload-documents"
               className="text-sm text-gray-500 cursor-pointer"
@@ -241,22 +272,43 @@ export default function CreateFutsalForm() {
 
         {/* Submit button */}
         <div className="text-center">
-          <Button type="submit" className="px-8 py-3 text-white bg-green-600 hover:bg-green-700 rounded-lg">
+          <Button
+            type="submit"
+            className="px-8 py-3 text-white bg-green-600 hover:bg-green-700 rounded-lg"
+          >
             Preview
           </Button>
         </div>
       </form>
 
       {/* Preview Dialog */}
-      <Dialog open={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <Dialog
+        open={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      >
         <div className="bg-white max-w-lg w-full p-6 rounded-lg relative space-y-4 overflow-y-auto max-h-[90vh]">
-          <h2 className="text-xl font-bold text-center mb-4">Preview Futsal Info</h2>
-          <p><strong>Name:</strong> {form.futsalName}</p>
-          <p><strong>Location:</strong> {form.location}</p>
-          <p><strong>Address:</strong> {form.address}</p>
-          <p><strong>Contact:</strong> {form.contactNumber}</p>
-          <p><strong>Price:</strong> Rs. {form.pricePerHour}</p>
-          <p><strong>Slots:</strong> {selectedSlots.join(", ")}</p>
+          <h2 className="text-xl font-bold text-center mb-4">
+            Preview Futsal Info
+          </h2>
+          <p>
+            <strong>Name:</strong> {form.futsalName}
+          </p>
+          <p>
+            <strong>Location:</strong> {form.location}
+          </p>
+          <p>
+            <strong>Address:</strong> {form.address}
+          </p>
+          <p>
+            <strong>Contact:</strong> {form.contactNumber}
+          </p>
+          <p>
+            <strong>Price:</strong> Rs. {form.pricePerHour}
+          </p>
+          <p>
+            <strong>Slots:</strong> {selectedSlots.join(", ")}
+          </p>
 
           <div>
             <p className="font-medium mb-2">Images:</p>
@@ -279,7 +331,11 @@ export default function CreateFutsalForm() {
             <ul className="list-disc list-inside text-sm text-gray-600">
               {uploadedDocUrls.map((doc, index) => (
                 <li key={index}>
-                  <a href={doc} target="_blank" className="text-blue-600 underline">
+                  <a
+                    href={doc}
+                    target="_blank"
+                    className="text-blue-600 underline"
+                  >
                     {`Document ${index + 1}`}
                   </a>
                 </li>
@@ -288,7 +344,9 @@ export default function CreateFutsalForm() {
           </div>
 
           <div className="flex justify-end gap-4 mt-6">
-            <Button variant="outline" onClick={() => setIsPreviewOpen(false)}>Back</Button>
+            <Button variant="outline" onClick={() => setIsPreviewOpen(false)}>
+              Back
+            </Button>
             <Button onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting ? "Submitting..." : "Submit"}
             </Button>

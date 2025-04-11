@@ -11,9 +11,20 @@ export default function VerifyOtpPage() {
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const [isVerifying, setIsVerifying] = useState(false);
   const [timer, setTimer] = useState(60);
-  const email = typeof window !== "undefined" ? localStorage.getItem("emailToVerify") : "";
+  const [email, setEmail] = useState("");
 
-  // Auto countdown for resend timer
+  // Load email from localStorage on mount
+  useEffect(() => {
+    const storedEmail = localStorage.getItem("email");
+    if (storedEmail) {
+      setEmail(storedEmail);
+    } else {
+      toast.error("Email not found. Please sign up again.");
+      router.push("/signup");
+    }
+  }, [router]);
+
+  // Countdown for resend timer
   useEffect(() => {
     if (timer === 0) return;
     const interval = setInterval(() => setTimer((t) => t - 1), 1000);
@@ -50,7 +61,7 @@ export default function VerifyOtpPage() {
     inputRefs.current[5]?.focus();
   };
 
-  // Verify OTP
+  // ✅ Verify OTP
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const code = otp.join("");
@@ -62,6 +73,9 @@ export default function VerifyOtpPage() {
 
     setIsVerifying(true);
     try {
+      console.log("📧 Email:", email);
+      console.log("🔢 OTP:", code);
+
       const res = await fetch("http://localhost:5000/api/users/verify-email-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -72,11 +86,13 @@ export default function VerifyOtpPage() {
 
       if (!res.ok) {
         toast.error(data.message || "Verification failed");
+        setIsVerifying(false);
         return;
       }
 
       toast.success("Email verified successfully!");
-      router.push("/createfutsal");
+      localStorage.removeItem("email"); // optional cleanup
+      router.push("/login");
     } catch (err) {
       console.error(err);
       toast.error("Something went wrong during verification.");
@@ -85,7 +101,7 @@ export default function VerifyOtpPage() {
     }
   };
 
-  // Resend OTP
+  // ✅ Resend OTP
   const resendOtp = async () => {
     if (!email) return toast.error("No email found to resend OTP.");
     try {
@@ -96,6 +112,7 @@ export default function VerifyOtpPage() {
       });
       if (res.ok) {
         toast.success("OTP resent!");
+        setOtp(Array(6).fill("")); // clear input
         setTimer(60); // restart timer
       } else {
         toast.error("Failed to resend OTP.");
@@ -117,6 +134,7 @@ export default function VerifyOtpPage() {
         >
           Back
         </Button>
+
         <h1 className="text-2xl font-bold text-center text-gray-800">Verify Your Email</h1>
         <p className="text-sm text-center text-gray-600">
           Enter the 6-digit OTP sent to <span className="font-medium">{email}</span>
@@ -136,7 +154,6 @@ export default function VerifyOtpPage() {
                 onChange={(e) => handleChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
                 className="w-12 h-12 text-center text-xl border-2 border-green-500 rounded-lg outline-none focus:ring-2 focus:ring-green-400 transition-all text-black"
-
               />
             ))}
           </div>
@@ -148,7 +165,9 @@ export default function VerifyOtpPage() {
 
         <div className="text-sm text-center text-gray-600">
           {timer > 0 ? (
-            <p>Resend OTP in <span className="font-semibold text-gray-800">{timer}s</span></p>
+            <p>
+              Resend OTP in <span className="font-semibold text-gray-800">{timer}s</span>
+            </p>
           ) : (
             <button
               onClick={resendOtp}

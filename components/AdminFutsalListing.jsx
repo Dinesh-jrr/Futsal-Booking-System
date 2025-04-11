@@ -1,239 +1,191 @@
 "use client";
-import { useState, useEffect } from "react";
 
-export default function AdminFutsalListings() {
+import React, { useState, useEffect } from "react";
+
+export default function FutsalListings() {
   const [futsals, setFutsals] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [currentFutsal, setCurrentFutsal] = useState(null);
-  const [newFutsal, setNewFutsal] = useState({
-    futsalName: "",
-    location: "",
-    ownerId: "",
-    pricePerHour: 0,
-    availableTimeSlots: [],
-    contactNumber: "",
-    images: [],
-  });
-
-  const apiUrl = "http://localhost:5000/api/futsals";
-
-  const fetchFutsals = async () => {
-    try {
-      const response = await fetch(apiUrl);
-      const data = await response.json();
-      setFutsals(data.futsals);
-    } catch (error) {
-      console.error("Error fetching futsals:", error);
-    }
-  };
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [selectedFutsal, setSelectedFutsal] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const fetchFutsals = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/getfutsals");
+        const data = await response.json();
+
+        const cleanedData = Array.isArray(data.futsals)
+          ? data.futsals
+              .filter((f) => f.status?.toLowerCase() === "pending")
+              .map((f, idx) => ({
+                id: f._id || idx + 1,
+                name: f.futsalName || "-",
+                email: f.ownerEmail || "-",
+                phone: f.contactNumber || "-",
+                status: f.status || "pending",
+                details: f,
+              }))
+          : [];
+
+        setFutsals(cleanedData);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Failed to fetch futsals:", error);
+        setIsLoading(false);
+      }
+    };
+
     fetchFutsals();
   }, []);
 
-  const handleAddFutsal = async () => {
+  const filteredFutsals = futsals.filter((futsal) => {
+    return !search || futsal.name.toLowerCase().includes(search.toLowerCase());
+  });
+
+  const paginatedFutsals = filteredFutsals.slice(
+    (page - 1) * itemsPerPage,
+    page * itemsPerPage
+  );
+
+  const totalPages = Math.ceil(filteredFutsals.length / itemsPerPage);
+
+  const handleApprove = async (id) => {
     try {
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newFutsal),
+      const res = await fetch(`http://localhost:5000/api/futsals/${id}/approve`, {
+        method: "PUT",
       });
-      const addedFutsal = await response.json();
-      setFutsals([...futsals, addedFutsal]);
-      setNewFutsal({
-        futsalName: "",
-        location: "",
-        ownerId: "",
-        pricePerHour: 0,
-        availableTimeSlots: [],
-        contactNumber: "",
-        images: [],
-      });
-    } catch (error) {
-      console.error("Error adding futsal:", error);
+      if (res.ok) {
+        setFutsals((prev) => prev.filter((f) => f.id !== id));
+      }
+    } catch (e) {
+      console.error("Approval failed", e);
     }
   };
 
-  const handleUpdate = (futsal) => {
-    setCurrentFutsal(futsal);
-    setShowModal(true);
+  const handleReject = async (id) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/futsals/${id}/reject`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: "Rejected by admin." }),
+      });
+      if (res.ok) {
+        setFutsals((prev) => prev.filter((f) => f.id !== id));
+      }
+    } catch (e) {
+      console.error("Rejection failed", e);
+    }
   };
 
-  const handleViewDetails = (futsal) => {
-    setCurrentFutsal(futsal);
-    setShowDetailsModal(true);
-  };
+  if (isLoading) {
+    return (
+      <div className="p-6 text-center text-gray-500 text-sm">
+        Loading futsals...
+      </div>
+    );
+  }
+
+  if (futsals.length === 0) {
+    return (
+      <div className="p-6 text-center text-gray-500 text-sm">
+        No pending futsals found.
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 text-sm">
-      <div className="mb-4 flex justify-between items-center px-2">
-        <h1 className="text-sm font-semibold text-gray-700 rounded-md px-3 py-1 shadow-sm bg-gradient-to-r from-green-400 via-green-400 to-white-400">
+      <div className="mb-4 flex justify-between items-center px-2 gap-3">
+      <h1 className="text-sm font-semibold text-gray-700 rounded-md px-3 py-1 shadow-sm bg-gradient-to-r from-green-400 via-green-400 to-white">
           Futsal Management
         </h1>
-        <button
-          onClick={() => setShowModal(true)}
-          className="text-xs bg-primary text-black px-3 py-1.5 rounded hover:bg-primary hover:text-white transition"
-        >
-          Add Futsal
-        </button>
+        <input
+          type="text"
+          placeholder="Search by name"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="text-xs border border-gray-300 rounded px-3 py-2 w-full max-w-xs"
+        />
       </div>
 
-      <div className="overflow-x-auto">
-        <div className="max-h-96 overflow-y-auto">
-          <table className="w-full text-xs text-left text-gray-700 border border-gray-200">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="px-3 py-2">S.N</th>
-                <th className="px-3 py-2">Name</th>
-                <th className="px-3 py-2">Location</th>
-                <th className="px-3 py-2">Price/Hour</th>
-                <th className="px-3 py-2">Time Slots</th>
-                <th className="px-3 py-2">Actions</th>
+      <div className="overflow-x-auto max-h-[400px]">
+        <table className="w-full text-xs text-left text-gray-700 border border-gray-200">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="px-3 py-2">ID</th>
+              <th className="px-3 py-2">Name</th>
+              <th className="px-3 py-2">Email</th>
+              <th className="px-3 py-2">Phone</th>
+              <th className="px-3 py-2">Status</th>
+              <th className="px-3 py-2 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {paginatedFutsals.map((futsal) => (
+              <tr key={futsal.id} className="hover:bg-gray-50">
+                <td className="px-3 py-2">{futsal.id}</td>
+                <td className="px-3 py-2">{futsal.name}</td>
+                <td className="px-3 py-2">{futsal.email}</td>
+                <td className="px-3 py-2">{futsal.phone}</td>
+                <td className="px-3 py-2">
+                  <span className="text-xs font-semibold px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">
+                    Pending
+                  </span>
+                </td>
+                <td className="px-3 py-2 space-x-2 text-right">
+                  <button
+                    onClick={() => handleApprove(futsal.id)}
+                    className="bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200 text-xs"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => handleReject(futsal.id)}
+                    className="bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 text-xs"
+                  >
+                    Reject
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y">
-              {futsals.map((futsal, index) => (
-                <tr key={futsal._id} className="hover:bg-gray-50">
-                  <td className="px-3 py-2">{index + 1}</td>
-                  <td className="px-3 py-2">{futsal.futsalName}</td>
-                  <td className="px-3 py-2">{futsal.location}</td>
-                  <td className="px-3 py-2">{futsal.pricePerHour}</td>
-                  <td className="px-3 py-2">
-                    {futsal.availableTimeSlots.join(", ")}
-                  </td>
-                  <td className="px-3 py-2 space-x-2 text-right">
-                    <button
-                      onClick={() => handleUpdate(futsal)}
-                      className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded hover:bg-yellow-200 text-xs"
-                    >
-                      Update
-                    </button>
-                    <button
-                      onClick={() => handleViewDetails(futsal)}
-                      className="bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200 text-xs"
-                    >
-                      View
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex justify-between items-center text-xs mt-4">
+        <span className="text-gray-600">
+          Page {page} of {totalPages}
+        </span>
+        <div className="space-x-2">
+          <button
+            onClick={() => setPage((p) => Math.max(p - 1, 1))}
+            disabled={page === 1}
+            className="px-3 py-1 border rounded bg-white hover:bg-gray-100 disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <button
+            onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+            disabled={page === totalPages}
+            className="px-3 py-1 border rounded bg-white hover:bg-gray-100 disabled:opacity-50"
+          >
+            Next
+          </button>
         </div>
       </div>
 
-      {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded p-6 w-96 shadow-lg text-sm">
-            <h2 className="text-lg font-semibold mb-4">Add New Futsal</h2>
-            <div className="space-y-3">
-              <input
-                type="text"
-                placeholder="Futsal Name"
-                value={newFutsal.futsalName}
-                onChange={(e) =>
-                  setNewFutsal({ ...newFutsal, futsalName: e.target.value })
-                }
-                className="w-full border px-3 py-2 rounded"
-              />
-              <input
-                type="text"
-                placeholder="Location"
-                value={newFutsal.location}
-                onChange={(e) =>
-                  setNewFutsal({ ...newFutsal, location: e.target.value })
-                }
-                className="w-full border px-3 py-2 rounded"
-              />
-              <input
-                type="number"
-                placeholder="Price Per Hour"
-                value={newFutsal.pricePerHour}
-                onChange={(e) =>
-                  setNewFutsal({ ...newFutsal, pricePerHour: e.target.value })
-                }
-                className="w-full border px-3 py-2 rounded"
-              />
-              <input
-                type="text"
-                placeholder="Available Time Slots (comma-separated)"
-                value={newFutsal.availableTimeSlots.join(", ")}
-                onChange={(e) =>
-                  setNewFutsal({
-                    ...newFutsal,
-                    availableTimeSlots: e.target.value.split(","),
-                  })
-                }
-                className="w-full border px-3 py-2 rounded"
-              />
-              <input
-                type="text"
-                placeholder="Contact Number"
-                value={newFutsal.contactNumber}
-                onChange={(e) =>
-                  setNewFutsal({ ...newFutsal, contactNumber: e.target.value })
-                }
-                className="w-full border px-3 py-2 rounded"
-              />
-              <input
-                type="text"
-                placeholder="Images (comma-separated)"
-                value={newFutsal.images.join(", ")}
-                onChange={(e) =>
-                  setNewFutsal({
-                    ...newFutsal,
-                    images: e.target.value.split(","),
-                  })
-                }
-                className="w-full border px-3 py-2 rounded"
-              />
-            </div>
-            <div className="mt-4 flex justify-end space-x-2">
+      {selectedFutsal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-xl w-96 max-h-[90vh] overflow-auto text-sm">
+            <h2 className="text-md font-semibold mb-4">Futsal Details</h2>
+            <pre className="text-xs text-gray-700 whitespace-pre-wrap break-words">
+              {JSON.stringify(selectedFutsal, null, 2)}
+            </pre>
+            <div className="mt-4 text-right">
               <button
-                onClick={() => setShowModal(false)}
-                className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleAddFutsal}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showDetailsModal && currentFutsal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded p-6 w-96 shadow-lg text-sm">
-            <h2 className="text-lg font-semibold mb-4">
-              {currentFutsal.futsalName} Details
-            </h2>
-            <div className="space-y-2">
-              <p>
-                <strong>Location:</strong> {currentFutsal.location}
-              </p>
-              <p>
-                <strong>Price/Hour:</strong> {currentFutsal.pricePerHour}
-              </p>
-              <p>
-                <strong>Time Slots:</strong>{" "}
-                {currentFutsal.availableTimeSlots.join(", ")}
-              </p>
-              <p>
-                <strong>Contact:</strong> {currentFutsal.contactNumber}
-              </p>
-              <p>
-                <strong>Images:</strong> {currentFutsal.images.join(", ")}
-              </p>
-            </div>
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={() => setShowDetailsModal(false)}
+                onClick={() => setSelectedFutsal(null)}
                 className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
               >
                 Close

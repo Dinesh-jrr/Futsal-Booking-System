@@ -35,20 +35,35 @@ export default function LoginPage() {
         const role = session?.user?.role;
         //@ts-ignore
         const ownerId = session?.user?.id;
+        console.log(ownerId);
 
         if (role === "admin") {
           router.push("/admin");
+          console.log("checking...");
         } else if (role === "futsal_owner") {
+          console.log("on it");
           const checkRes = await fetch(
-            `http://localhost:5000/api/futsals/by-owner?ownerId=${ownerId}`
+            `http://localhost:5000/api/by-owner?ownerId=${ownerId}`
           );
+          console.log("CheckRes OK:", checkRes.ok);
           const futsalData = await checkRes.json();
+          console.log("FutsalData:", futsalData);
 
-          if (checkRes.ok && futsalData?.futsalExists) {
-            router.push("/dashboard");
+          console.log(futsalData)
+          if (checkRes.ok && futsalData?.futsal) {
+            const status = futsalData.futsal.status;  
+            console.log("Owner ID:", ownerId);
+
+ 
+            if (status === "approved") {
+              router.push("/dashboard");
+            } else if (status === "pending" || status === "rejected") {
+              router.push("/futsalstatus"); // hold message page
+            }
           } else {
             router.push("/createfutsal");
           }
+          
         } else if (role === "user") {
           setError("Invalid login for this platform.");
         } else {
