@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -13,7 +15,7 @@ class ChatListScreen extends StatefulWidget {
 
 class _ChatListScreenState extends State<ChatListScreen> {
   String? playerId;
-  final String backendURL = 'http://192.168.1.5:5000';
+  final String backendURL = 'http://172.20.10.6:5000';
   bool isLoading = true;
   List<Map<String, dynamic>> conversations = [];
 

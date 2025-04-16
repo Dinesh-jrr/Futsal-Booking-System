@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:player/presentation/Main_Pages/navbar_roots.dart';
 
 class BookingSuccessScreen extends StatelessWidget {
   final String futsalName;
@@ -30,12 +31,16 @@ class BookingSuccessScreen extends StatelessWidget {
               const SizedBox(height: 24),
               const Text(
                 "Booking Confirmed!",
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.green),
+                style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green),
               ),
               const SizedBox(height: 12),
               Text(
                 futsalName,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 6),
               Text(
@@ -45,7 +50,8 @@ class BookingSuccessScreen extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 "Paid NPR ${amount.toStringAsFixed(2)}",
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 8),
               Text(
@@ -55,14 +61,21 @@ class BookingSuccessScreen extends StatelessWidget {
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.popUntil(context, (route) => route.isFirst);
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Navbar()),
+                    (route) => false,
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text("Back to Home", style: TextStyle(fontSize: 16)),
+                child:
+                    const Text("Back to Home", style: TextStyle(fontSize: 16)),
               )
             ],
           ),

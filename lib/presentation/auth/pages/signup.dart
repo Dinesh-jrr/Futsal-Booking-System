@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api, prefer_const_declarations, avoid_print, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:player/core/config/theme/app_colors.dart';
 import 'package:player/presentation/auth/pages/email_verify_page.dart';
@@ -22,6 +24,8 @@ class _SignUpState extends State<SignUp> {
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+
+  //need to update email and phone number field
 
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) {
@@ -67,7 +71,7 @@ class _SignUpState extends State<SignUp> {
 
   Future<void> _handleSignUp(BuildContext context) async {
     if (_formKey.currentState?.validate() ?? false) {
-      final url = 'http://192.168.1.5:5000/api/users/register';
+      final url = 'http://172.20.10.6:5000/api/users/register';
       final response = await http.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},

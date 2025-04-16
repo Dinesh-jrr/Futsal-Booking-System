@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 class Bookingdetails extends StatelessWidget {
-  final Map<String, String> booking;
+  final Map<String, dynamic> booking;
 
   const Bookingdetails({super.key, required this.booking});
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _getStatusColor(booking['status']!);
-    final statusIcon = _getStatusIcon(booking['status']!);
+    final statusColor = _getStatusColor(booking['status'] ?? 'Unknown');
+    final statusIcon = _getStatusIcon(booking['status'] ?? 'Unknown');
 
     return Scaffold(
       appBar: AppBar(
@@ -22,14 +22,14 @@ class Bookingdetails extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              // Card
+              // Booking Card
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                       blurRadius: 10,
                       color: Colors.black12,
@@ -47,7 +47,7 @@ class Bookingdetails extends StatelessWidget {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            booking['title']!,
+                            booking['futsalName'] ?? 'Futsal Match',
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
@@ -64,14 +64,14 @@ class Bookingdetails extends StatelessWidget {
                         const Icon(Icons.calendar_today, size: 20, color: Colors.grey),
                         const SizedBox(width: 8),
                         Text(
-                          booking['date']!,
+                          booking['date'] ?? 'N/A',
                           style: const TextStyle(fontSize: 16),
                         ),
                         const SizedBox(width: 20),
                         const Icon(Icons.access_time, size: 20, color: Colors.grey),
                         const SizedBox(width: 8),
                         Text(
-                          booking['time']!,
+                          booking['timeSlot'] ?? 'N/A',
                           style: const TextStyle(fontSize: 16),
                         ),
                       ],
@@ -84,7 +84,7 @@ class Bookingdetails extends StatelessWidget {
                         Chip(
                           avatar: Icon(statusIcon, color: Colors.white, size: 18),
                           label: Text(
-                            booking['status']!,
+                            booking['status'] ?? 'Unknown',
                             style: const TextStyle(color: Colors.white),
                           ),
                           backgroundColor: statusColor,
@@ -97,7 +97,7 @@ class Bookingdetails extends StatelessWidget {
 
               const SizedBox(height: 30),
 
-              // More Info Section
+              // Static Instructions Section
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),

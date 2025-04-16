@@ -1,5 +1,11 @@
+// ignore_for_file: depend_on_referenced_packages, avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'package:player/core/config/theme/app_colors.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'booking_details.dart';
 
 class BookingHistory extends StatefulWidget {
@@ -12,49 +18,110 @@ class BookingHistory extends StatefulWidget {
 class _BookingHistoryState extends State<BookingHistory> {
   String selectedTimeFrame = 'Today';
   String selectedStatus = 'Upcoming';
+  List<Map<String, dynamic>> bookings = [];
+  bool isLoading = true;
 
-  List<Map<String, String>> bookings = [
-    {'title': 'Futsal Match 1', 'status': 'Upcoming', 'date': '2025-02-17', 'time': '10:00 AM'},
-    {'title': 'Futsal Match 2', 'status': 'Cancelled', 'date': '2025-02-15', 'time': '02:00 PM'},
-    {'title': 'Futsal Match 3', 'status': 'Completed', 'date': '2025-02-16', 'time': '11:00 AM'},
-    {'title': 'Futsal Match 4', 'status': 'Upcoming', 'date': '2025-02-20', 'time': '01:00 PM'},
-  ];
+  @override
+  void initState() {
+    super.initState();
+    fetchBookings();
+  }
+
+  Future<void> fetchBookings() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('auth_token');
+      if (token == null) throw Exception("Token not found in SharedPreferences");
+
+      final res = await http.get(
+        Uri.parse("http://172.20.10.6:5000/api/users/me"),
+        headers: { 'Authorization': 'Bearer $token' },
+      );
+
+      if (res.statusCode == 200) {
+        final user = jsonDecode(res.body);
+        final userId = user['_id'];
+        print("Fetched user ID: $userId");
+
+        final bookingsRes = await http.get(
+          Uri.parse("http://172.20.10.6:5000/api/bookings/user/$userId"),
+        );
+
+        if (bookingsRes.statusCode == 200) {
+          final jsonData = jsonDecode(bookingsRes.body);
+          setState(() {
+            bookings = List<Map<String, dynamic>>.from(jsonData['bookings']);
+            isLoading = false;
+          });
+        } else {
+          throw Exception("Failed to fetch bookings");
+        }
+      } else {
+        throw Exception("Failed to fetch user info");
+      }
+    } catch (e) {
+      print("Error fetching bookings: $e");
+      setState(() => isLoading = false);
+    }
+  }
 
   DateTime _getStartDate(String timeframe) {
     DateTime now = DateTime.now();
     switch (timeframe) {
-      case 'Today': return now;
-      case '1 Week': return now.subtract(const Duration(days: 7));
-      case '1 Month': return DateTime(now.year, now.month - 1, now.day);
-      case '1 Year': return DateTime(now.year - 1, now.month, now.day);
-      default: return now;
+      case 'Today':
+        return now;
+      case '1 Week':
+        return now.subtract(const Duration(days: 7));
+      case '1 Month':
+        return DateTime(now.year, now.month - 1, now.day);
+      case '1 Year':
+        return DateTime(now.year - 1, now.month, now.day);
+      default:
+        return now;
     }
   }
 
-  List<Map<String, String>> _filterBookings() {
+  List<Map<String, dynamic>> _filterBookings() {
     DateTime startDate = _getStartDate(selectedTimeFrame);
     return bookings.where((booking) {
-      DateTime bookingDate = DateFormat('yyyy-MM-dd').parse(booking['date']!);
+      final dateStr = booking['date'];
+      final statusStr = booking['status'];
+
+      if (dateStr == null || statusStr == null) return false;
+
+      DateTime bookingDate;
+      try {
+        bookingDate = DateTime.parse(dateStr);
+      } catch (_) {
+        return false;
+      }
+
       bool isAfterDate = bookingDate.isAfter(startDate);
-      bool matchesStatus = booking['status'] == selectedStatus;
+      bool matchesStatus = statusStr == selectedStatus;
+
       return isAfterDate && matchesStatus;
     }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final filteredBookings = _filterBookings();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Bookings'),
         centerTitle: true,
-        backgroundColor: Colors.teal,
+        backgroundColor: AppColors.primary,
         automaticallyImplyLeading: false,
       ),
       body: Column(
         children: [
-          // Filters
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
@@ -87,8 +154,8 @@ class _BookingHistoryState extends State<BookingHistory> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        const BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 3))
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 3))
                       ],
                     ),
                     child: Row(
@@ -100,18 +167,18 @@ class _BookingHistoryState extends State<BookingHistory> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                booking['title']!,
+                                booking['futsalName'] ?? 'Futsal Match',
                                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                '${booking['date']} at ${booking['time']}',
+                                '${booking['date'] ?? 'Date'} at ${booking['timeSlot'] ?? ''}',
                                 style: TextStyle(color: Colors.grey[600]),
                               ),
                             ],
                           ),
                         ),
-                        _buildStatusChip(booking['status']!),
+                        _buildStatusChip(booking['status'] ?? 'Unknown'),
                       ],
                     ),
                   ),
@@ -131,7 +198,7 @@ class _BookingHistoryState extends State<BookingHistory> {
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: Colors.teal, width: 1.2),
+          border: Border.all(color: AppColors.primary, width: 1.2),
           borderRadius: BorderRadius.circular(12),
         ),
         child: DropdownButton<String>(

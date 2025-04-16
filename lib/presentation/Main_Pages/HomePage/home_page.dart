@@ -1,24 +1,72 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shimmer/shimmer.dart';
 import 'package:player/core/config/theme/app_colors.dart';
-import '../HomePage/popular_futsal.dart';
-import '../HomePage/nearby_futsal.dart';
+// import '../HomePage/popular_futsal.dart';
+// import '../HomePage/nearby_futsal.dart';
 import '../HomePage/futsal_detail_screen.dart';
-//notification set up to work on
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  String? selectedFilter;
+  String searchQuery = "";
+  List<Map<String, dynamic>> futsals = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchFutsals();
+  }
+
+  Future<void> fetchFutsals() async {
+    try {
+      final response = await http.get(Uri.parse('http://172.20.10.6:5000/api/getfutsals'));
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final List<dynamic> data = decoded['futsals'];
+        final List<Map<String, dynamic>> fetched = data.cast<Map<String, dynamic>>();
+        fetched.sort((a, b) => a['pricePerHour'].compareTo(b['pricePerHour']));
+        setState(() {
+          futsals = fetched;
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load futsals');
+      }
+    } catch (e) {
+      print('Error fetching futsals: $e');
+      setState(() => isLoading = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final List<Map<String, dynamic>> filteredFutsals = futsals.where((futsal) {
+      final query = searchQuery.toLowerCase();
+      if (selectedFilter == 'name') {
+        return futsal['futsalName'].toLowerCase().contains(query);
+      } else if (selectedFilter == 'location') {
+        return futsal['location'].toLowerCase().contains(query);
+      }
+      return true;
+    }).toList();
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: CustomScrollView(
         slivers: [
-          // SliverAppBar: Fixed header with collapsible effect
           SliverAppBar(
             expandedHeight: 300,
             floating: false,
-            pinned: true,  // Keeps the header visible when scrolled
+            pinned: true,
             automaticallyImplyLeading: false,
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
@@ -29,12 +77,10 @@ class HomePage extends StatelessWidget {
                     bottomRight: Radius.circular(20),
                   ),
                 ),
-                padding: const EdgeInsets.only(
-                    top: 50, left: 16, right: 16, bottom: 20),
+                padding: const EdgeInsets.only(top: 50, left: 16, right: 16, bottom: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Row for profile and notification icons
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -58,14 +104,11 @@ class HomePage extends StatelessWidget {
                         IconButton(
                           icon: const Icon(Icons.notifications, color: Colors.white),
                           iconSize: 40.0,
-                          onPressed: () {
-                            // Handle notification click
-                          },
+                          onPressed: () {},
                         ),
                       ],
                     ),
                     const SizedBox(height: 40),
-                    // Title
                     const Center(
                       child: Text(
                         "Find Futsal !",
@@ -77,11 +120,11 @@ class HomePage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    // Search Bar
                     Row(
                       children: [
                         Expanded(
                           child: TextField(
+                            onChanged: (value) => setState(() => searchQuery = value),
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: Colors.white,
@@ -97,16 +140,22 @@ class HomePage extends StatelessWidget {
                         const SizedBox(width: 10),
                         Container(
                           height: 50,
-                          width: 50,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(30),
                           ),
-                          child: IconButton(
-                            icon: const Icon(Icons.filter_alt, color: Colors.green),
-                            onPressed: () {
-                              // Handle filter click
-                            },
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: selectedFilter,
+                              hint: const Text("Search by"),
+                              icon: const Icon(Icons.arrow_drop_down, color: Colors.green),
+                              items: const [
+                                DropdownMenuItem(value: "name", child: Text("By Name")),
+                                DropdownMenuItem(value: "location", child: Text("By Location")),
+                              ],
+                              onChanged: (value) => setState(() => selectedFilter = value),
+                            ),
                           ),
                         ),
                       ],
@@ -116,22 +165,55 @@ class HomePage extends StatelessWidget {
               ),
             ),
           ),
-          // Content Section (Popular Futsals, Nearby Futsals, etc.)
           SliverList(
             delegate: SliverChildListDelegate([
-              const SizedBox(height:40),
-              _buildFutsalSection(
-                title: "Popular Futsal",
-                context: context,
-                navigateTo:  const PopularFutsalPage(),
-              ),
-              const SizedBox(height: 5),
-              _buildFutsalSection(
-                title: "Nearby Futsal",
-                context: context,
-                navigateTo:  const NearbyFutsalPage(),
-              ),
+              const SizedBox(height: 10),
+              if (searchQuery.isNotEmpty && selectedFilter != null)
+                _buildFutsalSection(title: "Filtered Results", futsals: filteredFutsals),
+              isLoading
+                  ? _buildShimmerSection("Popular Futsal")
+                  : _buildFutsalSection(title: "Popular Futsal", futsals: futsals),
+              const SizedBox(height: 10),
+              isLoading
+                  ? _buildShimmerSection("Nearby Futsal")
+                  : _buildFutsalSection(title: "Nearby Futsal", futsals: futsals),
             ]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShimmerSection(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 220,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 3,
+              itemBuilder: (context, index) {
+                return Container(
+                  width: 200,
+                  margin: const EdgeInsets.only(right: 10),
+                  child: Shimmer.fromColors(
+                    baseColor: Colors.grey.shade300,
+                    highlightColor: Colors.grey.shade100,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -140,59 +222,31 @@ class HomePage extends StatelessWidget {
 
   Widget _buildFutsalSection({
     required String title,
-    required BuildContext context,
-    required Widget navigateTo,
+    required List<Map<String, dynamic>> futsals,
   }) {
+    if (futsals.isEmpty) return const SizedBox();
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => navigateTo),
-                  );
-                },
-                child: const Text("View more", style: TextStyle(color: Colors.green)),
-              ),
-            ],
-          ),
+          Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           SizedBox(
-            height: 250,
-            child: ListView(
+            height: 220,
+            child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              children: [
-                FutsalCard(
-                  name: "Hariyali Futsal",
-                  location: "Satungal, KTM",
-                  price: 1200,
-                  imageUrl: "assets/images/futsal_pitch.jpg",
-                  onTap: () => _navigateToDetail(context, "Hariyali Futsal"),
-                ),
-                FutsalCard(
-                  name: "Green Turf",
-                  location: "Lalitpur",
-                  price: 1500,
-                  imageUrl: "assets/images/futsal_pitch.jpg",
-                  onTap: () => _navigateToDetail(context, "Green Turf"),
-                ),
-                FutsalCard(
-                  name: "Champion Arena",
-                  location: "Bhaktapur",
-                  price: 1300,
-                  imageUrl: "assets/images/futsal_pitch.jpg",
-                  onTap: () => _navigateToDetail(context, "Champion Arena"),
-                ),
-              ],
+              itemCount: futsals.length,
+              itemBuilder: (context, index) {
+                final f = futsals[index];
+                return FutsalCard(
+                  name: f['futsalName'],
+                  location: f['location'],
+                  price: f['pricePerHour'],
+                  imageUrl: f['images'].isNotEmpty ? f['images'][0] : "",
+                  onTap: () => _navigateToDetail(context, f['futsalName']),
+                );
+              },
             ),
           ),
         ],
@@ -239,7 +293,6 @@ class FutsalCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
-              // ignore: deprecated_member_use
               color: AppColors.primary.withOpacity(0.3),
               blurRadius: 5,
               spreadRadius: 2,
@@ -251,31 +304,20 @@ class FutsalCard extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
+              child: Image.network(
                 imageUrl,
                 width: double.infinity,
                 height: 120,
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.broken_image, size: 120),
               ),
             ),
             const SizedBox(height: 8),
-            Text(
-              name,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            Text(
-              location,
-              style: TextStyle(color: Colors.grey[700], fontSize: 14),
-            ),
+            Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            Text(location, style: TextStyle(color: Colors.grey[700], fontSize: 14)),
             const SizedBox(height: 5),
-            const Text(
-              "Availability: Yes",
-              style: TextStyle(color: Colors.green, fontSize: 14),
-            ),
-            Text(
-              "Price: NPR $price",
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-            ),
+            Text("Price: NPR $price", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
           ],
         ),
       ),

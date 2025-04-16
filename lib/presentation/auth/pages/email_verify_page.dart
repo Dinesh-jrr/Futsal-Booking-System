@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -27,7 +29,7 @@ class _VerifyEmailOtpPageState extends State<VerifyEmailOtpPage> {
 
     setState(() => isLoading = true);
 
-    final url = Uri.parse('http://192.168.1.5:5000/api/users/verify-email-otp');
+    final url = Uri.parse('http://172.20.10.6:5000/api/users/verify-email-otp');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},

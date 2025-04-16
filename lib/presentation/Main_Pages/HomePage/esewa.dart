@@ -46,10 +46,19 @@ class Esewa {
         ),
         onPaymentSuccess: (EsewaPaymentSuccessResult result) async {
           debugPrint('✅ Payment Success, Ref ID: ${result.refId}');
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Payment successful. Booking confirmed.")),
-          );
           await verifyTransaction(context, result);
+          Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => BookingSuccessScreen(
+        futsalName: futsalName,
+        timeSlot: selectedTimeSlot ?? '',
+        day: selectedDay,
+        amount: advancePayment,
+        transactionId: result.refId,
+      ),
+    ),
+  );
         },
         onPaymentFailure: () {
           debugPrint('❌ Payment Failure');
@@ -116,7 +125,7 @@ class Esewa {
       String? token = prefs.getString('auth_token');
 
       final userResponse = await http.get(
-        Uri.parse('http://192.168.1.5:5000/api/users/me'),
+        Uri.parse('http://172.20.10.6:5000/api/users/me'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${token ?? ''}',
@@ -127,7 +136,7 @@ class Esewa {
       final userId = userData['_id'];
 
       final bookingResponse = await http.post(
-        Uri.parse("http://192.168.1.5:5000/api/bookings"),
+        Uri.parse("http://172.20.10.6:5000/api/bookings"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "futsalName": futsalName,
@@ -168,7 +177,7 @@ class Esewa {
       String? token = prefs.getString('auth_token');
 
       final userResponse = await http.get(
-        Uri.parse('http://192.168.1.5:5000/api/users/me'),
+        Uri.parse('http://172.20.10.6:5000/api/users/me'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${token ?? ''}',
@@ -179,7 +188,7 @@ class Esewa {
       final userId = userBody['_id'];
 
       final paymentResponse = await http.post(
-        Uri.parse("http://192.168.1.5:5000/api/payment/create"),
+        Uri.parse("http://172.20.10.6:5000/api/payment/create"),
         headers: {
           "Content-Type": "application/json",
         },
@@ -196,18 +205,7 @@ class Esewa {
       if (paymentResponse.statusCode == 200 || paymentResponse.statusCode == 201) {
         debugPrint("✅ Payment history saved successfully.");
          // ➕ Show success screen
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => BookingSuccessScreen(
-        futsalName: futsalName,
-        timeSlot: selectedTimeSlot ?? '',
-        day: selectedDay,
-        amount: advancePayment,
-        transactionId: result.refId,
-      ),
-    ),
-  );
+  
       } else {
         debugPrint("❌ Failed to save payment. Code: ${paymentResponse.statusCode}");
         debugPrint("Response body: ${paymentResponse.body}");

@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print, use_build_context_synchronously
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -222,7 +224,7 @@ class BookNow extends StatelessWidget {
                 print("calling/users/me");
 
               final response = await http.get(
-                Uri.parse('http://192.168.1.5:5000/api/users/me'),
+                Uri.parse('http://172.20.10.6:5000/api/users/me'),
                 headers: {
                   'Content-Type': 'application/json',
                   'Authorization': 'Bearer ${token ?? ''}',  // Use empty string if token is null

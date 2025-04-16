@@ -34,7 +34,7 @@ class _SignInState extends State<SignIn> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.1.5:5000/api/users/login'),
+        Uri.parse('http://172.20.10.6:5000/api/users/login'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'email': email, 'password': password}),
       );
@@ -45,6 +45,8 @@ class _SignInState extends State<SignIn> {
           final String token = responseBody['token'];
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('auth_token', token);
+          await prefs.setString('user_id', responseBody['user']['id']);
+          await prefs.setBool('isLoggedIn', true);
 
           Navigator.pushReplacementNamed(context, '/home');
         } else {
@@ -82,9 +84,10 @@ class _SignInState extends State<SignIn> {
       final String googleId = account.id;
       final GoogleSignInAuthentication auth = await account.authentication;
       final String? idToken = auth.idToken;
+      
 
       final response = await http.post(
-        Uri.parse('http://192.168.1.5:5000/api/users/google-login'),
+        Uri.parse('http://10.22.2.114:5000/api/users/google-login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email': email,
@@ -99,6 +102,7 @@ class _SignInState extends State<SignIn> {
         final token = body['token'];
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', token);
+        await prefs.setBool('isLoggedIn', true);
         Navigator.pushReplacementNamed(context, '/home');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

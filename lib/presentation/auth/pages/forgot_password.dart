@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, avoid_print
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -31,7 +31,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       isLoading = true;
     });
 
-    final url = Uri.parse('http://192.168.1.5:5000/api/users/forgot-password');
+    final url = Uri.parse('http://172.20.10.6:5000/api/users/forgot-password');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},

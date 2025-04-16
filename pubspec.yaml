@@ -16,6 +16,7 @@ dependencies:
   cached_network_image: ^3.3.0
   socket_io_client: ^2.0.3+1
   google_sign_in: ^6.1.5
+  shimmer: ^3.0.0
 
   esewa_flutter_sdk:
     path: C:/Futsal Booking System/Player/external_sdk/esewa_sdk/esewa_flutter_sdk/esewa_flutter_sdk

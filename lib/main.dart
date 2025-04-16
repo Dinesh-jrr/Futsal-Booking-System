@@ -7,6 +7,7 @@ import 'package:player/presentation/auth/pages/signin.dart';
 
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 

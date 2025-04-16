@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api, avoid_print, deprecated_member_use
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -23,7 +25,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   late SocketService socketService;
 
-  final String backendURL = 'http://192.168.1.5:5000';
+  final String backendURL = 'http://172.20.10.6:5000';
   List<Map<String, String>> messages = [];
 
   @override
