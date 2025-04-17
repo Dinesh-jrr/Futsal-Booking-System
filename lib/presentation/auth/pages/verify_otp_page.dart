@@ -32,7 +32,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
     setState(() => isLoading = true);
 
     final response = await http.post(
-      Uri.parse('http://172.20.10.6:5000/api/users/reset-password'),
+      Uri.parse('http://192.168.1.9:5000/api/users/reset-password'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'email': widget.email,

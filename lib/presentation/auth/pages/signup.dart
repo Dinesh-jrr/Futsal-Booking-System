@@ -6,6 +6,8 @@ import 'package:player/presentation/auth/pages/email_verify_page.dart';
 import 'package:player/presentation/auth/pages/signin.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:player/utils/toast_helper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -25,89 +27,139 @@ class _SignUpState extends State<SignUp> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
-  //need to update email and phone number field
+  @override
+  void initState() {
+    super.initState();
+    _checkPendingVerification();
+  }
+
+  Future<void> _checkPendingVerification() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isPending = prefs.getBool('pending_verification') ?? false;
+    final email = prefs.getString('verifying_email');
+
+    if (isPending && email != null && mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => VerifyEmailOtpPage(email: email),
+        ),
+      );
+    }
+  }
 
   String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Email is required';
-    }
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\$');
-    if (!emailRegex.hasMatch(value)) {
-      return 'Please enter a valid email address';
-    }
+    if (value == null || value.isEmpty) return 'Email is required';
+    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    if (!emailRegex.hasMatch(value)) return 'Please enter a valid email address';
     return null;
   }
 
   String? _validatePhoneNumber(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Phone number is required';
-    }
-    final phoneRegex = RegExp(r'^[0-9]{10}\$');
-    if (!phoneRegex.hasMatch(value)) {
-      return 'Please enter a valid 10-digit phone number';
-    }
+    if (value == null || value.isEmpty) return 'Phone number is required';
+    final phoneRegex = RegExp(r'^[0-9]{10}$');
+    if (!phoneRegex.hasMatch(value)) return 'Please enter a valid 10-digit phone number';
     return null;
   }
 
   String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Password is required';
-    }
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters';
-    }
+    if (value == null || value.isEmpty) return 'Password is required';
+    if (value.length < 6) return 'Password must be at least 6 characters';
     return null;
   }
 
   String? _validateConfirmPassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please confirm your password';
-    }
-    if (value != _passwordController.text) {
-      return 'Passwords do not match';
-    }
+    if (value == null || value.isEmpty) return 'Please confirm your password';
+    if (value != _passwordController.text) return 'Passwords do not match';
     return null;
   }
 
   Future<void> _handleSignUp(BuildContext context) async {
     if (_formKey.currentState?.validate() ?? false) {
-      final url = 'http://172.20.10.6:5000/api/users/register';
+      final email = _emailController.text.trim();
+      final url = 'http://192.168.1.9:5000/api/users/register';
       final response = await http.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'name': _fullNameController.text,
-          'email': _emailController.text,
+          'email': email,
           'phoneNumber': _phoneController.text,
           'password': _passwordController.text,
         }),
       );
 
-      print("Response status: ${response.statusCode}");
-      print("Response body: ${response.body}");
+      final decoded = json.decode(response.body);
 
       if (response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Successfully signed up!'),
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('pending_verification', true);
+        await prefs.setString('verifying_email', email);
+
+        final otpResponse = await http.post(
+          Uri.parse('http://192.168.1.9:5000/api/users/send-otp'),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({'email': email}),
+        );
+
+        if (otpResponse.statusCode == 200) {
+          showToast(
+            context: context,
+            message: "Successfully signed up! OTP sent to your email.",
             backgroundColor: Colors.green,
-          ),
+            icon: Icons.check_circle,
+          );
+
+          Future.delayed(const Duration(seconds: 2), () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => VerifyEmailOtpPage(email: email),
+              ),
+            );
+          });
+        } else {
+          showToast(
+            context: context,
+            message: "Failed to send OTP. Please try again later.",
+            backgroundColor: Colors.orange,
+            icon: Icons.warning_amber,
+          );
+        }
+      } else if (decoded['status'] == 'unverified') {
+        print("status not showing");
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('pending_verification', true);
+        await prefs.setString('verifying_email', email);
+
+        await http.post(
+          Uri.parse('http://192.168.1.9:5000/api/users/send-otp'),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({'email': email}),
+        );
+
+        showToast(
+          context: context,
+          message: "Account exists but not verified. OTP resent.",
+          backgroundColor: Colors.orange,
+          icon: Icons.warning,
         );
 
         Future.delayed(const Duration(seconds: 2), () {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (_) => VerifyEmailOtpPage(email: _emailController.text.trim()),
+              builder: (_) => VerifyEmailOtpPage(email: email),
             ),
           );
         });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to sign up: ${json.decode(response.body)['message']}'),
-            backgroundColor: Colors.red,
-          ),
+        final errorMessage = decoded['message'] ?? 'Failed to sign up';
+        showToast(
+          context: context,
+          message: errorMessage,
+          backgroundColor: Colors.red,
+          icon: Icons.error,
         );
       }
     }
@@ -126,17 +178,12 @@ class _SignUpState extends State<SignUp> {
               children: [
                 const SizedBox(height: 40),
                 Center(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Image.asset(
-                        './assets/images/logo.png',
-                        height: 100,
-                        fit: BoxFit.contain,
-                      ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset(
+                      './assets/images/logo.png',
+                      height: 100,
+                      fit: BoxFit.contain,
                     ),
                   ),
                 ),
@@ -144,11 +191,7 @@ class _SignUpState extends State<SignUp> {
                 const Center(
                   child: Text(
                     "Create an account",
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -186,11 +229,7 @@ class _SignUpState extends State<SignUp> {
                   decoration: _inputDecoration('Enter your Password', Icons.lock).copyWith(
                     suffixIcon: IconButton(
                       icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, color: Colors.green),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
+                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
                 ),
@@ -204,11 +243,7 @@ class _SignUpState extends State<SignUp> {
                   decoration: _inputDecoration('Confirm your Password', Icons.lock).copyWith(
                     suffixIcon: IconButton(
                       icon: Icon(_obscureConfirmPassword ? Icons.visibility_off : Icons.visibility, color: Colors.green),
-                      onPressed: () {
-                        setState(() {
-                          _obscureConfirmPassword = !_obscureConfirmPassword;
-                        });
-                      },
+                      onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
                     ),
                   ),
                 ),
@@ -222,20 +257,6 @@ class _SignUpState extends State<SignUp> {
                   ),
                   child: const Text("Sign Up", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                 ),
-                // const SizedBox(height: 20),
-                // OutlinedButton.icon(
-                //   onPressed: () {},
-                //   style: OutlinedButton.styleFrom(
-                //     side: const BorderSide(color: Colors.green, width: 1.5),
-                //     padding: const EdgeInsets.symmetric(vertical: 16.0),
-                //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-                //   ),
-                //   icon: Image.asset('assets/icons/google.png', height: 24),
-                //   label: const Text(
-                //     "Sign in with Google",
-                //     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green),
-                //   ),
-                // ),
                 const SizedBox(height: 20),
                 Center(
                   child: TextButton(
