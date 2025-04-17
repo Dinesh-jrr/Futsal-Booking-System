@@ -1,7 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:player/core/config/theme/app_colors.dart';
+import 'package:player/core/theme/app_colors.dart';
 import 'package:player/presentation/auth/pages/signup.dart';
 import 'package:player/presentation/auth/pages/forgot_password.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:player/utils/toast_helper.dart';
+import 'package:player/core/config/constants.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({super.key});
@@ -38,7 +39,7 @@ class _SignInState extends State<SignIn> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.1.9:5000/api/users/login'),
+        Uri.parse('${AppConfig.baseUrl}/api/users/login'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'email': email, 'password': password}),
       );

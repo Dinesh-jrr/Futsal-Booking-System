@@ -8,6 +8,7 @@ import 'package:esewa_flutter_sdk/esewa_payment_success_result.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:player/common/esewa.dart';
+import 'package:player/core/config/constants.dart';
 import 'package:player/presentation/Main_Pages/HomePage/booking_success.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -125,7 +126,7 @@ class Esewa {
       String? token = prefs.getString('auth_token');
 
       final userResponse = await http.get(
-        Uri.parse('http://172.20.10.6:5000/api/users/me'),
+        Uri.parse('${AppConfig.baseUrl}/api/users/me'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${token ?? ''}',
@@ -136,7 +137,7 @@ class Esewa {
       final userId = userData['_id'];
 
       final bookingResponse = await http.post(
-        Uri.parse("http://172.20.10.6:5000/api/bookings"),
+        Uri.parse("${AppConfig.baseUrl}/api/bookings"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "futsalName": futsalName,
@@ -177,7 +178,7 @@ class Esewa {
       String? token = prefs.getString('auth_token');
 
       final userResponse = await http.get(
-        Uri.parse('http://172.20.10.6:5000/api/users/me'),
+        Uri.parse('${AppConfig.baseUrl}/api/users/me'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${token ?? ''}',
@@ -188,7 +189,7 @@ class Esewa {
       final userId = userBody['_id'];
 
       final paymentResponse = await http.post(
-        Uri.parse("http://172.20.10.6:5000/api/payment/create"),
+        Uri.parse("${AppConfig.baseUrl}/api/payment/create"),
         headers: {
           "Content-Type": "application/json",
         },

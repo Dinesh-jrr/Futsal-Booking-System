@@ -1,12 +1,13 @@
 // ignore_for_file: depend_on_referenced_packages, avoid_print
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+// import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
-import 'package:player/core/config/theme/app_colors.dart';
+import 'package:player/core/theme/app_colors.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'booking_details.dart';
+import 'package:player/core/config/constants.dart';
 
 class BookingHistory extends StatefulWidget {
   const BookingHistory({super.key});
@@ -34,7 +35,7 @@ class _BookingHistoryState extends State<BookingHistory> {
       if (token == null) throw Exception("Token not found in SharedPreferences");
 
       final res = await http.get(
-        Uri.parse("http://172.20.10.6:5000/api/users/me"),
+        Uri.parse("${AppConfig.baseUrl}/api/users/me"),
         headers: { 'Authorization': 'Bearer $token' },
       );
 
@@ -44,7 +45,7 @@ class _BookingHistoryState extends State<BookingHistory> {
         print("Fetched user ID: $userId");
 
         final bookingsRes = await http.get(
-          Uri.parse("http://172.20.10.6:5000/api/bookings/user/$userId"),
+          Uri.parse("${AppConfig.baseUrl}/api/bookings/user/$userId"),
         );
 
         if (bookingsRes.statusCode == 200) {

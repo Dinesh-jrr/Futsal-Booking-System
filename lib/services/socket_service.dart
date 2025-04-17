@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print, library_prefixes
 
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:player/core/config/constants.dart';
 
 class SocketService {
   late IO.Socket socket;
@@ -9,7 +10,8 @@ class SocketService {
   SocketService(this.userId);
 
   void initSocket() {
-    socket = IO.io('http://192.168.1.4:5000', <String, dynamic>{
+    // ignore: unnecessary_string_interpolations
+    socket = IO.io('${AppConfig.baseUrl}', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
     });

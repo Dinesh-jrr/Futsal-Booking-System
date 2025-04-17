@@ -1,13 +1,14 @@
 // ignore_for_file: library_private_types_in_public_api, prefer_const_declarations, avoid_print, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:player/core/config/theme/app_colors.dart';
+import 'package:player/core/theme/app_colors.dart';
 import 'package:player/presentation/auth/pages/email_verify_page.dart';
 import 'package:player/presentation/auth/pages/signin.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:player/utils/toast_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:player/core/config/constants.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -77,9 +78,9 @@ class _SignUpState extends State<SignUp> {
   Future<void> _handleSignUp(BuildContext context) async {
     if (_formKey.currentState?.validate() ?? false) {
       final email = _emailController.text.trim();
-      final url = 'http://192.168.1.9:5000/api/users/register';
+      final url = Uri.parse('${AppConfig.baseUrl}/users/register');
       final response = await http.post(
-        Uri.parse(url),
+        url,
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'name': _fullNameController.text,
@@ -97,7 +98,7 @@ class _SignUpState extends State<SignUp> {
         await prefs.setString('verifying_email', email);
 
         final otpResponse = await http.post(
-          Uri.parse('http://192.168.1.9:5000/api/users/send-otp'),
+          Uri.parse('${AppConfig.baseUrl}/api/users/send-otp'),
           headers: {'Content-Type': 'application/json'},
           body: json.encode({'email': email}),
         );
@@ -133,7 +134,7 @@ class _SignUpState extends State<SignUp> {
         await prefs.setString('verifying_email', email);
 
         await http.post(
-          Uri.parse('http://192.168.1.9:5000/api/users/send-otp'),
+          Uri.parse('${AppConfig.baseUrl}/api/users/send-otp'),
           headers: {'Content-Type': 'application/json'},
           body: json.encode({'email': email}),
         );

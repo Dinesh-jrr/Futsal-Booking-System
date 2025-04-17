@@ -9,6 +9,7 @@ import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:another_flushbar/flushbar.dart';
 
 import 'package:player/presentation/auth/pages/signin.dart';
+import 'package:player/core/config/constants.dart';
 
 class VerifyEmailOtpPage extends StatefulWidget {
   final String email;
@@ -75,7 +76,7 @@ class _VerifyEmailOtpPageState extends State<VerifyEmailOtpPage> {
   Future<void> _resendOtp() async {
     if (!_canResend) return;
 
-    final url = Uri.parse('http://192.168.1.9:5000/api/users/send-otp');
+    final url = Uri.parse('${AppConfig.baseUrl}/api/users/send-otp');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -102,7 +103,7 @@ class _VerifyEmailOtpPageState extends State<VerifyEmailOtpPage> {
     setState(() => isLoading = true);
 
     final url =
-        Uri.parse('http://192.168.1.9:5000/api/users/verify-email-otp');
+        Uri.parse('${AppConfig.baseUrl}/api/users/verify-email-otp');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},

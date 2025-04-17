@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'chat_screen.dart';
+import 'package:player/core/config/constants.dart';
 //chat system updated
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
@@ -15,7 +16,8 @@ class ChatListScreen extends StatefulWidget {
 
 class _ChatListScreenState extends State<ChatListScreen> {
   String? playerId;
-  final String backendURL = 'http://172.20.10.6:5000';
+  // ignore: unnecessary_string_interpolations
+  final String backendURL = '${AppConfig.baseUrl}';
   bool isLoading = true;
   List<Map<String, dynamic>> conversations = [];
 

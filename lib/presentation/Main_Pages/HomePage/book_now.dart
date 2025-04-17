@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:player/core/config/constants.dart';
 import 'package:player/presentation/Main_Pages/HomePage/esewa.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -224,7 +225,7 @@ class BookNow extends StatelessWidget {
                 print("calling/users/me");
 
               final response = await http.get(
-                Uri.parse('http://172.20.10.6:5000/api/users/me'),
+                Uri.parse('${AppConfig.baseUrl}/api/users/me'),
                 headers: {
                   'Content-Type': 'application/json',
                   'Authorization': 'Bearer ${token ?? ''}',  // Use empty string if token is null

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:player/core/config/theme/app_colors.dart';
+import 'package:player/core/theme/app_colors.dart';
 import 'package:player/presentation/Main_Pages/HomePage/home_page.dart';
 import 'package:player/presentation/Main_Pages/Bookings/booking_history.dart';
 import 'package:player/presentation/Main_Pages/Chats/chat_list_screen.dart';

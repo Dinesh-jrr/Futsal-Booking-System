@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:player/core/config/constants.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:player/core/config/theme/app_colors.dart';
+import 'package:player/core/theme/app_colors.dart';
 // import '../HomePage/popular_futsal.dart';
 // import '../HomePage/nearby_futsal.dart';
 import '../HomePage/futsal_detail_screen.dart';
@@ -28,7 +29,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> fetchFutsals() async {
     try {
-      final response = await http.get(Uri.parse('http://172.20.10.6:5000/api/getfutsals'));
+      final response = await http.get(Uri.parse('${AppConfig.baseUrl}/api/getfutsals'));
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         final List<dynamic> data = decoded['futsals'];

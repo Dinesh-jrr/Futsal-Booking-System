@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../../services/socket_service.dart';
+import 'package:player/core/config/constants.dart';
 
 class ChatScreen extends StatefulWidget {
   final String playerId;
@@ -25,7 +26,8 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   late SocketService socketService;
 
-  final String backendURL = 'http://172.20.10.6:5000';
+  // ignore: unnecessary_string_interpolations
+  final String backendURL = '${AppConfig.baseUrl}';
   List<Map<String, String>> messages = [];
 
   @override

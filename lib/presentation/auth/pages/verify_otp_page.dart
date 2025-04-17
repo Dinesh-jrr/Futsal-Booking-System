@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:player/core/config/constants.dart';
 
 class VerifyOtpPage extends StatefulWidget {
   final String email;
@@ -32,7 +33,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
     setState(() => isLoading = true);
 
     final response = await http.post(
-      Uri.parse('http://192.168.1.9:5000/api/users/reset-password'),
+      Uri.parse('${AppConfig.baseUrl}/api/users/reset-password'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'email': widget.email,

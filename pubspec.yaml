@@ -19,6 +19,7 @@ dependencies:
   shimmer: ^3.0.0
   another_flushbar: ^1.10.28
   flutter_otp_text_field: ^1.1.1
+  image_picker: ^1.0.4
 
   esewa_flutter_sdk:
     path: C:/Futsal Booking System/Player/external_sdk/esewa_sdk/esewa_flutter_sdk/esewa_flutter_sdk
