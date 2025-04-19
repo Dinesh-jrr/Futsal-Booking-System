@@ -14,8 +14,21 @@ exports.registerUser = async (req, res) => {
 
   try {
     const userExists = await User.findOne({ email });
+
     if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+      if (!userExists.isVerified) {
+        // ✅ User exists but not verified – allow resend OTP on frontend
+        return res.status(400).json({
+          message: 'User already exists but not verified',
+          isVerified: false,          // Optional for compatibility
+          status: 'unverified',       // ✅ Use this in frontend check
+        });
+      }
+
+      return res.status(400).json({
+        message: 'User already exists',
+        isVerified: true,
+      });
     }
 
     const userRole = role || 'user';
@@ -30,11 +43,13 @@ exports.registerUser = async (req, res) => {
 
     res.status(201).json({
       message: 'User registered successfully. Please verify your email with the OTP.',
+      status: 'created',
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
 
 
 // Verify email OTP

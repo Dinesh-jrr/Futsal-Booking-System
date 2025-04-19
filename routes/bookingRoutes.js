@@ -6,6 +6,7 @@ const {
   getAllBookings,
   getBookingById,
   cancelBooking,
+  updateBooking
 } = require('../controllers/bookingController');
 
 const router = express.Router();
@@ -16,5 +17,7 @@ router.get('/bookings/owner/:ownerId', getOwnerBookings); // Get bookings for an
 router.get('/bookings/allBookings', getAllBookings); // Get all bookings (admin)
 router.get('/bookings/:bookingId', getBookingById); // Get a single booking by ID
 router.put('/bookings/:bookingId/cancel', cancelBooking); // Cancel a booking
+router.put('/bookings/:bookingId', updateBooking)
+
 
 module.exports = router;

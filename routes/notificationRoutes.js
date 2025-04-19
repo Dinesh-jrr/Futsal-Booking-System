@@ -1,18 +1,28 @@
-const express = require('express');
-const router = express.Router();
+const express = require("express");
 const {
-  getNotifications,
+  getUserNotifications,
   markAsRead,
-  createNotification,
-} = require('../controllers/notificationController');
+  deleteNotification,
+} = require("../controllers/notificationController");
 
-// Get notifications for a specific recipient
-router.get('/:recipientId', getNotifications);
+const router = express.Router();
 
-// Mark a notification as read
-router.patch('/read/:id', markAsRead);
+// GET: All notifications for a user
+router.get("/notifications/:userId", getUserNotifications);
 
-// Create a new notification
-router.post('/create', createNotification);
+// PUT: Mark a notification as read
+router.put("/notifications/:notificationId/read", markAsRead);
+
+// DELETE: Delete a notification
+router.delete("/notifications/:notificationId", deleteNotification);
+
+//just to test
+router.post("/notify-test", async (req, res) => {
+  const { userId, title, message } = req.body;
+  const sendNotification = require("../utils/sendNotification");
+  await sendNotification(userId, title, message);
+  res.status(200).json({ message: "Push sent" });
+});
+
 
 module.exports = router;

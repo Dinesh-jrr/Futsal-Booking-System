@@ -9,6 +9,7 @@ const UserSchema = new mongoose.Schema({
   role: { type: String, default: 'user', enum: ['user', 'admin', 'futsal_owner'] },
   status: { type: String, default: 'Pending', enum: ['Pending', 'Approved', 'Declined'] },
   isVerified: { type: Boolean, default: false },
+  profileImage: String,
   createdAt: { type: Date, default: Date.now },
 });
 

@@ -11,6 +11,8 @@ router.patch("/payments/:transactionUuid", paymentController.updatePaymentStatus
 //get all payments
 router.get("/getAllPayments", paymentController.getAllPayments);
 
+router.get("/owner/:ownerId", paymentController.getPaymentsByOwner);
+
 // router.get('/payments', paymentController.getAllPayments);
 
 module.exports = router;

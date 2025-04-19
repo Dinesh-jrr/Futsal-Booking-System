@@ -7,6 +7,7 @@ const futsalRoutes = require('./routes/futsalRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const notificationRoutes=require('./routes/notificationRoutes');
+const tokenRoutes = require('./routes/tokenRoutes');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const http = require('http');
@@ -33,6 +34,7 @@ app.use('/api', futsalRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/notification',notificationRoutes);
+app.use('/api', tokenRoutes);
 
 // Socket.IO setup
 const io = new socketIo.Server(server, {
