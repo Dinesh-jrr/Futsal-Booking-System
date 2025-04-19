@@ -4,10 +4,12 @@ import 'package:player/core/theme/app_theme.dart';
 import 'package:player/presentation/splash/pages/splash.dart';
 import 'package:player/presentation/Main_Pages/navbar_roots.dart';
 import 'package:player/presentation/auth/pages/signin.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 
-void main() {
+void main()async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 

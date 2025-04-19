@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:player/core/theme/app_colors.dart';
 import 'package:player/presentation/auth/pages/signup.dart';
@@ -52,6 +53,19 @@ class _SignInState extends State<SignIn> {
           await prefs.setString('auth_token', token);
           await prefs.setString('user_id', responseBody['user']['id']);
           await prefs.setBool('isLoggedIn', true);
+          final fcmToken = await FirebaseMessaging.instance.getToken();
+          if (fcmToken != null) {
+            final uploadResponse = await http.post(
+              Uri.parse('${AppConfig.baseUrl}/api/token/save'),
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode({
+                'userId': responseBody['user']['id'],
+                'fcmToken': fcmToken,
+              }),
+            );
+            print("token saved ");
+            print('📤 Token upload response: ${uploadResponse.body}');
+          }
 
           showToast(
             context: context,
@@ -174,14 +188,20 @@ class _SignInState extends State<SignIn> {
                 ),
                 const SizedBox(height: 20),
                 const Center(
-                  child: Text("Welcome !", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  child: Text("Welcome !",
+                      style:
+                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                 ),
                 const SizedBox(height: 15),
                 const Center(
-                  child: Text("Sign in to your account", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  child: Text("Sign in to your account",
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                 ),
                 const SizedBox(height: 20),
-                const Text("Email", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text("Email",
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _emailController,
@@ -189,11 +209,15 @@ class _SignInState extends State<SignIn> {
                     prefixIcon: const Icon(Icons.email, color: Colors.green),
                     hintText: 'Enter your email',
                     contentPadding: const EdgeInsets.symmetric(vertical: 20),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0), borderSide: const BorderSide(color: Colors.green)),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: const BorderSide(color: Colors.green)),
                   ),
                 ),
                 const SizedBox(height: 25),
-                const Text("Password", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text("Password",
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _passwordController,
@@ -202,10 +226,17 @@ class _SignInState extends State<SignIn> {
                     prefixIcon: const Icon(Icons.password, color: Colors.green),
                     hintText: 'Enter your Password',
                     contentPadding: const EdgeInsets.symmetric(vertical: 20),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0), borderSide: const BorderSide(color: AppColors.primary)),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: const BorderSide(color: AppColors.primary)),
                     suffixIcon: IconButton(
-                      icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, color: Colors.green),
-                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                      icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: Colors.green),
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
                 ),
@@ -214,8 +245,12 @@ class _SignInState extends State<SignIn> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPasswordPage())),
-                      child: const Text("Forgot Password?", style: TextStyle(fontSize: 14, color: Colors.red)),
+                      onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const ForgotPasswordPage())),
+                      child: const Text("Forgot Password?",
+                          style: TextStyle(fontSize: 14, color: Colors.red)),
                     ),
                   ],
                 ),
@@ -225,9 +260,14 @@ class _SignInState extends State<SignIn> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     padding: const EdgeInsets.symmetric(vertical: 24.0),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0)),
                   ),
-                  child: const Text("Sign In", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                  child: const Text("Sign In",
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white)),
                 ),
                 const SizedBox(height: 30),
                 OutlinedButton.icon(
@@ -235,15 +275,23 @@ class _SignInState extends State<SignIn> {
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Colors.green, width: 2),
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0)),
                   ),
                   icon: Image.asset('assets/icons/google.png', height: 24),
-                  label: const Text("Sign in with Google", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green)),
+                  label: const Text("Sign in with Google",
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green)),
                 ),
                 const SizedBox(height: 30),
                 Center(
                   child: TextButton(
-                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SignUp())),
+                    onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const SignUp())),
                     child: const Text.rich(
                       TextSpan(
                         text: "Don't have an account? ",
@@ -251,7 +299,10 @@ class _SignInState extends State<SignIn> {
                         children: [
                           TextSpan(
                             text: "Sign Up",
-                            style: TextStyle(fontSize: 16, color: AppColors.primary, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontSize: 16,
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),

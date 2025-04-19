@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "1016472998738",
-    "project_id": "push-notification-footlock",
-    "storage_bucket": "push-notification-footlock.firebasestorage.app"
+    "project_number": "648240048361",
+    "project_id": "footlock-379ce",
+    "storage_bucket": "footlock-379ce.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1016472998738:android:8115084d08f259af08e08b",
+        "mobilesdk_app_id": "1:648240048361:android:1852b3ce3bc2a1c53da878",
         "android_client_info": {
           "package_name": "com.example.futsal"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAf5-xpMwG1HPaKUFSWvmAzET0tqtASIrs"
+          "current_key": "AIzaSyDQ2fhVmoU9Xel8tyO9okZ7RsVcJzIVagg"
         }
       ],
       "services": {
