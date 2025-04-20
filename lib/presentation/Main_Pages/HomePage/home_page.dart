@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:player/core/config/constants.dart';
+import 'package:player/presentation/Main_Pages/Notifications/notification_page.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:player/core/theme/app_colors.dart';
 // import '../HomePage/popular_futsal.dart';
@@ -109,7 +110,9 @@ class _HomePageState extends State<HomePage> {
                           icon: const Icon(Icons.notifications,
                               color: Colors.white),
                           iconSize: 40.0,
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=>const NotificationPage()));
+                          },
                         ),
                       ],
                     ),
