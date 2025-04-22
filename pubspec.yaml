@@ -22,6 +22,13 @@ dependencies:
   image_picker: ^1.0.4
   firebase_core: ^2.25.4
   firebase_messaging: ^14.7.4
+  flutter_local_notifications: 19.1.0
+
+# dependency_overrides:
+#   flutter_local_notifications_linux:
+#     git:
+#       url: https://github.com/MaikuB/flutter_local_notifications.git
+#       path: flutter_local_notifications_linux
 
   esewa_flutter_sdk:
     path: C:/Futsal Booking System/Player/external_sdk/esewa_sdk/esewa_flutter_sdk/esewa_flutter_sdk
@@ -34,7 +41,7 @@ dependencies:
   shared_preferences: ^2.0.15  # Add this to store data locally (e.g., user login status)
   flutter_secure_storage: ^9.2.4  # Add for securely storing sensitive data (e.g., tokens)
   fluttertoast: ^8.2.12
-  
+
 
 dev_dependencies:
   flutter_test:
