@@ -8,6 +8,7 @@ import 'package:player/core/theme/app_colors.dart';
 // import '../HomePage/popular_futsal.dart';
 // import '../HomePage/nearby_futsal.dart';
 import '../HomePage/futsal_detail_screen.dart';
+//setting up opponent finder
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
