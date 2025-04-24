@@ -1,31 +1,30 @@
-const admin = require("../firebase");
+const admin = require("../firebase"); // ✅ Import from your firebase.js
 const Token = require("../models/token");
-const Notification = require("../models/notifications"); // ✅ import model
+const Notification = require("../models/notifications");
 
-async function sendNotification(userId, title, body) {
-  const tokenDoc = await Token.findOne({ userId });
-  if (!tokenDoc || !tokenDoc.fcmToken) return;
-
-  const message = {
-    token: tokenDoc.fcmToken,
-    notification: { title, body },
-  };
-
+const sendNotification = async (userId, title, message) => {
   try {
-    // ✅ Send FCM push
-    await admin.messaging().send(message);
-    console.log("✅ Push notification sent");
+    const tokenDoc = await Token.findOne({ userId });
+    if (!tokenDoc || !tokenDoc.fcmToken) {
+      console.warn("⚠️ FCM token not found for user:", userId);
+      return;
+    }
 
-    // ✅ Save to DB
-    await Notification.create({
-      userId,
-      title,
-      message: body,
-    });
+    const payload = {
+      notification: {
+        title,
+        body: message,
+      },
+      token: tokenDoc.fcmToken,
+    };
 
-  } catch (error) {
-    console.error("❌ Error sending push:", error);
+    await admin.messaging().send(payload); // ✅ will now work
+    await Notification.create({ userId, title, message });
+
+    console.log("✅ Push notification sent & saved.");
+  } catch (err) {
+    console.error("❌ Failed to send/save notification:", err);
   }
-}
+};
 
 module.exports = sendNotification;

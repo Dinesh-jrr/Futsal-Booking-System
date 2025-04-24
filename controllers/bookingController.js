@@ -185,4 +185,37 @@ exports.updateBooking = async (req, res) => {
   }
 };
 
+// ✅ Owner approves a booking and player gets a push notification
+exports.approveBooking = async (req, res) => {
+  try {
+    const bookingId = req.params.bookingId;
+
+    // 1. Update booking status to 'confirmed'
+    const updatedBooking = await Booking.findByIdAndUpdate(
+      bookingId,
+      { status: 'confirmed' },
+      { new: true }
+    );
+
+    if (!updatedBooking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    // 2. Send notification to the player
+    const title = 'Booking Approved!';
+    const message = `Your booking for ${updatedBooking.futsalName} on ${updatedBooking.selectedDay} at ${updatedBooking.selectedTimeSlot} has been approved.`;
+
+    await sendNotification(updatedBooking.userId, title, message);
+
+    // 3. Respond
+    res.status(200).json({
+      message: 'Booking approved and player notified',
+      booking: updatedBooking,
+    });
+  } catch (error) {
+    console.error('Error approving booking:', error);
+    res.status(500).json({ message: 'Error approving booking', error });
+  }
+};
+
 
