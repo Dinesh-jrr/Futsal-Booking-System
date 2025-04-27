@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 
 // Create a new futsal
+
 exports.createFutsal = async (req, res) => {
   try {
     const {
@@ -15,7 +16,8 @@ exports.createFutsal = async (req, res) => {
       availableTimeSlots,
       contactNumber,
       images,
-      documents
+      documents,
+      description, // ✅ Add this
     } = req.body;
 
     // Validate ownerId
@@ -38,6 +40,11 @@ exports.createFutsal = async (req, res) => {
       return res.status(400).json({ message: "Futsal with this name already exists." });
     }
 
+    // ✅ Optional: Validate description length (optional but highly recommended)
+    if (!description || description.length < 30) {
+      return res.status(400).json({ message: "Description must be at least 20 characters long." });
+    }
+
     const newFutsal = new Futsal({
       futsalName,
       location,
@@ -47,7 +54,8 @@ exports.createFutsal = async (req, res) => {
       availableTimeSlots,
       contactNumber,
       images,
-      documents
+      documents,
+      description, // ✅ Save description
     });
 
     const savedFutsal = await newFutsal.save();
@@ -57,12 +65,14 @@ exports.createFutsal = async (req, res) => {
       futsal: savedFutsal,
     });
   } catch (error) {
+    console.error('Error creating futsal:', error);
     res.status(500).json({
       message: 'Error creating futsal',
       error: error.message,
     });
   }
 };
+
 
 // Get all futsals
 exports.getAllFutsals = async (req, res) => {

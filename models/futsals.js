@@ -13,6 +13,7 @@ const futsalSchema = new mongoose.Schema({
   contactNumber: { type: String, required: true },
   images: [{ type: String }],
   documents: [{ type: String }],
+  description: { type: String, required: true },
   
   // ✅ Replace isApproved + old status field with this:
   status: {

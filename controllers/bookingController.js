@@ -30,7 +30,9 @@ exports.createBooking = async (req, res) => {
     const title = "Booking Confirmed!";
     const message = `Your booking for ${futsalName} on ${selectedDay} at ${selectedTimeSlot} has been confirmed.`;
 
-    await sendNotification(userId, title, message);
+    const actualUserId = updatedBooking.userId._id || updatedBooking.userId;
+    await sendNotification(actualUserId, title, message);
+
 
     // 3. Return response
     res.status(201).json({
@@ -185,37 +187,40 @@ exports.updateBooking = async (req, res) => {
   }
 };
 
-// ✅ Owner approves a booking and player gets a push notification
+//approve booking
 exports.approveBooking = async (req, res) => {
   try {
+    console.log("🔍 inside approveBooking"); // Add for debugging
+
     const bookingId = req.params.bookingId;
 
-    // 1. Update booking status to 'confirmed'
     const updatedBooking = await Booking.findByIdAndUpdate(
       bookingId,
       { status: 'confirmed' },
       { new: true }
-    );
+    ); // ✅ userId is string, no need to populate
 
     if (!updatedBooking) {
+      console.log("⚠️ Booking not found for ID:", bookingId);
       return res.status(404).json({ message: 'Booking not found' });
     }
 
-    // 2. Send notification to the player
+    console.log("✅ Approving booking for userId:", updatedBooking.userId);
+
     const title = 'Booking Approved!';
     const message = `Your booking for ${updatedBooking.futsalName} on ${updatedBooking.selectedDay} at ${updatedBooking.selectedTimeSlot} has been approved.`;
 
     await sendNotification(updatedBooking.userId, title, message);
 
-    // 3. Respond
     res.status(200).json({
       message: 'Booking approved and player notified',
       booking: updatedBooking,
     });
   } catch (error) {
-    console.error('Error approving booking:', error);
+    console.error('❌ Error in approveBooking:', error);
     res.status(500).json({ message: 'Error approving booking', error });
   }
 };
+
 
 

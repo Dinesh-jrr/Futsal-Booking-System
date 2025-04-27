@@ -236,3 +236,36 @@ exports.sendOtpToEmail = async (req, res) => {
   }
 };
 
+// update profile
+exports.updateUserProfile = async (req, res) => {
+  const userId = req.user.id;
+  const { name, email, phoneNumber, profileImage } = req.body;
+
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        name,
+        email,
+        phoneNumber,
+        ...(profileImage && { profileImage }), // Only include if present
+      },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      data: updatedUser,
+    });
+  } catch (error) {
+    console.error('Profile update error:', error);
+    res.status(500).json({ success: false, message: 'Something went wrong' });
+  }
+};
+
+

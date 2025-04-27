@@ -26,7 +26,10 @@ const server = http.createServer(app);
 
 // Middleware
 app.use(bodyParser.json());
-app.use(cors({ origin: "*" }));
+app.use(cors({
+  origin: 'http://localhost:3000', // or whatever your frontend address is
+  credentials: true
+}));
 
 // API Routes
 app.use('/api/users', userRoutes);
