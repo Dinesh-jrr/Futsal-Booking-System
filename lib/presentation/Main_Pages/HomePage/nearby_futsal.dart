@@ -1,8 +1,46 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:player/core/config/constants.dart';
 import '../HomePage/futsal_detail_screen.dart';
 
-class NearbyFutsalPage extends StatelessWidget {
+class NearbyFutsalPage extends StatefulWidget {
   const NearbyFutsalPage({super.key});
+
+  @override
+  State<NearbyFutsalPage> createState() => _NearbyFutsalPageState();
+}
+
+class _NearbyFutsalPageState extends State<NearbyFutsalPage> {
+  List<Map<String, dynamic>> futsals = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchFutsals();
+  }
+
+  Future<void> fetchFutsals() async {
+    try {
+      final response = await http.get(Uri.parse('${AppConfig.baseUrl}/api/getfutsals'));
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final List<dynamic> data = decoded['futsals'];
+        final List<Map<String, dynamic>> fetched = data.cast<Map<String, dynamic>>();
+
+        setState(() {
+          futsals = fetched;
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load futsals');
+      }
+    } catch (e) {
+      print('Error fetching futsals: $e');
+      setState(() => isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,99 +57,33 @@ class NearbyFutsalPage extends StatelessWidget {
         backgroundColor: Colors.green,
         centerTitle: true,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(10),
-        children: [
-          FutsalCard(
-            name: "Dreamer's Futsal",
-            location: "Satungal, KTM",
-            price: 10,
-            availability: "Yes",
-            imageUrl: "assets/images/futsal_pitch.jpg",
-            onTap: () => _navigateToDetail(context, "Dreamer's Futsal"),
-          ),
-          FutsalCard(
-            name: "Green Field Futsal",
-            location: "Lalitpur",
-            price: 1300,
-            availability: "Yes",
-            imageUrl: "assets/images/futsal_pitch.jpg",
-            onTap: () => _navigateToDetail(context, "Green Field Futsal"),
-          ),
-          FutsalCard(
-            name: "Champion's Arena",
-            location: "Bhaktapur",
-            price: 1400,
-            availability: "No",
-            imageUrl: "assets/images/futsal_pitch.jpg",
-            onTap: () => _navigateToDetail(context, "Champion's Arena"),
-          ),
-          FutsalCard(
-            name: "Sports Hub",
-            location: "Baneshwor",
-            price: 1500,
-            availability: "Yes",
-            imageUrl: "assets/images/futsal_pitch.jpg",
-            onTap: () => _navigateToDetail(context, "Sports Hub"),
-          ),
-          FutsalCard(
-            name: "Goal Zone",
-            location: "Tinkune",
-            price: 1200,
-            availability: "Yes",
-            imageUrl: "assets/images/futsal_pitch.jpg",
-            onTap: () => _navigateToDetail(context, "Goal Zone"),
-          ),
-          FutsalCard(
-            name: "Victory Ground",
-            location: "Koteshwor",
-            price: 1300,
-            availability: "Yes",
-            imageUrl: "assets/images/futsal_pitch.jpg",
-            onTap: () => _navigateToDetail(context, "Victory Ground"),
-          ),
-          FutsalCard(
-            name: "Striker's Paradise",
-            location: "Thimi",
-            price: 1100,
-            availability: "Yes",
-            imageUrl: "assets/images/futsal_pitch.jpg",
-            onTap: () => _navigateToDetail(context, "Striker's Paradise"),
-          ),
-          FutsalCard(
-            name: "Football Factory",
-            location: "Balaju",
-            price: 1250,
-            availability: "Yes",
-            imageUrl: "assets/images/futsal_pitch.jpg",
-            onTap: () => _navigateToDetail(context, "Football Factory"),
-          ),
-          FutsalCard(
-            name: "Play Arena",
-            location: "Kalanki",
-            price: 1350,
-            availability: "No",
-            imageUrl: "assets/images/futsal_pitch.jpg",
-            onTap: () => _navigateToDetail(context, "Play Arena"),
-          ),
-          FutsalCard(
-            name: "Soccer Stars",
-            location: "Chabahil",
-            price: 1150,
-            availability: "Yes",
-            imageUrl: "assets/images/futsal_pitch.jpg",
-            onTap: () => _navigateToDetail(context, "Soccer Stars"),
-          ),
-        ],
-      ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              padding: const EdgeInsets.all(10),
+              itemCount: futsals.length,
+              itemBuilder: (context, index) {
+                final futsal = futsals[index];
+                return FutsalCard(
+                  name: futsal['futsalName'],
+                  location: futsal['location'],
+                  price: futsal['pricePerHour'],
+                  availability: "Yes", // You can update if backend sends availability too
+                  imageUrl: (futsal['images'] != null && futsal['images'].isNotEmpty)
+                      ? futsal['images'][0]
+                      : 'assets/images/futsal_pitch.jpg', // fallback if no image
+                  onTap: () => _navigateToDetail(context, futsal['_id']),
+                );
+              },
+            ),
     );
   }
 
-  void _navigateToDetail(BuildContext context, String futsalName) {
+  void _navigateToDetail(BuildContext context, String futsalId) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => FutsalDetailScreen(futsalName: futsalName),
+        builder: (context) => FutsalDetailScreen(futsalId: futsalId),
       ),
     );
   }
@@ -193,11 +165,12 @@ class FutsalCard extends StatelessWidget {
               const SizedBox(width: 10),
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
+                child: Image.network(
                   imageUrl,
                   width: 80,
                   height: 60,
                   fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image),
                 ),
               ),
             ],

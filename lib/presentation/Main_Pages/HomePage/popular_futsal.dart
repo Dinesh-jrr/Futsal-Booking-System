@@ -91,18 +91,18 @@ class PopularFutsalPage extends StatelessWidget {
             price: futsal["price"],
             availability: futsal["availability"],
             imageUrl: futsal["imageUrl"],
-            onTap: () => _navigateToDetail(context, futsal["name"]),
+            onTap: () => _navigateToDetail(context, futsal['_id']),
           );
         },
       ),
     );
   }
 
-  void _navigateToDetail(BuildContext context, String futsalName) {
+  void _navigateToDetail(BuildContext context, String futsalId) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => FutsalDetailScreen(futsalName: futsalName),
+        builder: (context) => FutsalDetailScreen(futsalId: futsalId),
       ),
     );
   }

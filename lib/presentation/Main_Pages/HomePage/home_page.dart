@@ -5,10 +5,8 @@ import 'package:player/core/config/constants.dart';
 import 'package:player/presentation/Main_Pages/Notifications/notification_page.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:player/core/theme/app_colors.dart';
-// import '../HomePage/popular_futsal.dart';
-// import '../HomePage/nearby_futsal.dart';
 import '../HomePage/futsal_detail_screen.dart';
-//setting up opponent finder
+import '../../Main_Pages/OppoentFinder/opponent_finder_page.dart'; // Add this import
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -69,7 +67,7 @@ class _HomePageState extends State<HomePage> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 300,
+            expandedHeight: 360,
             floating: false,
             pinned: true,
             automaticallyImplyLeading: false,
@@ -151,11 +149,10 @@ class _HomePageState extends State<HomePage> {
                         const SizedBox(width: 10),
                         Theme(
                           data: Theme.of(context).copyWith(
-                            canvasColor: Colors.white, // dropdown background
+                            canvasColor: Colors.white,
                             dialogTheme: DialogTheme(
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                    30), // rounded border for dropdown
+                                borderRadius: BorderRadius.circular(30),
                               ),
                             ),
                           ),
@@ -164,8 +161,7 @@ class _HomePageState extends State<HomePage> {
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(
-                                  30), // pill-shaped container
+                              borderRadius: BorderRadius.circular(30),
                               border:
                                   Border.all(color: Colors.green, width: 1.5),
                             ),
@@ -175,8 +171,7 @@ class _HomePageState extends State<HomePage> {
                                 hint: const Text("Search by"),
                                 icon: const Icon(Icons.arrow_drop_down,
                                     color: Colors.green),
-                                borderRadius: BorderRadius.circular(
-                                    30), // <-- for dropdown popup
+                                borderRadius: BorderRadius.circular(30),
                                 items: const [
                                   DropdownMenuItem(
                                       value: "name", child: Text("By Name")),
@@ -192,6 +187,37 @@ class _HomePageState extends State<HomePage> {
                         )
                       ],
                     ),
+                    const SizedBox(height: 16),
+                    GestureDetector(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const OpponentFinderPage()),
+                      ),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(14),
+                        margin: const EdgeInsets.only(top: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.green, width: 1.5),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: const [
+                            Text(
+                              "Find an Opponent",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green,
+                              ),
+                            ),
+                            Icon(Icons.sports_soccer, color: Colors.green),
+                          ],
+                        ),
+                      ),
+                    )
                   ],
                 ),
               ),
@@ -283,7 +309,7 @@ class _HomePageState extends State<HomePage> {
                   location: f['location'],
                   price: f['pricePerHour'],
                   imageUrl: f['images'].isNotEmpty ? f['images'][0] : "",
-                  onTap: () => _navigateToDetail(context, f['futsalName']),
+                  onTap: () => _navigateToDetail(context, f['_id']),
                 );
               },
             ),
@@ -293,11 +319,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _navigateToDetail(BuildContext context, String futsalName) {
+  void _navigateToDetail(BuildContext context, String futsalId) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => FutsalDetailScreen(futsalName: futsalName),
+        builder: (context) => FutsalDetailScreen(futsalId: futsalId),
       ),
     );
   }
