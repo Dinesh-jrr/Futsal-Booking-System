@@ -20,15 +20,17 @@ class Esewa {
   late String bookingId; // late so we can set after booking creation
   final double totalCost;
   final String userId;
+  final String futsalId;
 
   Esewa({
     required this.futsalName,
     required this.selectedDay,
     required this.selectedTimeSlot,
     required this.advancePayment,
-    required this.bookingId,
+    // required this.bookingId,
     required this.totalCost,
-    required this.userId,
+    required this.userId, 
+    required this.futsalId,
   });
 
   void pay(BuildContext context) {
@@ -120,99 +122,70 @@ class Esewa {
     }
   }
 
-  Future<void> createBookings(BuildContext context) async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString('auth_token');
+ Future<void> createBookings(BuildContext context) async {
+  try {
+    final bookingResponse = await http.post(
+      Uri.parse("${AppConfig.baseUrl}/api/bookings"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "futsalId": futsalId, // ✅ futsalId from constructor
+        "futsalName": futsalName,
+        "selectedDay": selectedDay.toIso8601String(),
+        "selectedTimeSlot": selectedTimeSlot,
+        "status": "partiallyPaid",
+        "totalCost": totalCost,
+        "advancePayment": advancePayment,
+        "userId": userId, // ✅ Already available inside class
+      }),
+    );
 
-      final userResponse = await http.get(
-        Uri.parse('${AppConfig.baseUrl}/api/users/me'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${token ?? ''}',
-        },
-      );
-
-      final userData = json.decode(userResponse.body);
-      final userId = userData['_id'];
-
-      final bookingResponse = await http.post(
-        Uri.parse("${AppConfig.baseUrl}/api/bookings"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "futsalName": futsalName,
-          "selectedDay": selectedDay.toIso8601String(),
-          "selectedTimeSlot": selectedTimeSlot,
-          "status": "partiallyPaid",
-          "totalCost": totalCost,
-          "advancePayment": advancePayment,
-          "userId": userId,
-        }),
-      );
-
-      if (bookingResponse.statusCode == 201) {
-        final bookingData = json.decode(bookingResponse.body);
-        if (bookingData.containsKey('booking')) {
-          bookingId = bookingData['booking']['_id'];
-          debugPrint("✅ Booking created: $bookingId");
-        } else {
-          debugPrint("❌ 'booking' key missing in response: ${bookingResponse.body}");
-        }
+    if (bookingResponse.statusCode == 201) {
+      final bookingData = json.decode(bookingResponse.body);
+      if (bookingData.containsKey('booking')) {
+        bookingId = bookingData['booking']['_id'];
+        debugPrint("✅ Booking created: $bookingId");
       } else {
-        debugPrint("❌ Booking creation failed: ${bookingResponse.statusCode}");
-        debugPrint("Response: ${bookingResponse.body}");
+        debugPrint("❌ 'booking' key missing in response: ${bookingResponse.body}");
       }
-    } catch (e) {
-      debugPrint("⚠️ Exception creating booking: $e");
+    } else {
+      debugPrint("❌ Booking creation failed: ${bookingResponse.statusCode}");
+      debugPrint("Response: ${bookingResponse.body}");
     }
+  } catch (e) {
+    debugPrint("⚠️ Exception creating booking: $e");
   }
+}
 
   Future<void> savePaymentHistory(BuildContext context, EsewaPaymentSuccessResult result) async {
-    try {
-      if (bookingId.isEmpty) {
-        debugPrint("❌ Booking ID is missing. Cannot save payment.");
-        return;
-      }
-
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString('auth_token');
-
-      final userResponse = await http.get(
-        Uri.parse('${AppConfig.baseUrl}/api/users/me'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${token ?? ''}',
-        },
-      );
-
-      final userBody = json.decode(userResponse.body);
-      final userId = userBody['_id'];
-
-      final paymentResponse = await http.post(
-        Uri.parse("${AppConfig.baseUrl}/api/payment/create"),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({
-          "user": userId,
-          "booking": bookingId,
-          "transactionUuid": result.refId,
-          "amount": advancePayment,
-          "status": "Pending",
-          "paymentGateway": "eSewa",
-        }),
-      );
-
-      if (paymentResponse.statusCode == 200 || paymentResponse.statusCode == 201) {
-        debugPrint("✅ Payment history saved successfully.");
-         // ➕ Show success screen
-  
-      } else {
-        debugPrint("❌ Failed to save payment. Code: ${paymentResponse.statusCode}");
-        debugPrint("Response body: ${paymentResponse.body}");
-      }
-    } catch (e) {
-      debugPrint("⚠️ Exception while saving payment history: $e");
+  try {
+    if (bookingId.isEmpty) {
+      debugPrint("❌ Booking ID is missing. Cannot save payment.");
+      return;
     }
+
+    final paymentResponse = await http.post(
+      Uri.parse("${AppConfig.baseUrl}/api/payment/create"),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "user": userId, // ✅ Already available inside class
+        "booking": bookingId,
+        "transactionUuid": result.refId,
+        "amount": advancePayment,
+        "status": "Pending",
+        "paymentGateway": "eSewa",
+      }),
+    );
+
+    if (paymentResponse.statusCode == 200 || paymentResponse.statusCode == 201) {
+      debugPrint("✅ Payment history saved successfully.");
+    } else {
+      debugPrint("❌ Failed to save payment. Code: ${paymentResponse.statusCode}");
+      debugPrint("Response body: ${paymentResponse.body}");
+    }
+  } catch (e) {
+    debugPrint("⚠️ Exception while saving payment history: $e");
   }
+}
 }

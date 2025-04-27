@@ -9,7 +9,7 @@ import 'package:player/core/theme/app_colors.dart';
 import 'package:player/presentation/Main_Pages/HomePage/book_now.dart';
 
 class FutsalDetailScreen extends StatefulWidget {
-  final String futsalId; // 🔥 Pass futsalId now, not futsalName
+  final String futsalId;
 
   const FutsalDetailScreen({Key? key, required this.futsalId}) : super(key: key);
 
@@ -24,6 +24,7 @@ class _FutsalDetailScreenState extends State<FutsalDetailScreen> {
 
   List<String> images = [];
   List<String> timeSlots = [];
+  Set<String> bookedSlots = {};
   String futsalName = '';
   String description = '';
   double price = 0;
@@ -34,6 +35,7 @@ class _FutsalDetailScreenState extends State<FutsalDetailScreen> {
   void initState() {
     super.initState();
     fetchFutsalDetails();
+    fetchBookedSlotsForDay();
   }
 
   Future<void> fetchFutsalDetails() async {
@@ -52,15 +54,15 @@ class _FutsalDetailScreenState extends State<FutsalDetailScreen> {
           timeSlots = List<String>.from(data['availableTimeSlots'] ?? []);
           description = data['description'] ?? '';
           price = (data['pricePerHour'] ?? 0).toDouble();
-         final coordinates = data['coordinates'];
-if (coordinates != null) {
-  futsalLocation = LatLng(
-    coordinates['lat'] ?? 27.7172,
-    coordinates['lng'] ?? 85.3240,
-  );
-} else {
-  futsalLocation = const LatLng(27.7172, 85.3240); // Default fallback Kathmandu
-}
+          final coordinates = data['coordinates'];
+          if (coordinates != null) {
+            futsalLocation = LatLng(
+              coordinates['lat'] ?? 27.7172,
+              coordinates['lng'] ?? 85.3240,
+            );
+          } else {
+            futsalLocation = const LatLng(27.7172, 85.3240);
+          }
           isLoading = false;
         });
       } else {
@@ -68,6 +70,26 @@ if (coordinates != null) {
       }
     } catch (e) {
       print('Error fetching futsal details: $e');
+    }
+  }
+
+  Future<void> fetchBookedSlotsForDay() async {
+    try {
+      final formattedDate = "${_selectedDay.year}-\${_selectedDay.month.toString().padLeft(2, '0')}-\${_selectedDay.day.toString().padLeft(2, '0')}";
+      final response = await http.get(
+        Uri.parse('${AppConfig.baseUrl}/api/bookedslots/${widget.futsalId}/$formattedDate'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          bookedSlots = Set<String>.from(data['bookedSlots'] ?? []);
+        });
+      } else {
+        print('Failed to load booked slots');
+      }
+    } catch (e) {
+      print('Error fetching booked slots: $e');
     }
   }
 
@@ -142,29 +164,15 @@ if (coordinates != null) {
                   itemCount: images.length,
                   itemBuilder: (context, index) {
                     return Image.network(
-  images[index],
-  width: double.infinity,
-  fit: BoxFit.cover,
-  errorBuilder: (context, error, stackTrace) {
-    return const Center(
-      child: Icon(Icons.broken_image, size: 120, color: Colors.grey)    );
-  },
-);
-
+                      images[index],
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const Center(
+                        child: Icon(Icons.broken_image, size: 120, color: Colors.grey),
+                      ),
+                    );
                   },
                 ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text(
-                      'See all',
-                      style: TextStyle(color: Colors.green),
-                    ),
-                  ),
-                ],
               ),
             ],
           );
@@ -181,36 +189,11 @@ if (coordinates != null) {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  RatingBarIndicator(
-                    rating: 4.5, // Example rating for now
-                    itemBuilder: (context, index) => const Icon(
-                      Icons.star,
-                      color: Colors.amber,
-                    ),
-                    itemCount: 5,
-                    itemSize: 24,
-                    direction: Axis.horizontal,
-                  ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    '4.5 (120 reviews)',
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
-                ],
-              ),
-              TextButton(
-                onPressed: () {},
-                child: const Text(
-                  'See all',
-                  style: TextStyle(color: Colors.green),
-                ),
-              ),
-            ],
+          RatingBarIndicator(
+            rating: 4.5,
+            itemBuilder: (context, _) => const Icon(Icons.star, color: Colors.amber),
+            itemCount: 5,
+            itemSize: 24,
           ),
         ],
       ),
@@ -223,15 +206,9 @@ if (coordinates != null) {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'About',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
+          const Text('About', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          Text(
-            description,
-            style: TextStyle(color: Colors.grey[600], height: 1.5),
-          ),
+          Text(description, style: TextStyle(color: Colors.grey[600], height: 1.5)),
         ],
       ),
     );
@@ -248,16 +225,11 @@ if (coordinates != null) {
           _selectedDay = selectedDay;
           _focusedDay = focusedDay;
         });
+        fetchBookedSlotsForDay();
       },
       calendarStyle: const CalendarStyle(
-        selectedDecoration: BoxDecoration(
-          color: Colors.green,
-          shape: BoxShape.circle,
-        ),
-        todayDecoration: BoxDecoration(
-          color: Colors.greenAccent,
-          shape: BoxShape.circle,
-        ),
+        selectedDecoration: BoxDecoration(color: Colors.green, shape: BoxShape.circle),
+        todayDecoration: BoxDecoration(color: Colors.greenAccent, shape: BoxShape.circle),
       ),
     );
   }
@@ -268,32 +240,29 @@ if (coordinates != null) {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Available Time Slots',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
+          const Text('Available Time Slots', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: timeSlots.map((time) {
+              final isBooked = bookedSlots.contains(time);
               final isSelected = _selectedTimeSlot == time;
+
               return InkWell(
-                onTap: () {
-                  setState(() {
-                    _selectedTimeSlot = time;
-                  });
-                },
+                onTap: isBooked ? null : () => setState(() => _selectedTimeSlot = time),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isSelected ? Colors.green : Colors.white,
-                    border: Border.all(color: Colors.green),
+                    color: isBooked ? Colors.grey[300] : (isSelected ? Colors.green : Colors.white),
+                    border: Border.all(color: isBooked ? Colors.grey : Colors.green),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     time,
-                    style: TextStyle(color: isSelected ? Colors.white : Colors.green),
+                    style: TextStyle(
+                      color: isBooked ? Colors.grey : (isSelected ? Colors.white : Colors.green),
+                    ),
                   ),
                 ),
               );
@@ -310,34 +279,26 @@ if (coordinates != null) {
       child: ElevatedButton(
         onPressed: _selectedTimeSlot == null
             ? null
-            : () {
-                Navigator.push(
+            : () => Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => BookNow(
+                      futsalId: widget.futsalId,
                       futsalName: futsalName,
                       selectedDay: _selectedDay,
-                      selectedTimeSlot: _selectedTimeSlot,
+                      selectedTimeSlot: _selectedTimeSlot!,
                       totalCost: price,
                     ),
                   ),
-                );
-              },
+                ),
         style: ElevatedButton.styleFrom(
           backgroundColor: _selectedTimeSlot == null ? Colors.grey : AppColors.primary,
           padding: const EdgeInsets.symmetric(vertical: 24.0),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.0),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
         ),
         child: const Text(
           "Book Now",
-          style: TextStyle(
-            fontFamily: 'Roboto',
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
     );

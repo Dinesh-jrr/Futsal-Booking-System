@@ -81,6 +81,7 @@ class BookNow extends StatelessWidget {
   final DateTime selectedDay;
   final String? selectedTimeSlot;
   final double totalCost;
+  final String futsalId;
   // final String userId;
 
   const BookNow({
@@ -89,6 +90,7 @@ class BookNow extends StatelessWidget {
     required this.selectedDay,
     required this.selectedTimeSlot,
     required this.totalCost,
+    required this.futsalId,
     // required this.userId,
   });
 
@@ -219,7 +221,7 @@ class BookNow extends StatelessWidget {
                 // }
 
                 // You might want to generate a booking ID here (if needed) or send to backend to get it
-                final bookingId = "booking-${DateTime.now().millisecondsSinceEpoch}";
+                // final bookingId = "booking-${DateTime.now().millisecondsSinceEpoch}";
                 SharedPreferences prefs = await SharedPreferences.getInstance();
                 String? token = prefs.getString('auth_token');
                 print("calling/users/me");
@@ -238,12 +240,13 @@ class BookNow extends StatelessWidget {
 
                 // ✅ Now proceed with payment
                 Esewa esewa = Esewa(
+                  // bookingId: bookingId,
                   futsalName: futsalName,
                   selectedDay: selectedDay,
                   selectedTimeSlot: selectedTimeSlot,
                   advancePayment: advancePayment,
                   userId: userId,
-                  bookingId: bookingId,
+                  futsalId:futsalId,
                   totalCost: totalCost,
                   // userId: userId,
                 );
