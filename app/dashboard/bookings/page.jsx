@@ -1,11 +1,11 @@
 
 "use client"
-import AdminBookingListings from "@/components/AdminBookingListing"
+import OwnerBookingPage from "@/components/OwnerBookings"
 export default function Home() {
   return (
     <div className="p-8">
 
-      <AdminBookingListings/>
+      <OwnerBookingPage/>
      
     </div>
   );

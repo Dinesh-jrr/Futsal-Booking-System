@@ -23,7 +23,7 @@ export default function Header() {
       if (!session?.user?.id) return;
 
       try {
-        const response = await fetch(`http://localhost:5000/api/notification/${session.user.id}`);
+        const response = await fetch(`http://localhost:5000/api/notification/notifications/${session.user.id}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

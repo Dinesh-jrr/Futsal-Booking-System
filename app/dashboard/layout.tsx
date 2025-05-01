@@ -2,6 +2,7 @@ import ClientProviders from '@/components/ClientProvider';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import ClientOnly from '@/components/ClientOnly';
+import { Toaster } from 'sonner';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (

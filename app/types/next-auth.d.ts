@@ -4,12 +4,15 @@ export interface Conversation {
     id: String;
     name: string;
     lastMessage: string;
+    avatar?: string;
+    unreadCount : number;
   }
   
   export interface Message {
     sender: string;
     content: string;
     timestamp: string;
+    type?: 'text' | 'voice' | 'file';
   }
   
   import { DefaultSession, DefaultUser } from "next-auth";

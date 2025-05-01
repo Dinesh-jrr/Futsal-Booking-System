@@ -1,11 +1,11 @@
 
 "use client"
-import AdminPaymentListings from "@/components/AdminPaymentListing"
+import OwnerPaymentPage from "@/components/OwnerPayment"
 export default function Home() {
   return (
     <div className="p-8">
 
-      <AdminPaymentListings/>
+      <OwnerPaymentPage/>
      
     </div>
   );

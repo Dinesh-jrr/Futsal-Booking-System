@@ -6,10 +6,10 @@ import { signIn, getSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { toast } from "sonner"; // ✅ Sonner toast
 
 export default function LoginPage() {
   const router = useRouter();
-  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -28,51 +28,46 @@ export default function LoginPage() {
       });
 
       if (res?.error) {
-        setError(res.error);
+        toast.error(res.error || "Invalid credentials");
       } else {
         const session = await getSession();
         //@ts-ignore
         const role = session?.user?.role;
         //@ts-ignore
         const ownerId = session?.user?.id;
-        console.log(ownerId);
 
         if (role === "admin") {
+          toast.success("Welcome, Admin!");
           router.push("/admin");
-          console.log("checking...");
         } else if (role === "futsal_owner") {
-          console.log("on it");
+          toast.success("Welcome, Owner!");
           const checkRes = await fetch(
             `http://localhost:5000/api/by-owner?ownerId=${ownerId}`
           );
-          console.log("CheckRes OK:", checkRes.ok);
           const futsalData = await checkRes.json();
-          console.log("FutsalData:", futsalData);
 
-          console.log(futsalData)
           if (checkRes.ok && futsalData?.futsal) {
-            const status = futsalData.futsal.status;  
-            console.log("Owner ID:", ownerId);
+            const status = futsalData.futsal.status;
 
- 
             if (status === "approved") {
               router.push("/dashboard");
             } else if (status === "pending" || status === "rejected") {
-              router.push("/futsalstatus"); // hold message page
+              toast.info("Futsal is under review or rejected.");
+              router.push("/futsalstatus");
             }
           } else {
+            toast("No futsal found. Let's get started!");
             router.push("/createfutsal");
           }
-          
         } else if (role === "user") {
-          setError("Invalid login for this platform.");
+          toast.error("Unauthorized: User access not allowed here.");
         } else {
-          setError("Unknown role. Contact support.");
+          toast.error("Unknown role. Please contact support.");
         }
       }
     } catch (error) {
       console.error(error);
-      setError("Something went wrong");
+      toast.error("Something went wrong during login");
     } finally {
       setIsLoading(false);
     }
@@ -96,9 +91,6 @@ export default function LoginPage() {
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <p className="text-red-500 text-sm text-center">{error}</p>
-          )}
           <div className="rounded-md shadow-sm space-y-4">
             <div>
               <Input
@@ -131,7 +123,7 @@ export default function LoginPage() {
           </div>
         </form>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link
             href="/signup"
             className="font-medium text-primary hover:text-primary/80"

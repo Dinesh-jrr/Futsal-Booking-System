@@ -22,7 +22,7 @@ export default function NotificationsPage() {
 
     async function fetchNotifications() {
       try {
-        const response = await fetch(`http://localhost:5000/api/notification/${userId}`);
+        const response = await fetch(`http://localhost:5000/api/notification/notifications/${userId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch notifications');
         }

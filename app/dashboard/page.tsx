@@ -1,7 +1,8 @@
 'use client'
+
 import Header from "@/components/Header";
 import UsersTable from "@/components/UsersTable";
-import AdminBookingListing from "@/components/AdminBookingListing";
+import OwnerBookingListing from "@/components/OwnerBookings";
 import Image from "next/image";
 
 export default function Home() {
@@ -21,41 +22,29 @@ export default function Home() {
     <div className="p-6 grid grid-cols-1 lg:grid-cols-[2fr_0.8fr] gap-6">
       {/* Main Content */}
       <div className="space-y-6">
+        {/* Section Heading */}
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800 mb-1">Dashboard Overview</h1>
+          <p className="text-sm text-gray-500 mb-4">Overview of bookings and revenue.</p>
+        </div>
+
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white p-4 rounded-xl shadow flex items-center justify-between">
-            <div>
-              <h3 className="text-sm text-gray-500">Total Players</h3>
-              <p className="text-xl font-bold">350</p>
-            </div>
-            <div className="text-blue-500">
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 2a8 8 0 100 16 8 8 0 000-16zM8 9a2 2 0 114 0 2 2 0 01-4 0zm4 4H8a4 4 0 018 0z" clipRule="evenodd" /></svg>
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-xl shadow flex items-center justify-between">
-            {/* <div>
-              <h3 className="text-sm text-gray-500">Total Futsals</h3>
-              <p className="text-xl font-bold">3</p>
-            </div> */}
-            <div className="text-green-500">
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M3 3h14a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z" /></svg>
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-xl shadow flex items-center justify-between">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+          <div className="bg-white p-4 rounded-xl shadow hover:shadow-md transition duration-200 flex items-center justify-between">
             <div>
               <h3 className="text-sm text-gray-500">Total Bookings</h3>
-              <p className="text-xl font-bold">87</p>
+              <p className="text-2xl font-bold text-gray-800">87</p>
             </div>
-            <div className="text-purple-500">
+            <div className="bg-purple-100 p-2 rounded-full text-purple-600">
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a1 1 0 00-1 1v1h12V4a1 1 0 00-1-1H5zm11 4H4v9a1 1 0 001 1h10a1 1 0 001-1V7z" /></svg>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-xl shadow flex items-center justify-between">
+          <div className="bg-white p-4 rounded-xl shadow hover:shadow-md transition duration-200 flex items-center justify-between">
             <div>
               <h3 className="text-sm text-gray-500">Total Revenue</h3>
-              <p className="text-xl font-bold">Rs. 150,000</p>
+              <p className="text-2xl font-bold text-gray-800">Rs. 150,000</p>
             </div>
-            <div className="text-yellow-500">
+            <div className="bg-yellow-100 p-2 rounded-full text-yellow-600">
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M11 17a1 1 0 01-1-1V5a1 1 0 112 0v11a1 1 0 01-1 1z" /></svg>
             </div>
           </div>
@@ -64,7 +53,7 @@ export default function Home() {
         {/* Booking Table */}
         <div className="bg-white p-6 rounded-xl shadow">
           <h2 className="text-lg font-semibold mb-4">Recent Bookings</h2>
-          <AdminBookingListing />
+          <OwnerBookingListing />
         </div>
       </div>
 

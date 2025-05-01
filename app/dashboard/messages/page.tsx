@@ -1,22 +1,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import socket from '../../socket';
 import { Conversation, Message } from '../../types/next-auth';
+import { FaPaperclip, FaSmile, FaMicrophone, FaSearch } from 'react-icons/fa';
+import { FiSend } from 'react-icons/fi';
 
 export default function MessagesPage() {
-  const router = useRouter();
   const { data: session, status } = useSession();
+  const router = useRouter();
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState<string>('');
-  const [isTyping, setIsTyping] = useState<boolean>(false);
+  const [newMessage, setNewMessage] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
 
-  // Fetch conversations and fix _id mapping
   useEffect(() => {
     if (session?.user?.id) {
       fetch(`http://localhost:5000/api/chat/conversation?userId=${session.user.id}`)
@@ -25,136 +26,96 @@ export default function MessagesPage() {
           const mapped = (data.conversations || []).map((conv: any) => ({
             id: conv._id,
             name: conv.name,
+            avatar: conv.avatar || '/default-avatar.png',
             lastMessage: conv.lastMessage,
+            unreadCount: conv.unreadCount || 0,
           }));
           setConversations(mapped);
-        })
-        .catch(err => console.error('Failed to load conversations:', err));
+        });
     }
   }, [session]);
 
-  // Set up socket listeners
   useEffect(() => {
     if (status === 'loading') return;
+    if (!session?.user?.id) return;
 
-    const userId = session?.user?.id;
-    if (userId) {
-      if (!socket.connected) socket.connect();
+    socket.connect();
+    socket.emit('join', session.user.id);
 
-      socket.emit('join', userId);
+    socket.on('newMessage', (msg: any) => {
+      if (selectedConversation && (msg.sender === selectedConversation.id || msg.receiver === selectedConversation.id)) {
+        const formatted: Message = {
+          sender: msg.sender === session.user.id ? 'You' : selectedConversation.name,
+          content: msg.message,
+          type: msg.type || 'text',
+          timestamp: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        };
+        setMessages(prev => [...prev, formatted]);
+      }
+    });
 
-      socket.on('newMessage', (message: any) => {
-        const isParticipant =
-          selectedConversation &&
-          (message.sender === selectedConversation.id || message.receiver === selectedConversation.id);
-
-        if (isParticipant) {
-          const formatted: Message = {
-            sender: message.sender === session?.user?.id ? 'You' : selectedConversation.name,
-            content: message.message,
-            timestamp: new Date(message.createdAt || Date.now()).toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            }),
-          };
-          setMessages(prev => [...prev, formatted]);
-        }
-      });
-
-      socket.on('typing', ({ senderId }) => {
-        if (selectedConversation && senderId === selectedConversation.id) {
-          setIsTyping(true);
-          setTimeout(() => setIsTyping(false), 2000);
-        }
-      });
-    }
+    socket.on('typing', ({ senderId }) => {
+      if (selectedConversation && senderId === selectedConversation.id) {
+        setIsTyping(true);
+        setTimeout(() => setIsTyping(false), 2000);
+      }
+    });
 
     return () => {
       socket.off('newMessage');
       socket.off('typing');
     };
-  }, [session, status, selectedConversation]);
+  }, [selectedConversation, session]);
 
-  // When selecting a conversation
   const handleConversationSelect = async (conv: Conversation) => {
-    if (!conv?.id || !session?.user?.id) {
-      console.error('Missing conv.id or session.user.id');
-      return;
-    }
-
     setSelectedConversation(conv);
     setMessages([]);
     setIsTyping(false);
     setNewMessage('');
 
-    try {
-      const res = await fetch(
-        `http://localhost:5000/api/chat/chat-history?userId1=${session.user.id}&userId2=${conv.id}`
-      );
-      const data = await res.json();
+    const res = await fetch(`http://localhost:5000/api/chat/chat-history?userId1=${session?.user?.id}&userId2=${conv.id}`);
+    const data = await res.json();
 
-      const formatted = (data.data || []).map((msg: any) => ({
-        sender: msg.sender._id === session.user.id ? 'You' : conv.name,
-        content: msg.message,
-        timestamp: new Date(msg.createdAt).toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
-      }));
+    const formatted = (data.data || []).map((msg: any) => ({
+      sender: msg.sender._id === session?.user?.id ? 'You' : conv.name,
+      content: msg.message,
+      type: msg.type || 'text',
+      timestamp: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    }));
 
-      setMessages(formatted);
-
-      await fetch('http://localhost:5000/api/chat/chat-history', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ senderId: session.user.id , receiverId: conv.id }),
-      });
-    } catch (err) {
-      console.error('Failed to load messages:', err);
-    }
+    setMessages(formatted);
   };
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedConversation) return;
 
-    const timestamp = new Date().toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-
-    const messageData: Message = {
-      sender: 'You',
-      content: newMessage,
-      timestamp,
-    };
-
-    setMessages(prev => [...prev, messageData]);
-
-    socket.emit('sendMessage', {
+    const msg = {
       senderId: session?.user?.id,
       receiverId: selectedConversation.id,
       message: newMessage,
+    };
+
+    setMessages(prev => [
+      ...prev,
+      {
+        sender: 'You',
+        content: newMessage,
+        type: 'text',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      },
+    ]);
+
+    socket.emit('sendMessage', msg);
+
+    await fetch('http://localhost:5000/api/chat/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(msg),
     });
 
-    try {
-      await fetch('http://localhost:5000/api/chat/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          senderId: session?.user?.id,
-          receiverId: selectedConversation.id,
-          message: newMessage,
-        }),
-      });
-    } catch (error) {
-      console.error('Failed to save message:', error);
-    }
-
     setNewMessage('');
-    setIsTyping(false);
   };
 
-  // Typing indicator
   useEffect(() => {
     if (selectedConversation && newMessage.trim()) {
       socket.emit('typing', {
@@ -165,83 +126,98 @@ export default function MessagesPage() {
   }, [newMessage]);
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Conversations Panel */}
-      <div className="w-80 bg-white border-r overflow-y-auto p-4">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Chats</h2>
-          <button
-            onClick={() => router.push('/admin')}
-            className="text-sm text-green-600 hover:underline"
-          >
-            Back
-          </button>
-        </div>
-
-        {conversations.map((conv) => (
+    <div className="flex h-screen">
+      {/* Sidebar */}
+      <aside className="w-80 bg-white border-r p-4 overflow-y-auto">
+        <h2 className="text-2xl font-bold mb-4">Inbox</h2>
+        {conversations.map(conv => (
           <div
-            key={String(conv.id)}
+          key={conv.id.toString()}
             onClick={() => handleConversationSelect(conv)}
-            className={`p-3 rounded-lg cursor-pointer hover:bg-gray-300 text-black ${
-              String(selectedConversation?.id) === String(conv.id) ? 'bg-green-100' : ''
+            className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-gray-100 ${
+              selectedConversation?.id === conv.id ? 'bg-green-100' : ''
             }`}
           >
-            <h3 className="font-semibold">{conv.name}</h3>
-            <p className="text-sm text-gray-700 truncate">{conv.lastMessage}</p>
+            <img src={conv.avatar} alt={conv.name} className="w-12 h-12 rounded-full" />
+            <div className="flex-1">
+              <h4 className="font-semibold">{conv.name}</h4>
+              <p className="text-gray-500 text-sm truncate">{conv.lastMessage}</p>
+            </div>
+            {(conv.unreadCount ?? 0) > 0 && (
+  <span className="bg-green-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+    {conv.unreadCount}
+  </span>
+)}
           </div>
         ))}
-      </div>
+      </aside>
 
-      {/* Chat Panel */}
-      <div className="flex-1 flex flex-col">
-        <div className="px-6 py-4 border-b bg-green-200 text-black flex items-center justify-between">
-          <h2 className="text-lg font-bold">
-            {selectedConversation?.name || 'Select a conversation'}
-          </h2>
-        </div>
-
-        <div className="flex-1 px-6 py-4 overflow-y-auto space-y-4 flex flex-col bg-gray-50">
-          {messages.map((msg, index) => (
-            <div
-              key={index}
-              className={`max-w-xs px-4 py-2 rounded-2xl text-sm ${
-                msg.sender === 'You'
-                  ? 'bg-green-500 text-white self-end'
-                  : 'bg-gray-200 text-gray-800 self-start'
-              }`}
-            >
-              <p>{msg.content}</p>
-              <p className="text-xs mt-1 text-right opacity-70">{msg.timestamp}</p>
-            </div>
-          ))}
-
-          {isTyping && selectedConversation && (
-            <div className="text-sm italic text-gray-500 self-start">
-              {selectedConversation.name} is typing...
-            </div>
+      {/* Chat Area */}
+      <main className="flex-1 flex flex-col bg-gray-50">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b bg-white">
+          {selectedConversation ? (
+            <>
+              <div className="flex items-center gap-3">
+                <img src={selectedConversation.avatar} className="w-10 h-10 rounded-full" />
+                <div>
+                  <h3 className="font-bold">{selectedConversation.name}</h3>
+                  <p className="text-xs text-green-500">Online</p>
+                </div>
+              </div>
+              <FaSearch className="text-gray-500" />
+            </>
+          ) : (
+            <p className="text-gray-400">Select a conversation</p>
           )}
         </div>
 
-        {selectedConversation && (
-          <div className="p-4 border-t bg-white">
-            <div className="flex items-center space-x-2">
-              <input
-                type="text"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Type a message..."
-                className="flex-1 px-4 py-2 border rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500 text-black"
-              />
-              <button
-                onClick={handleSendMessage}
-                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full"
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {messages.map((msg, i) => (
+            <div
+              key={i}
+              className={`flex flex-col max-w-sm ${
+                msg.sender === 'You' ? 'self-end items-end' : 'self-start items-start'
+              }`}
+            >
+              <div
+                className={`px-4 py-2 rounded-2xl text-sm ${
+                  msg.sender === 'You' ? 'bg-green-500 text-white' : 'bg-gray-200 text-black'
+                }`}
               >
-                Send
-              </button>
+                {msg.type === 'text' && <p>{msg.content}</p>}
+                {msg.type === 'voice' && <audio controls src={msg.content} className="w-full" />}
+                {msg.type === 'file' && (
+                  <a href={msg.content} target="_blank" rel="noopener noreferrer" className="underline">
+                    Download file
+                  </a>
+                )}
+              </div>
+              <span className="text-xs text-gray-500 mt-1">{msg.timestamp}</span>
             </div>
+          ))}
+          {isTyping && <p className="italic text-gray-400">Typing...</p>}
+        </div>
+
+        {/* Input */}
+        {selectedConversation && (
+          <div className="p-4 border-t bg-white flex items-center gap-3">
+            <FaSmile className="text-gray-500" />
+            <FaPaperclip className="text-gray-500" />
+            <input
+              type="text"
+              value={newMessage}
+              onChange={e => setNewMessage(e.target.value)}
+              placeholder="Write a message..."
+              className="flex-1 px-4 py-2 bg-gray-100 rounded-full outline-none"
+            />
+            <button onClick={handleSendMessage} className="bg-green-500 p-2 rounded-full text-white">
+              <FiSend />
+            </button>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

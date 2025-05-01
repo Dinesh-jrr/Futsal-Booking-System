@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 
-export default function AdminPaymentListings() {
+export default function OwnerPaymentListings() {
+  const { data: session } = useSession();
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -12,46 +14,43 @@ export default function AdminPaymentListings() {
   const [itemsPerPage] = useState(10);
 
   useEffect(() => {
+    const fetchPayments = async () => {
+      if (!session?.user?.id) return;
+
+      try {
+        const res = await fetch(`http://localhost:5000/api/payment/owner/${session.user.id}`);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const data = await res.json();
+        setPayments(data.payments || []);
+      } catch (err) {
+        console.error("Failed to fetch owner payments:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchPayments();
-  }, []);
+  }, [session]);
 
-  const fetchPayments = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/api/payment/getAllPayments");
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      const data = await res.json();
-      setPayments(data.payments);
-    } catch (err) {
-      console.error("Failed to fetch payments:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleViewDetails = (payment) => {
-    setCurrentPayment(payment);
-    setShowModal(true);
-  };
-
-  const filteredPayments = payments.filter((p) =>
+  const filtered = payments.filter((p) =>
     p.user?.name?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const paginated = filteredPayments.slice((page - 1) * itemsPerPage, page * itemsPerPage);
-  const totalPages = Math.ceil(filteredPayments.length / itemsPerPage);
+  const paginated = filtered.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
 
   return (
     <div className="p-4 text-sm">
       <div className="mb-4 flex justify-between items-center px-2 gap-3">
-        <h1 className="text-sm font-semibold text-gray-700 rounded-md px-3 py-1 shadow-sm bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
-          Payments Management
+        <h1 className="text-sm font-semibold text-gray-700 rounded-md px-3 py-1 shadow-sm bg-gradient-to-r from-purple-400 to-pink-400">
+          My Futsal Payments
         </h1>
         <input
           type="text"
           placeholder="Search by user name"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="text-sm font-semibold text-gray-700 border border-indigo-400 rounded-md px-3 py-1 shadow-sm"
+          className="text-sm font-semibold text-gray-700 border border-purple-400 rounded-md px-3 py-1 shadow-sm"
         />
       </div>
 
@@ -63,7 +62,7 @@ export default function AdminPaymentListings() {
             <thead className="bg-gray-100">
               <tr>
                 <th className="px-3 py-2">Transaction ID</th>
-                <th className="px-3 py-2">Name</th>
+                <th className="px-3 py-2">User</th>
                 <th className="px-3 py-2">Email</th>
                 <th className="px-3 py-2">Amount (NPR)</th>
                 <th className="px-3 py-2">Status</th>
@@ -99,7 +98,7 @@ export default function AdminPaymentListings() {
                     <td className="px-3 py-2">{payment.paymentGateway}</td>
                     <td className="px-3 py-2 text-right">
                       <button
-                        onClick={() => handleViewDetails(payment)}
+                        onClick={() => setCurrentPayment(payment) || setShowModal(true)}
                         className="bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200 text-xs"
                       >
                         View
@@ -115,20 +114,18 @@ export default function AdminPaymentListings() {
 
       {/* Pagination */}
       <div className="flex justify-between items-center text-xs mt-4">
-        <span className="text-gray-600">
-          Page {page} of {totalPages}
-        </span>
+        <span className="text-gray-600">Page {page} of {totalPages}</span>
         <div className="space-x-2">
           <button
             onClick={() => setPage((p) => Math.max(p - 1, 1))}
-            className="text-sm font-semibold text-gray-700 border border-indigo-400 rounded-md px-3 py-1 shadow-sm"
+            className="text-sm font-semibold text-gray-700 border border-purple-400 rounded-md px-3 py-1 shadow-sm"
           >
             Previous
           </button>
           <button
             onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
             disabled={page === totalPages}
-            className="text-sm font-semibold text-gray-700 border border-indigo-400 rounded-md px-3 py-1 shadow-sm"
+            className="text-sm font-semibold text-gray-700 border border-purple-400 rounded-md px-3 py-1 shadow-sm"
           >
             Next
           </button>
