@@ -34,7 +34,7 @@ class _NotificationPageState extends State<NotificationPage> {
 
   Future<void> fetchNotifications() async {
     setState(() => isLoading = true);
-    final response = await http.get(Uri.parse('${AppConfig.baseUrl}/api/notifications/$userId'));
+    final response = await http.get(Uri.parse('${AppConfig.baseUrl}/api/notification/notifications/$userId'));
     if (response.statusCode == 200) {
       setState(() {
         notifications = json.decode(response.body);
@@ -88,41 +88,45 @@ class _NotificationPageState extends State<NotificationPage> {
           ? const Center(child: CircularProgressIndicator())
           : notifications.isEmpty
               ? const Center(child: Text("No notifications yet"))
-              : ListView.builder(
-                  itemCount: notifications.length,
-                  itemBuilder: (context, index) {
-                    final notif = notifications[index];
-                    return Card(
-                      color: notif['isRead'] ? Colors.white : Colors.green.shade50,
-                      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      child: ListTile(
-                        title: Text(notif['title'], style: const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(notif['message']),
-                            const SizedBox(height: 4),
-                            Text(formatDate(notif['createdAt']), style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                          ],
-                        ),
-                        trailing: Column(
-                          children: [
-                            if (!notif['isRead'])
-                              IconButton(
-                                icon: const Icon(Icons.mark_email_read, color: Colors.blue),
-                                tooltip: 'Mark as Read',
-                                onPressed: () => markAsRead(notif['_id']),
-                              ),
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              tooltip: 'Delete',
-                              onPressed: () => deleteNotification(notif['_id']),
+              : SingleChildScrollView( // Make the content scrollable
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0), // Add padding to avoid content touching screen edges
+                    child: Column(
+                      children: List.generate(notifications.length, (index) {
+                        final notif = notifications[index];
+                        return Card(
+                          color: notif['isRead'] ? Colors.white : Colors.green.shade50,
+                          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          child: ListTile(
+                            title: Text(notif['title'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(notif['message']),
+                                const SizedBox(height: 4),
+                                Text(formatDate(notif['createdAt']), style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
+                            trailing: Column(
+                              children: [
+                                if (!notif['isRead'])
+                                  IconButton(
+                                    icon: const Icon(Icons.mark_email_read, color: Colors.blue),
+                                    tooltip: 'Mark as Read',
+                                    onPressed: () => markAsRead(notif['_id']),
+                                  ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete, color: Colors.red),
+                                  tooltip: 'Delete',
+                                  onPressed: () => deleteNotification(notif['_id']),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
                 ),
     );
   }
