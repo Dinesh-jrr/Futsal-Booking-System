@@ -24,7 +24,7 @@ router.get("/by-owner", checkFutsalByOwner);
 router.get('/getOnefutsal/:futsalId', getFutsalById);
 
 // Update a futsal by ID
-router.put('/futsals/update:futsalId', updateFutsal);
+router.put('/futsals/update/:futsalId', updateFutsal);
 
 // Delete a futsal by ID
 router.delete('/futsals/delete:futsalId', deleteFutsal);

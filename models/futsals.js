@@ -7,7 +7,7 @@ const futsalSchema = new mongoose.Schema({
     lat: { type: Number },
     lng: { type: Number }
   },
-  ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true },
+  ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   pricePerHour: { type: Number, required: true },
   availableTimeSlots: [{ type: String, required: true }],
   contactNumber: { type: String, required: true },

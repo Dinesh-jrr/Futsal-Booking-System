@@ -1,4 +1,4 @@
-const admin = require("../firebase"); // ✅ Import from your firebase.js
+const admin = require("../firebase");
 const Token = require("../models/token");
 const Notification = require("../models/notifications");
 
@@ -11,14 +11,28 @@ const sendNotification = async (userId, title, message) => {
     }
 
     const payload = {
+      token: tokenDoc.fcmToken,
       notification: {
-        title,
+        title: title,
         body: message,
       },
-      token: tokenDoc.fcmToken,
+      data: {
+        click_action: 'FLUTTER_NOTIFICATION_CLICK',
+        status: 'done',
+      },
+      android: {
+        priority: "high",
+      },
+      apns: {
+        payload: {
+          aps: {
+            contentAvailable: true,
+          },
+        },
+      },
     };
 
-    await admin.messaging().send(payload); // ✅ will now work
+    await admin.messaging().send(payload);
     await Notification.create({ userId, title, message });
 
     console.log("✅ Push notification sent & saved.");

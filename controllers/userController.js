@@ -122,6 +122,28 @@ exports.loginUser = async (req, res) => {
   }
 };
 
+// Controller function to fetch user details by userId
+exports.getUserDetails = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Find the user in the database by userId
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Return user details (you can modify what data you want to send back)
+    res.status(200).json({ success: true, user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
+
 // Get current user
 exports.getCurrentUser = async (req, res) => {
   try {
@@ -236,36 +258,74 @@ exports.sendOtpToEmail = async (req, res) => {
   }
 };
 
-// update profile
+
+// Controller to update user profile
 exports.updateUserProfile = async (req, res) => {
-  const userId = req.user.id;
-  const { name, email, phoneNumber, profileImage } = req.body;
-
   try {
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      {
-        name,
-        email,
-        phoneNumber,
-        ...(profileImage && { profileImage }), // Only include if present
-      },
-      { new: true }
-    );
+    const { userId } = req.params;  // Extract userId from the URL
 
-    if (!updatedUser) {
+    // Find the user by userId
+    const user = await User.findById(userId);
+    if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    res.status(200).json({
-      success: true,
-      message: 'Profile updated successfully',
-      data: updatedUser,
-    });
-  } catch (error) {
-    console.error('Profile update error:', error);
-    res.status(500).json({ success: false, message: 'Something went wrong' });
+    // Update the user details with the provided data from the request body
+    const updatedData = req.body;
+    for (let key in updatedData) {
+      if (updatedData[key] !== undefined) {
+        user[key] = updatedData[key];
+      }
+    }
+
+    // Save the updated user
+    await user.save();
+
+    // Send the updated user data as a response
+    res.status(200).json({ success: true, user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
+//update password change
+exports.changePassword = async (req, res) => {
+  try {
+    const { userId } = req.params;  // Extract userId from the URL, or get it from session if needed
+    const { currentPassword, newPassword } = req.body;
 
+    // Find the user by userId
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Check if the current password matches
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: 'Current password is incorrect' });
+    }
+
+    // Validate the new password (optional - can be customized)
+    if (newPassword === currentPassword) {
+      return res.status(400).json({ success: false, message: 'New password must be different from the current password' });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update the user's password
+    user.password = hashedPassword;
+
+    // Save the updated user
+    await user.save();
+
+    // Send the updated user data as a response (excluding password)
+    res.status(200).json({ success: true, message: 'Password changed successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};

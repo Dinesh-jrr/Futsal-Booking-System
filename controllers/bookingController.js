@@ -6,6 +6,7 @@ const sendNotification = require('../utils/sendNotification');
 exports.createBooking = async (req, res) => {
   try {
     const {
+      futsalId,       // ✅ ADD THIS !!
       futsalName,
       selectedDay,
       selectedTimeSlot,
@@ -16,6 +17,7 @@ exports.createBooking = async (req, res) => {
 
     // 1. Save booking to DB
     const newBooking = new Booking({
+      futsalId,        // ✅ PASS futsalId properly
       futsalName,
       selectedDay,
       selectedTimeSlot,
@@ -30,9 +32,8 @@ exports.createBooking = async (req, res) => {
     const title = "Booking Confirmed!";
     const message = `Your booking for ${futsalName} on ${selectedDay} at ${selectedTimeSlot} has been confirmed.`;
 
-    const actualUserId = updatedBooking.userId._id || updatedBooking.userId;
+    const actualUserId = savedBooking.userId._id || savedBooking.userId;  // ✅ Typo corrected, use savedBooking not updatedBooking
     await sendNotification(actualUserId, title, message);
-
 
     // 3. Return response
     res.status(201).json({
@@ -48,6 +49,7 @@ exports.createBooking = async (req, res) => {
     });
   }
 };
+
 
 // Get all bookings for a user
 exports.getUserBookings = async (req, res) => {
@@ -162,35 +164,36 @@ exports.cancelBooking = async (req, res) => {
 };
 
 // ✅ Update a booking
-exports.updateBooking = async (req, res) => {
-  try {
-    const bookingId = req.params.bookingId;
-    const updateData = req.body;
+// exports.updateBooking = async (req, res) => {
+//   try {
+//     const bookingId = req.params.bookingId;
+//     const updateData = req.body;
 
-    const updatedBooking = await Booking.findByIdAndUpdate(bookingId, updateData, {
-      new: true,
-    });
+//     const updatedBooking = await Booking.findByIdAndUpdate(bookingId, updateData, {
+//       new: true,
+//     });
 
-    if (!updatedBooking) {
-      return res.status(404).json({ message: 'Booking not found' });
-    }
+//     if (!updatedBooking) {
+//       return res.status(404).json({ message: 'Booking not found' });
+//     }
 
-    res.status(200).json({
-      message: 'Booking updated successfully!',
-      booking: updatedBooking,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: 'Error updating booking',
-      error: error.message,
-    });
-  }
-};
+//     res.status(200).json({
+//       message: 'Booking updated successfully!',
+//       booking: updatedBooking,
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       message: 'Error updating booking',
+//       error: error.message,
+//     });
+//   }
+// };
 
 //approve booking
 exports.approveBooking = async (req, res) => {
+  console.log('🚀 Approve booking endpoint hit from frontend');
   try {
-    console.log("🔍 inside approveBooking"); // Add for debugging
+    console.log("🔍 inside approveBooking");
 
     const bookingId = req.params.bookingId;
 
@@ -198,19 +201,18 @@ exports.approveBooking = async (req, res) => {
       bookingId,
       { status: 'confirmed' },
       { new: true }
-    ); // ✅ userId is string, no need to populate
+    );
 
     if (!updatedBooking) {
       console.log("⚠️ Booking not found for ID:", bookingId);
       return res.status(404).json({ message: 'Booking not found' });
     }
 
-    console.log("✅ Approving booking for userId:", updatedBooking.userId);
-
     const title = 'Booking Approved!';
     const message = `Your booking for ${updatedBooking.futsalName} on ${updatedBooking.selectedDay} at ${updatedBooking.selectedTimeSlot} has been approved.`;
 
     await sendNotification(updatedBooking.userId, title, message);
+    console.log("✅ Notification sent to userId:", updatedBooking.userId);
 
     res.status(200).json({
       message: 'Booking approved and player notified',
@@ -219,6 +221,26 @@ exports.approveBooking = async (req, res) => {
   } catch (error) {
     console.error('❌ Error in approveBooking:', error);
     res.status(500).json({ message: 'Error approving booking', error });
+  }
+};
+
+
+//get the time slot
+exports.getBookedSlots = async (req, res) => {
+  try {
+    const { futsalId, date } = req.params;
+
+    const bookings = await Booking.find({
+      futsalId,
+      selectedDay: new Date(date),
+      status: 'confirmed'  // Only confirmed bookings block slots
+    });
+
+    const bookedSlots = bookings.map(b => b.selectedTimeSlot);
+
+    res.status(200).json({ bookedSlots });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching booked slots', error: error.message });
   }
 };
 

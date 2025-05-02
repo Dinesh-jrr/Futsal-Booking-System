@@ -120,41 +120,24 @@ exports.getFutsalById = async (req, res) => {
 //Update a futsal
 exports.updateFutsal = async (req, res) => {
   try {
-    const futsalId = req.params.futsalId;
-    const updatedData = req.body;
+    const { futsalId } = req.params;
+    const updateData = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(futsalId)) {
-      return res.status(400).json({ message: "Invalid futsal ID format." });
-    }
-
-    if (updatedData.ownerId && !mongoose.Types.ObjectId.isValid(updatedData.ownerId)) {
-      return res.status(400).json({ message: "Invalid owner ID format." });
-    }
-
-    if (updatedData.ownerId) {
-      const ownerExists = await User.findById(updatedData.ownerId);
-      if (!ownerExists) {
-        return res.status(404).json({ message: "Owner not found." });
-      }
-    }
-
-    const updatedFutsal = await Futsal.findByIdAndUpdate(futsalId, updatedData, {
-      new: true,
-    }).populate('ownerId', 'name email');
+    // Find and update the futsal
+    const updatedFutsal = await Futsal.findByIdAndUpdate(
+      futsalId,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
 
     if (!updatedFutsal) {
-      return res.status(404).json({ message: 'Futsal not found' });
+      return res.status(404).json({ success: false, message: "Futsal not found" });
     }
 
-    res.status(200).json({
-      message: 'Futsal updated successfully!',
-      futsal: updatedFutsal,
-    });
+    res.json({ success: true, futsal: updatedFutsal });
   } catch (error) {
-    res.status(500).json({
-      message: 'Error updating futsal',
-      error: error.message,
-    });
+    console.error("Error updating futsal:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -221,25 +204,34 @@ exports.approveFutsal = async (req, res) => {
 exports.checkFutsalByOwner = async (req, res) => {
   const { ownerId } = req.query;
 
-  // ✅ Instead of validating, just check if it's present
   if (!ownerId) {
-    return res.status(400).json({ message: "Owner ID is required." });
+    return res.status(400).json({ success: false, message: "Owner ID is required." });
   }
 
   try {
     const futsal = await Futsal.findOne({ ownerId });
 
     if (futsal) {
-      return res.status(200).json({ futsalExists: true, futsal });
+      return res.status(200).json({
+        success: true,
+        futsalExists: true,
+        futsal,
+      });
     } else {
-      return res.status(200).json({ futsalExists: false });
+      return res.status(200).json({
+        success: true,
+        futsalExists: false,
+        futsal: null,
+      });
     }
   } catch (error) {
     res.status(500).json({
+      success: false,
       message: "Error checking futsal",
       error: error.message,
     });
   }
 };
+
 
 
