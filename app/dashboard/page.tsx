@@ -3,6 +3,7 @@
 import Header from "@/components/Header";
 import UsersTable from "@/components/UsersTable";
 import OwnerBookingListing from "@/components/OwnerBookings";
+import BookingListForOwner from "@/components/RecentBookings";
 import Image from "next/image";
 
 export default function Home() {
@@ -53,7 +54,7 @@ export default function Home() {
         {/* Booking Table */}
         <div className="bg-white p-6 rounded-xl shadow">
           <h2 className="text-lg font-semibold mb-4">Recent Bookings</h2>
-          <OwnerBookingListing />
+          <BookingListForOwner />
         </div>
       </div>
 

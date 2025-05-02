@@ -179,10 +179,10 @@ export default function OwnerBookingPage() {
                       {b.status}
                     </span>
                   </td>
-                  <td className="px-3 py-2 text-right space-x-2">
+                  <td className="px-3 py-2 text-right space-x-2 text-black">
                     <button
                       onClick={() => setSelectedBooking(b)}
-                      className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs hover:bg-blue-200"
+                      className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs hover:bg-blue-200 text-black"
                     >
                       View
                     </button>
