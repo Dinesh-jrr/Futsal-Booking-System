@@ -30,11 +30,12 @@ class _BookingHistoryState extends State<BookingHistory> {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('auth_token');
-      if (token == null) throw Exception("Token not found in SharedPreferences");
+      if (token == null)
+        throw Exception("Token not found in SharedPreferences");
 
       final res = await http.get(
         Uri.parse("${AppConfig.baseUrl}/api/users/me"),
-        headers: { 'Authorization': 'Bearer $token' },
+        headers: {'Authorization': 'Bearer $token'},
       );
 
       if (res.statusCode == 200) {
@@ -49,8 +50,9 @@ class _BookingHistoryState extends State<BookingHistory> {
         if (bookingsRes.statusCode == 200) {
           final jsonData = jsonDecode(bookingsRes.body);
           setState(() {
-            List<Map<String, dynamic>> allBookings = List<Map<String, dynamic>>.from(jsonData['bookings']);
-            
+            List<Map<String, dynamic>> allBookings =
+                List<Map<String, dynamic>>.from(jsonData['bookings']);
+
             // Separate today's bookings and other bookings
             DateTime now = DateTime.now();
             todayBookings = allBookings.where((booking) {
@@ -63,8 +65,10 @@ class _BookingHistoryState extends State<BookingHistory> {
               return !isSameDay(now, bookingDate);
             }).toList();
 
-            todayBookings.sort((a, b) => DateTime.parse(b['createdAt']).compareTo(DateTime.parse(a['createdAt'])));
-            otherBookings.sort((a, b) => DateTime.parse(b['createdAt']).compareTo(DateTime.parse(a['createdAt'])));
+            todayBookings.sort((a, b) => DateTime.parse(b['createdAt'])
+                .compareTo(DateTime.parse(a['createdAt'])));
+            otherBookings.sort((a, b) => DateTime.parse(b['createdAt'])
+                .compareTo(DateTime.parse(a['createdAt'])));
             isLoading = false;
           });
         } else {
@@ -81,7 +85,9 @@ class _BookingHistoryState extends State<BookingHistory> {
 
   // Helper function to check if two dates are the same day
   bool isSameDay(DateTime date1, DateTime date2) {
-    return date1.year == date2.year && date1.month == date2.month && date1.day == date2.day;
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
   }
 
   @override
@@ -104,14 +110,16 @@ class _BookingHistoryState extends State<BookingHistory> {
           if (todayBookings.isNotEmpty) ...[
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              child: Text('Today', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              child: Text('Today',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             ),
             ...todayBookings.map((booking) => _buildBookingCard(booking)),
           ],
           if (otherBookings.isNotEmpty) ...[
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              child: Text('Upcoming / Past', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              child: Text('Upcoming / Past',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             ),
             ...otherBookings.map((booking) => _buildBookingCard(booking)),
           ],
@@ -126,7 +134,7 @@ class _BookingHistoryState extends State<BookingHistory> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => Bookingdetails(booking: booking)),
+          MaterialPageRoute(builder: (_) => BookingDetails(booking: booking)),
         );
       },
       child: Container(
@@ -136,7 +144,8 @@ class _BookingHistoryState extends State<BookingHistory> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: const [
-            BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 3))
+            BoxShadow(
+                color: Colors.black12, blurRadius: 8, offset: Offset(0, 3))
           ],
         ),
         child: Row(
@@ -149,11 +158,14 @@ class _BookingHistoryState extends State<BookingHistory> {
                 children: [
                   Text(
                     booking['futsalName'] ?? 'Futsal Match',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '${booking['date'] ?? 'Date'} at ${booking['selectedDay'] ?? ''}',
+                    booking['selectedDay'] != null
+                        ? DateTime.parse(booking['selectedDay']).toLocal().toString().split(' ')[0]
+                        : 'Selected day',
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                 ],
@@ -167,31 +179,39 @@ class _BookingHistoryState extends State<BookingHistory> {
   }
 
   Widget _buildStatusChip(String status) {
-    Color color;
-    IconData icon;
+  Color color;
+  IconData icon;
 
-    switch (status) {
-      case 'Upcoming':
-        color = Colors.blue;
-        icon = Icons.schedule;
-        break;
-      case 'Completed':
-        color = Colors.green;
-        icon = Icons.check_circle_outline;
-        break;
-      case 'Cancelled':
-        color = Colors.red;
-        icon = Icons.cancel_outlined;
-        break;
-      default:
-        color = Colors.grey;
-        icon = Icons.help_outline;
-    }
-
-    return Chip(
-      avatar: Icon(icon, size: 16, color: Colors.white),
-      label: Text(status, style: const TextStyle(color: Colors.white)),
-      backgroundColor: color,
-    );
+  switch (status.toLowerCase()) {
+    case 'upcoming':
+      color = Colors.blue;
+      icon = Icons.schedule;
+      break;
+    case 'completed':
+      color = Colors.green;
+      icon = Icons.check_circle_outline;
+      break;
+    case 'cancelled':
+      color = Colors.red;
+      icon = Icons.cancel_outlined;
+      break;
+    case 'confirmed':
+      color = AppColors.primary;
+      icon = Icons.verified;
+      break;
+    case 'pending':
+      color = Colors.orange;
+      icon = Icons.hourglass_empty;
+      break;
+    default:
+      color = Colors.grey;
+      icon = Icons.help_outline;
   }
+
+  return Chip(
+    avatar: Icon(icon, size: 16, color: Colors.white),
+    label: Text(status, style: const TextStyle(color: Colors.white)),
+    backgroundColor: color,
+  );
+}
 }
