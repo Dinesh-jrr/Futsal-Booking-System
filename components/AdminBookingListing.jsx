@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { baseUrl } from '@/lib/config';
 
 export default function AdminBookingListing() {
   const { data: session } = useSession();
@@ -19,8 +20,8 @@ export default function AdminBookingListing() {
         const role = session?.user?.role;
         const endpoint =
           role === 'admin'
-            ? 'http://localhost:5000/api/bookings/allBookings'
-            : `http://localhost:5000/api/bookings/owner/${session.user.id}`;
+            ? `${baseUrl}/api/bookings/allBookings`
+            : `${baseUrl}/api/bookings/owner/${session.user.id}`;
 
         const res = await fetch(endpoint);
         const data = await res.json();
@@ -44,7 +45,7 @@ export default function AdminBookingListing() {
 
   const handleStatusUpdate = async (id, newStatus) => {
     try {
-      await fetch(`http://localhost:5000/api/bookings/${id}`, {
+      await fetch(`${baseUrl}/api/bookings/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),

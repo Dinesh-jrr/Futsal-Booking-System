@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import { baseUrl } from '@/lib/config';
 
 export default function OwnerPaymentListings() {
   const { data: session } = useSession();
@@ -18,7 +19,7 @@ export default function OwnerPaymentListings() {
       if (!session?.user?.id) return;
 
       try {
-        const res = await fetch(`http://localhost:5000/api/payment/owner/${session.user.id}`);
+        const res = await fetch(`${baseUrl}/api/payment/owner/${session.user.id}`);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
         setPayments(data.payments || []);

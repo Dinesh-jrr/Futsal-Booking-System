@@ -1,4 +1,5 @@
 "use client";
+import { baseUrl } from "@/lib/config";
 import { useState, useEffect } from "react";
 
 export default function AdminUserListings() {
@@ -14,7 +15,7 @@ export default function AdminUserListings() {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const response = await fetch("http://localhost:5000/api/users/allUsers");
+      const response = await fetch(`${baseUrl}/api/users/allUsers`);
       const data = await response.json();
       setUsers(data);
     };
@@ -36,7 +37,7 @@ export default function AdminUserListings() {
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/users/${id}`, {
+      const response = await fetch(`${baseUrl}/api/users/${id}`, {
         method: "DELETE",
       });
 
@@ -52,7 +53,7 @@ export default function AdminUserListings() {
   };
 
   const handleAddUser = async () => {
-    const response = await fetch("http://localhost:5000/api/users/register", {
+    const response = await fetch(`${baseUrl}/api/users/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newUserData),

@@ -1,5 +1,6 @@
 "use client";
 
+import { baseUrl } from "@/lib/config";
 import React, { useState, useEffect } from "react";
 
 export default function FutsalListings() {
@@ -13,7 +14,7 @@ export default function FutsalListings() {
   useEffect(() => {
     const fetchFutsals = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/getfutsals");
+        const response = await fetch(`${baseUrl}/api/getfutsals`);
         const data = await response.json();
 
         const cleanedData = Array.isArray(data.futsals)
@@ -53,7 +54,7 @@ export default function FutsalListings() {
 
   const handleApprove = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/futsals/${id}/approve`, {
+      const res = await fetch(`${baseUrl}/api/futsals/${id}/approve`, {
         method: "PUT",
       });
       if (res.ok) {
@@ -66,7 +67,7 @@ export default function FutsalListings() {
 
   const handleReject = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/futsals/${id}/reject`, {
+      const res = await fetch(`${baseUrl}/api/futsals/${id}/reject`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reason: "Rejected by admin." }),

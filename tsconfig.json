@@ -30,12 +30,12 @@
     }
   },
   "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.d.ts",
-    ".next/types/**/*.ts"
-, "components/Header.tsx", "components/AdminBookingListing.jsx"  ],
+  "next-env.d.ts",
+  "**/*.ts",
+  "**/*.tsx",
+  ".next/types/**/*.d.ts",
+  "types"
+],
   "exclude": [
     "node_modules"
   ]

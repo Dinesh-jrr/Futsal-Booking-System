@@ -1,5 +1,6 @@
 'use client';
 
+import { baseUrl } from "@/lib/config";
 import { useEffect, useState } from "react";
 
 export default function AdminPaymentListings() {
@@ -17,7 +18,7 @@ export default function AdminPaymentListings() {
 
   const fetchPayments = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/payment/getAllPayments");
+      const res = await fetch(`${baseUrl}/api/payment/getAllPayments`);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
       setPayments(data.payments);

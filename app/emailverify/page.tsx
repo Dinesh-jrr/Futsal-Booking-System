@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { baseUrl } from "@/lib/config";
 
 export default function VerifyOtpPage() {
   const router = useRouter();
@@ -76,7 +77,7 @@ export default function VerifyOtpPage() {
       console.log("📧 Email:", email);
       console.log("🔢 OTP:", code);
 
-      const res = await fetch("http://localhost:5000/api/users/verify-email-otp", {
+      const res = await fetch(`${baseUrl}/api/users/verify-email-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp: code }),
@@ -105,7 +106,7 @@ export default function VerifyOtpPage() {
   const resendOtp = async () => {
     if (!email) return toast.error("No email found to resend OTP.");
     try {
-      const res = await fetch("http://localhost:5000/api/users/send-otp", {
+      const res = await fetch(`${baseUrl}/api/users/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),

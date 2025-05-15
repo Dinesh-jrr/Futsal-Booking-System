@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { Bell } from 'lucide-react';
 import { Menu } from '@headlessui/react';
+import { baseUrl } from '@/lib/config';
 
 interface Notification {
   id: number;
@@ -22,7 +23,7 @@ export default function NotificationsPage() {
 
     async function fetchNotifications() {
       try {
-        const response = await fetch(`http://localhost:5000/api/notification/notifications/${userId}`);
+        const response = await fetch(`${baseUrl}/api/notification/notifications/${userId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch notifications');
         }

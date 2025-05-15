@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner'; // Ensure you have <Toaster /> in layout.tsx
+import { baseUrl } from '@/lib/config';
 
 export default function FutsalStatusPage() {
   const { data: session } = useSession();
@@ -19,7 +20,7 @@ export default function FutsalStatusPage() {
       console.log(session?.user?.id)
 
       try {
-        const res = await fetch(`http://localhost:5000/api/by-owner?ownerId=${ownerId}`);
+        const res = await fetch(`${baseUrl}/api/by-owner?ownerId=${ownerId}`);
         if (!res.ok) throw new Error('No futsal found');
 
         const data = await res.json();

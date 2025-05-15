@@ -11,6 +11,7 @@ import { Dialog } from "@headlessui/react";
 import { UploadButton } from "@uploadthing/react";
 import type { OurFileRouter } from "@/lib/uploadthing";
 import { useSession } from "next-auth/react";
+import { baseUrl } from "@/lib/config";
 
 const availableTimeSlots = [
   "6 - 7 AM",
@@ -83,7 +84,7 @@ export default function CreateFutsalForm() {
         documents: uploadedDocUrls,
       };
 
-      const res = await fetch("http://localhost:5000/api/createfutsal", {
+      const res = await fetch(`${baseUrl}/api/createfutsal`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

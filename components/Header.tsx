@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Search, Bell, MessageSquare } from 'lucide-react';
 import { Menu } from '@headlessui/react';
 import { useSession } from 'next-auth/react';
+import { baseUrl } from '@/lib/config';
 
 interface Notification {
   id: number;
@@ -23,7 +24,7 @@ export default function Header() {
       if (!session?.user?.id) return;
 
       try {
-        const response = await fetch(`http://localhost:5000/api/notification/notifications/${session.user.id}`);
+        const response = await fetch(`${baseUrl}/api/notification/notifications/${session.user.id}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

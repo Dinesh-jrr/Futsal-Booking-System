@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { toast } from "sonner"; // ✅ Sonner toast
+import { baseUrl } from "@/lib/config";
+
 
 export default function LoginPage() {
   const router = useRouter();
@@ -42,7 +44,7 @@ export default function LoginPage() {
         } else if (role === "futsal_owner") {
           toast.success("Welcome, Owner!");
           const checkRes = await fetch(
-            `http://localhost:5000/api/by-owner?ownerId=${ownerId}`
+            `${baseUrl}/api/by-owner?ownerId=${ownerId}`
           );
           const futsalData = await checkRes.json();
 

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
+import { baseUrl } from "@/lib/config";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -73,7 +74,7 @@ export default function RegisterPage() {
   
     try {
       // Step 1: Register the user (unverified)
-      const registerRes = await fetch("http://localhost:5000/api/users/register", {
+      const registerRes = await fetch(`${baseUrl}/api/users/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, role: "futsal_owner" }),
@@ -87,7 +88,7 @@ export default function RegisterPage() {
       }
   
       // Step 2: Send OTP to email
-      const otpRes = await fetch("http://localhost:5000/api/users/send-otp", {
+      const otpRes = await fetch(`${baseUrl}/api/users/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: form.email }),

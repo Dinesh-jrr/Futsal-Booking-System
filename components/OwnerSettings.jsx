@@ -5,6 +5,7 @@ import { UploadButton } from "@uploadthing/react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { getSession } from "next-auth/react";
+import { baseUrl } from '@/lib/config';
 
 export default function OwnerSettingsPage() {
   const [activeTab, setActiveTab] = useState("Profile Settings");
@@ -49,12 +50,12 @@ export default function OwnerSettingsPage() {
         
         // Fetch user profile and futsal data in parallel
         const [profileRes, futsalRes] = await Promise.all([
-          fetch(`http://localhost:5000/api/users/${session.user.id}`, {
+          fetch(`${baseUrl}/api/users/${session.user.id}`, {
             method: "GET",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
           }),
-          fetch(`http://localhost:5000/api/by-owner?ownerId=${session.user.id}`, {
+          fetch(`${baseUrl}/api/by-owner?ownerId=${session.user.id}`, {
             method: "GET",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -133,7 +134,7 @@ export default function OwnerSettingsPage() {
     if (!session) return toast.error("You are not logged in");
     
     try {
-      const res = await fetch(`http://localhost:5000/api/users/profile/${session.user.id}`, {
+      const res = await fetch(`${baseUrl}/api/users/profile/${session.user.id}`, {
         method: "PUT", // Use PUT for updating the profile
         headers: { "Content-Type": "application/json" },
         credentials: "include", // If needed for session/cookies
@@ -168,7 +169,7 @@ export default function OwnerSettingsPage() {
       }
   
       // Proceed with password change if the session exists
-      const res = await fetch(`http://localhost:5000/api/users/change-password/${session.user.id}`, {
+      const res = await fetch(`${baseUrl}/api/users/change-password/${session.user.id}`, {
         method: "PUT", // Use PUT for updating the password
         headers: { "Content-Type": "application/json" },
         credentials: "include", // If needed for session/cookies
@@ -231,7 +232,7 @@ export default function OwnerSettingsPage() {
         return toast.error("No changes detected");
       }
   
-      const res = await fetch(`http://localhost:5000/api/futsals/update/${futsal._id}`, {
+      const res = await fetch(`${baseUrl}/api/futsals/update/${futsal._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

@@ -1,5 +1,6 @@
 "use client";
 
+import { baseUrl } from "@/lib/config";
 import React, { useState, useEffect } from "react";
 
 
@@ -15,7 +16,7 @@ export default function FutsalListings() {
   useEffect(() => {
     const fetchFutsals = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/getfutsals");
+        const response = await fetch(`${baseUrl}/api/getfutsals`);
         const data = await response.json();
 
         const cleanedData = Array.isArray(data.futsals)

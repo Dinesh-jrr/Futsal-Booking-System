@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import clsx from 'clsx';
+import { baseUrl } from '@/lib/config';
 
 export default function BookingListForOwner() {
   const { data: session } = useSession();
@@ -23,7 +24,7 @@ export default function BookingListForOwner() {
     if (!session?.user?.id) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/bookings/owner/${session.user.id}`);
+      const res = await fetch(`${baseUrl}/api/bookings/owner/${session.user.id}`);
       const data = await res.json();
       setBookings(data.bookings || []);
     } catch (err) {
@@ -42,7 +43,7 @@ const fetchUserDetails = async (userId) => {
   }
 
   try {
-    const res = await fetch(`http://localhost:5000/api/users/${userId}`);
+    const res = await fetch(`${baseUrl}/api/users/${userId}`);
     const data = await res.json();
     setUserDetails((prevDetails) => ({ ...prevDetails, [userId]: data.user }));
   } catch (err) {
@@ -83,7 +84,7 @@ console.log('Filtered todayBookings:', todayBookings);
    // Function to approve booking
    const approveBooking = async (bookingId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/bookings/${bookingId}/approve`, {
+      const res = await fetch(`${baseUrl}/api/bookings/${bookingId}/approve`, {
         method: 'PUT',
       });
       const data = await res.json();
@@ -97,7 +98,7 @@ console.log('Filtered todayBookings:', todayBookings);
       setSelectedBooking(null); // Clear selected booking
 
       // Fetch updated bookings
-      const updatedRes = await fetch(`http://localhost:5000/api/bookings/owner/${session.user.id}`);
+      const updatedRes = await fetch(`${baseUrl}/api/bookings/owner/${session.user.id}`);
       const updatedData = await updatedRes.json();
       setBookings(updatedData.bookings || []); // Update bookings list
 

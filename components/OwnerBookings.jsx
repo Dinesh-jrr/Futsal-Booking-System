@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
+import { baseUrl } from '@/lib/config';
 
 export default function OwnerBookingPage() {
   const { data: session } = useSession();
@@ -66,7 +67,7 @@ export default function OwnerBookingPage() {
 
   const approveBooking = async (bookingId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/bookings/${bookingId}/approve`, {
+      const res = await fetch(`${baseUrl}/api/bookings/${bookingId}/approve`, {
         method: 'PUT',
       });
       const data = await res.json();
@@ -79,7 +80,7 @@ export default function OwnerBookingPage() {
 
       setSelectedBooking(null);
 
-      const updatedRes = await fetch(`http://localhost:5000/api/bookings/owner/${session.user.id}`);
+      const updatedRes = await fetch(`${baseUrl}/api/bookings/owner/${session.user.id}`);
       const updatedData = await updatedRes.json();
       setBookings(updatedData.bookings || []);
     } catch (err) {
@@ -90,7 +91,7 @@ export default function OwnerBookingPage() {
 
   const declineBooking = async (bookingId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/bookings/${bookingId}/decline`, {
+      const res = await fetch(`${baseUrl}/api/bookings/${bookingId}/decline`, {
         method: 'PUT',
       });
       const data = await res.json();
@@ -103,7 +104,7 @@ export default function OwnerBookingPage() {
 
       setSelectedBooking(null);
 
-      const updatedRes = await fetch(`http://localhost:5000/api/bookings/owner/${session.user.id}`);
+      const updatedRes = await fetch(`${baseUrl}/api/bookings/owner/${session.user.id}`);
       const updatedData = await updatedRes.json();
       setBookings(updatedData.bookings || []);
     } catch (err) {
