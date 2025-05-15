@@ -1,3 +1,4 @@
 /node_modules
 .env
-/config/fcm-service-key.json
+# Ignore FCM private key
+config/fcm-service-key.json
