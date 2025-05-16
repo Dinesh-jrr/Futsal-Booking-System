@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 const chat = require("../models/chat");
 const user = require("../models/user");
+const Futsal = require('../models/futsal');
+
+
 
 // Send a new chat message
 const sendMessage = async (req, res) => {
@@ -83,6 +86,17 @@ const getConversationPartners = async (req, res) => {
     for (const partnerId of conversationPartnerIds) {
       const userInfo = await user.findById(partnerId).select("name role profileImage");
 
+      let displayName = userInfo.name;
+
+       if (userInfo.role === 'futsalOwner') {
+        const futsal = await Futsal.findOne({ ownerId: partnerId }).select("name logo");
+        if (futsal) {
+          displayName = futsal.name;             
+                
+        }
+      }
+
+
       const lastMessage = await chat
         .findOne({
           $or: [
@@ -101,7 +115,7 @@ const getConversationPartners = async (req, res) => {
 
       conversations.push({
         _id: userInfo._id,
-        name: userInfo.name,
+        name: displayName,
         role: userInfo.role,
         avatar: userInfo.profileImage || '',
         lastMessage: lastMessage?.message || "",
