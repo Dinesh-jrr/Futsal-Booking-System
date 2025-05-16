@@ -15,65 +15,67 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+  e.preventDefault();
+  const formData = new FormData(e.currentTarget);
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
 
-    setIsLoading(true);
+  setIsLoading(true);
 
-    try {
-      const res = await signIn("credentials", {
-        redirect: false,
-        email,
-        password,
-      });
+  try {
+    const res = await signIn("credentials", {
+      redirect: false,
+      email,
+      password,
+    });
 
-      if (res?.error) {
-        toast.error(res.error || "Invalid credentials");
-      } else {
-        const session = await getSession();
-        //@ts-ignore
-        const role = session?.user?.role;
-        //@ts-ignore
-        const ownerId = session?.user?.id;
-
-        if (role === "admin") {
-          toast.success("Welcome, Admin!");
-          router.push("/admin");
-        } else if (role === "futsal_owner") {
-          toast.success("Welcome, Owner!");
-          const checkRes = await fetch(
-            `${baseUrl}/api/by-owner?ownerId=${ownerId}`
-          );
-          const futsalData = await checkRes.json();
-
-          if (checkRes.ok && futsalData?.futsal) {
-            const status = futsalData.futsal.status;
-
-            if (status === "approved") {
-              router.push("/dashboard");
-            } else if (status === "pending" || status === "rejected") {
-              toast.info("Futsal is under review or rejected.");
-              router.push("/futsalstatus");
-            }
-          } else {
-            toast("No futsal found. Let's get started!");
-            router.push("/createfutsal");
-          }
-        } else if (role === "user") {
-          toast.error("Unauthorized: User access not allowed here.");
-        } else {
-          toast.error("Unknown role. Please contact support.");
-        }
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong during login");
-    } finally {
-      setIsLoading(false);
+    if (res?.error) {
+      toast.error(res.error || "Invalid credentials");
+      return;
     }
-  };
+
+    // ✅ Wait a moment and manually fetch session
+    const response = await fetch("/api/auth/session");
+    const session = await response.json();
+    const role = session?.user?.role;
+    const ownerId = session?.user?.id;
+
+    if (role === "admin") {
+      toast.success("Welcome, Admin!");
+      router.push("/admin");
+    } else if (role === "futsal_owner") {
+      toast.success("Welcome, Owner!");
+      const checkRes = await fetch(
+        `${baseUrl}/api/by-owner?ownerId=${ownerId}`
+      );
+      const futsalData = await checkRes.json();
+
+      if (checkRes.ok && futsalData?.futsal) {
+        const status = futsalData.futsal.status;
+
+        if (status === "approved") {
+          router.push("/dashboard");
+        } else {
+          toast.info("Futsal is under review or rejected.");
+          router.push("/futsalstatus");
+        }
+      } else {
+        toast("No futsal found. Let's get started!");
+        router.push("/createfutsal");
+      }
+    } else if (role === "user") {
+      toast.error("Unauthorized: User access not allowed here.");
+    } else {
+      toast.error("Unknown role. Please contact support.");
+    }
+  } catch (error) {
+    console.error(error);
+    toast.error("Something went wrong during login");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-gray-800">
