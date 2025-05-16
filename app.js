@@ -45,8 +45,9 @@ app.use('/api/review',reviewRoutes);
 // Socket.IO setup
 const io = new socketIo.Server(server, {
   cors: {
-    origin: '*', // Replace with your frontend domain in production
+    origin: ['https://futsal-booking-system-production.up.railway.app', 'http://localhost:3000'],
     methods: ['GET', 'POST'],
+    credentials: true,
   },
 });
 
