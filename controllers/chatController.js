@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const chat = require("../models/chat");
 const user = require("../models/user");
-const Futsal = require('../models/futsal');
+const Futsal = require('../models/futsals');
 
 
 
