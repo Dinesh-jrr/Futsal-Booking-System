@@ -81,7 +81,7 @@ const getConversationPartners = async (req, res) => {
     const conversations = [];
 
     for (const partnerId of conversationPartnerIds) {
-      const userInfo = await user.findById(partnerId).select("name role");
+      const userInfo = await user.findById(partnerId).select("name role profileImage");
 
       const lastMessage = await chat
         .findOne({
@@ -103,6 +103,7 @@ const getConversationPartners = async (req, res) => {
         _id: userInfo._id,
         name: userInfo.name,
         role: userInfo.role,
+        avatar: userInfo.profileImage || '',
         lastMessage: lastMessage?.message || "",
         lastMessageTime: lastMessage?.createdAt || null,
         isRead: lastMessage?.isRead ?? false,
