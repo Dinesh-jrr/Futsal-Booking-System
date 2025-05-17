@@ -230,19 +230,28 @@ exports.getBookedSlots = async (req, res) => {
   try {
     const { futsalId, date } = req.params;
 
+    // Convert to date range for the full day
+    const startOfDay = new Date(date);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(date);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+
     const bookings = await Booking.find({
       futsalId,
-      selectedDay: new Date(date),
-      status: { $in: ['confirmed', 'pending'] }  // ✅ Include pending, ignore cancelled/rejected
-    }).select('selectedTimeSlot status');
+      selectedDay: { $gte: startOfDay, $lte: endOfDay },
+      status: { $in: ['confirmed', 'pending'] },
+    });
 
-    const bookedSlots = bookings.map(b => b.selectedTimeSlot);
+    const bookedSlots = bookings.map((b) => b.selectedTimeSlot);
 
     res.status(200).json({ bookedSlots });
   } catch (error) {
+    console.error("Error fetching booked slots:", error);
     res.status(500).json({ message: 'Error fetching booked slots', error: error.message });
   }
 };
+
 
 
 

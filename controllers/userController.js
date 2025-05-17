@@ -329,3 +329,38 @@ exports.changePassword = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+//get user by email
+exports.getUserByEmail = async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    const user = await User.findOne({ email }).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    console.error("getUserByEmail error:", error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Search users by partial email
+exports.searchUsersByEmail = async (req, res) => {
+  const query = req.query.query;
+  if (!query) return res.json({ users: [] });
+
+  try {
+    const users = await User.find({ email: { $regex: query, $options: 'i' } })
+      .select('name email _id') // include name here
+      .limit(10);
+
+    res.json({ users });
+  } catch (error) {
+    res.status(500).json({ message: 'Search failed', error: error.message });
+  }
+};
+
+

@@ -10,7 +10,9 @@ const {
   sendOtpToEmail,
   updateUserProfile,
   getUserDetails,
-  changePassword
+  changePassword,
+  getUserByEmail,
+  searchUsersByEmail
 } = require('../controllers/userController.js');
 const protect = require('../middleware/authMiddleware.js');
 
@@ -20,6 +22,8 @@ router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.get('/me', protect(), getCurrentUser);
 router.get('/allUsers', getAllUsers);
+router.get('/email/:email', getUserByEmail);
+router.get('/search-email', searchUsersByEmail);
 router.get('/:userId',getUserDetails);
 
 router.post('/forgot-password', forgotPassword);
