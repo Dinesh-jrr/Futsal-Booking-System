@@ -225,7 +225,7 @@ exports.approveBooking = async (req, res) => {
 };
 
 
-//get the time slot
+// Get booked or pending slots for a futsal on a specific date
 exports.getBookedSlots = async (req, res) => {
   try {
     const { futsalId, date } = req.params;
@@ -233,8 +233,8 @@ exports.getBookedSlots = async (req, res) => {
     const bookings = await Booking.find({
       futsalId,
       selectedDay: new Date(date),
-      status: 'confirmed'  // Only confirmed bookings block slots
-    });
+      status: { $in: ['confirmed', 'pending'] }  // ✅ Include pending, ignore cancelled/rejected
+    }).select('selectedTimeSlot status');
 
     const bookedSlots = bookings.map(b => b.selectedTimeSlot);
 
@@ -243,6 +243,7 @@ exports.getBookedSlots = async (req, res) => {
     res.status(500).json({ message: 'Error fetching booked slots', error: error.message });
   }
 };
+
 
 
 
