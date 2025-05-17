@@ -9,19 +9,40 @@ import { Badge } from "@/components/ui/badge";
 import clsx from "clsx";
 import { baseUrl } from "@/lib/config";
 import { useMemo } from "react";
-import { useRouter } from 'next/navigation';
-
+import { useRouter } from "next/navigation";
+import ManualBookingModal from "@/components/ManualBookingModal";
 
 export default function BookingListForOwner() {
   const { data: session } = useSession();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [availableSlots, setAvailableSlots] = useState([]);
   const [userDetails, setUserDetails] = useState({});
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedBooking, setSelectedBooking] = useState(null);
-  const [activeTab, setActiveTab] = useState("pending"); // 'pending', 'slots', or 'today'
+  const [activeTab, setActiveTab] = useState("pending");
+  const [bookedSlots, setBookedSlots] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState("");
+  const [futsalId, setFutsalId] = useState("");
+  const [futsalName, setFutsalName] = useState("");
   const router = useRouter();
+  const allTimeSlots = [
+    "6 - 7 AM",
+    "7 - 8 AM",
+    "8 - 9 AM",
+    "9 - 10 AM",
+    "10 - 11 AM",
+    "11 - 12 AM",
+    "12 - 1 PM",
+    "1 - 2 PM",
+    "2 - 3 PM",
+    "3 - 4 PM",
+    "4 - 5 PM",
+    "5 - 6 PM",
+    "6 - 7 PM",
+    "7 - 8 PM",
+    "8 - 9 PM",
+  ];
 
   // Fetch bookings for the owner
   const fetchBookings = async () => {
@@ -67,13 +88,48 @@ export default function BookingListForOwner() {
     setSelectedDate(date);
     fetchAvailableSlots(date);
   };
-  const fetchAvailableSlots = (date) => {
-    const bookedSlots = bookedSlotsByDate[date] || [];
-    const available = allTimeSlots.filter(
-      (slot) => !bookedSlots.includes(slot)
+  const fetchAvailableSlots = async (date) => {
+  if (!date || !session?.user?.id) return;
+
+  try {
+    // 1. Get the futsal for this owner
+    const futsalRes = await fetch(
+      `${baseUrl}/api/by-owner?ownerId=${session.user.id}`
     );
-    setAvailableSlots(available);
-  };
+    const futsalData = await futsalRes.json();
+
+    if (!futsalRes.ok || !futsalData.futsal?._id) {
+      toast.error("❌ Could not find futsal for owner");
+      return;
+    }
+
+    const futsalId = futsalData.futsal._id;
+    setFutsalId(futsalId);
+    setFutsalName(futsalData.futsal.futsalName); // If you need the name
+
+    const formattedDate = new Date(date).toISOString().split("T")[0];
+
+    // 2. Fetch booked slots
+    const slotsRes = await fetch(
+      `${baseUrl}/api/bookedslots/${futsalId}/${formattedDate}`
+    );
+    const slotsData = await slotsRes.json();
+
+    if (!slotsRes.ok) {
+      toast.error("❌ Failed to load booked slots");
+      return;
+    }
+
+    const booked = slotsData.bookedSlots || [];
+    console.log("📦 Booked slots from server:", booked);
+
+    // 3. Store booked slots
+    setBookedSlots(booked);
+  } catch (error) {
+    console.error("Error in fetchAvailableSlots:", error);
+    toast.error("❌ Something went wrong while fetching slots");
+  }
+};
 
   // Function to approve booking
   const approveBooking = async (bookingId) => {
@@ -106,6 +162,19 @@ export default function BookingListForOwner() {
   useEffect(() => {
     fetchBookings();
   }, [session]);
+
+  useEffect(() => {
+    const today = new Date();
+    const isoDate = today.toISOString().split("T")[0];
+    setSelectedDate(isoDate);
+    fetchAvailableSlots(isoDate); // <--- Make sure this is here
+  }, []);
+
+  useEffect(() => {
+    if (session?.user?.id && selectedDate && activeTab === "slots") {
+      fetchAvailableSlots(selectedDate);
+    }
+  }, [selectedDate, session?.user?.id, activeTab]);
 
   useEffect(() => {
     // Fetch user details for all players involved in today's bookings
@@ -237,6 +306,7 @@ export default function BookingListForOwner() {
           )}
         </div>
       )}
+      {/* Available slots */}
 
       {activeTab === "slots" && (
         <div className="mt-8">
@@ -278,26 +348,21 @@ export default function BookingListForOwner() {
               All Available Slots
             </h4>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {[
-                "6-7 AM",
-                "7-8 AM",
-                "8-9 AM",
-                "9-10 AM",
-                "10-11 AM",
-                "11-12 AM",
-                "12-1 PM",
-                "1-2 PM",
-                "2-3 PM",
-                "3-4 PM",
-                "4-5 PM",
-                "5-6 PM",
-                "6-7 PM",
-                "7-8 PM",
-                "8-9 PM",
-              ].map((slot, index) => (
+              {allTimeSlots.map((slot, index) => (
                 <div
                   key={index}
-                  className="bg-white border-2 border-green-600 hover:bg-green-50 p-2 rounded-lg shadow-md transition-colors"
+                  className={clsx(
+                    "p-2 rounded-lg shadow-md text-center font-semibold transition-colors",
+                    bookedSlots.includes(slot)
+                      ? "bg-red-200 text-gray-600 border border-red-400 cursor-not-allowed"
+                      : "bg-white border-2 border-green-600 hover:bg-green-50"
+                  )}
+                  onClick={() => {
+    if (!bookedSlots.includes(slot)) {
+      setSelectedSlot(slot);
+      setModalOpen(true);
+    }
+  }}
                 >
                   <h5 className="text-black text-lg font-semibold text-center">
                     {slot}
@@ -308,6 +373,16 @@ export default function BookingListForOwner() {
           </div>
         </div>
       )}
+      {modalOpen && (
+  <ManualBookingModal
+    open={modalOpen}
+    onClose={() => setModalOpen(false)}
+    slot={selectedSlot}
+    date={selectedDate}
+    futsalId={futsalId}          // Pass this from fetched futsal data
+    futsalName={futsalName}      // Same
+  />
+)}
 
       {/* ======== TODAY'S BOOKINGS ======== */}
       {activeTab === "today" && (
@@ -376,7 +451,9 @@ export default function BookingListForOwner() {
                       <div className="pt-2">
                         <Button
                           onClick={() =>
-                            router.push(`/dashboard/messages?userId=${booking.userId}`)
+                            router.push(
+                              `/dashboard/messages?userId=${booking.userId}`
+                            )
                           }
                           className="mt-2 text-sm text-white bg-green-600 hover:bg-green-700 px-4 py-1 rounded"
                         >

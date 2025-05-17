@@ -21,6 +21,20 @@ export default function MessagesPage() {
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
 
+  const fetchConversations = async () => {
+    if (!session?.user?.id) return;
+    const res = await fetch(`${baseUrl}/api/chat/conversation?userId=${session.user.id}`);
+    const data = await res.json();
+    const mapped = (data.conversations || []).map((conv: any) => ({
+      id: conv._id,
+      name: conv.name,
+      avatar: conv.avatar || '/default-avatar.png',
+      lastMessage: conv.lastMessage,
+      unreadCount: conv.unreadCount || 0,
+    }));
+    setConversations(mapped);
+  };
+
   const createNewConversation = async (receiverId: string) => {
     try {
       const res = await fetch(`${baseUrl}/api/users/${receiverId}`);
@@ -55,20 +69,26 @@ export default function MessagesPage() {
 
   useEffect(() => {
     if (session?.user?.id) {
-      fetch(`${baseUrl}/api/chat/conversation?userId=${session.user.id}`)
-        .then((res) => res.json())
-        .then((data) => {
-          const mapped = (data.conversations || []).map((conv: any) => ({
-            id: conv._id,
-            name: conv.name,
-            avatar: conv.avatar || '/default-avatar.png',
-            lastMessage: conv.lastMessage,
-            unreadCount: conv.unreadCount || 0,
-          }));
-          setConversations(mapped);
-        });
+      fetchConversations();
     }
   }, [session]);
+
+  // useEffect(() => {
+  //   if (session?.user?.id) {
+  //     fetch(`${baseUrl}/api/chat/conversation?userId=${session.user.id}`)
+  //       .then((res) => res.json())
+  //       .then((data) => {
+  //         const mapped = (data.conversations || []).map((conv: any) => ({
+  //           id: conv._id,
+  //           name: conv.name,
+  //           avatar: conv.avatar || '/default-avatar.png',
+  //           lastMessage: conv.lastMessage,
+  //           unreadCount: conv.unreadCount || 0,
+  //         }));
+  //         setConversations(mapped);
+  //       });
+  //   }
+  // }, [session]);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -93,6 +113,7 @@ export default function MessagesPage() {
         };
         setMessages((prev) => [...prev, formatted]);
       }
+       fetchConversations();
     });
 
     socket.on('typing', ({ senderId }) => {
@@ -150,6 +171,14 @@ export default function MessagesPage() {
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       },
     ]);
+     // 💡 Update sidebar UI manually
+  setConversations((prevConversations) =>
+    prevConversations.map((conv) =>
+      conv.id === selectedConversation.id
+        ? { ...conv, lastMessage: newMessage }
+        : conv
+    )
+  );
 
     socket.emit('sendMessage', msg);
 
@@ -160,6 +189,7 @@ export default function MessagesPage() {
     });
 
     setNewMessage('');
+     fetchConversations();
   };
 
   useEffect(() => {
