@@ -4,11 +4,15 @@ import 'package:player/presentation/Main_Pages/HomePage/home_page.dart';
 import 'package:player/presentation/Main_Pages/Bookings/booking_history.dart';
 import 'package:player/presentation/Main_Pages/Chats/chat_list_screen.dart';
 import 'package:player/presentation/Main_Pages/Profile/profile_screen.dart';
+import 'package:player/presentation/Main_Pages/QR_Payments/cash_payment.dart';
+import 'package:player/presentation/Main_Pages/QR_Payments/esewa_qr_code.dart';
+import 'package:player/presentation/Main_Pages/QR_Payments/esewa_utils.dart';
 
 
 class Navbar extends StatefulWidget {
   // final String userId;
   const Navbar({super.key});
+  
 
   @override
   State<Navbar> createState() => _NavbarState();
@@ -17,6 +21,7 @@ class Navbar extends StatefulWidget {
 class _NavbarState extends State<Navbar> {
   int _selectedIndex = 0;
   late final List<Widget> _screens;
+  double remainingAmount = 500.0;
 
   @override
   void initState() {
@@ -87,8 +92,76 @@ class _NavbarState extends State<Navbar> {
               left: MediaQuery.of(context).size.width / 2 - 30, // Center horizontally
               child: GestureDetector(
                 onTap: () {
-                  // Handle QR action
-                },
+  showModalBottomSheet(
+    context: context,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (context) {
+      return Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Pay Remaining Amount',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.money),
+              label: const Text('Pay by Cash'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: Size(double.infinity, 45),
+              ),
+              onPressed: () {
+  Navigator.pop(context); // close bottom sheet
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => CashPaymentScreen(amount: remainingAmount),
+    ),
+  );
+},
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.payment),
+              label: const Text('Pay by eSewa'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: Size(double.infinity, 45),
+                backgroundColor: Colors.teal,
+              ),
+              onPressed: () {
+  Navigator.pop(context);
+
+  // TODO: Replace with actual values fetched from backend or context
+  String scd = 'EPAYTEST'; // Futsal owner's merchant code (get from DB if dynamic)
+  String pid = 'booking123'; // e.g. booking ID or any unique transaction ID
+  String amt = '500'; // remaining balance (get dynamically if possible)
+  String paymentUrl = generateEsewaPaymentUrl(scd: scd, pid: pid, amt: amt);
+
+
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => EsewaQrCodeScreen(paymentUrl: paymentUrl),
+    ),
+  );
+},
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            )
+          ],
+        ),
+      );
+    },
+  );
+},
+
                 child: Container(
                   height: 60,
                   width: 60,
