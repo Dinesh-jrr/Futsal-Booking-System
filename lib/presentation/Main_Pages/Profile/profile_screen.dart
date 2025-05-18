@@ -2,6 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:player/presentation/Main_Pages/Profile/payment_history.dart';
+import 'package:player/presentation/Main_Pages/Profile/booking_history.dart';
+import 'package:player/presentation/Main_Pages/Profile/change_password.dart';
+import 'package:player/presentation/Main_Pages/Profile/edit_profile_screen.dart';
+import 'package:player/presentation/Main_Pages/Profile/opponent_finder.dart';
+
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -15,14 +21,6 @@ class ProfileScreen extends StatelessWidget {
         centerTitle: true,
         backgroundColor: Colors.green,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              // Navigate to settings
-            },
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -30,38 +28,39 @@ class ProfileScreen extends StatelessWidget {
           child: Column(
             children: [
               // Profile Image Section
-              Center(
+              const Center(
                 child: Stack(
                   children: [
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 80,
                       backgroundColor: Colors.green,
-                      backgroundImage: AssetImage('assets/images/futsal_pitch.jpg'), // Replace with a dynamic image from user's profile
+                      backgroundImage: AssetImage(
+                          'assets/images/futsal_pitch.jpg'), // Replace with user image
                     ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: CircleAvatar(
-                        radius: 25,
-                        backgroundColor: Colors.green,
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.edit,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                          onPressed: () {
-                            // Handle profile picture edit
-                          },
-                        ),
-                      ),
-                    ),
+                    // Positioned(
+                    //   bottom: 0,
+                    //   right: 0,
+                    //   child: CircleAvatar(
+                    //     radius: 25,
+                    //     backgroundColor: Colors.green,
+                    //     // child: IconButton(
+                    //     //   icon: const Icon(
+                    //     //     Icons.edit,
+                    //     //     color: Colors.white,
+                    //     //     size: 20,
+                    //     //   ),
+                    //     //   onPressed: () {
+                    //     //     // Handle profile picture update
+                    //     //   },
+                    //     // ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
               const SizedBox(height: 20),
 
-              // User Information Section
+              // User Info
               const Text(
                 'Dinesh Singh',
                 style: TextStyle(
@@ -83,11 +82,16 @@ class ProfileScreen extends StatelessWidget {
               // Edit Profile Button
               ElevatedButton(
                 onPressed: () {
-                  // Navigate to edit profile screen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const EditProfileScreen()),
+                  ); // Add your route here
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 60, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
@@ -95,66 +99,97 @@ class ProfileScreen extends StatelessWidget {
                 child: const Text(
                   'Edit Profile',
                   style: TextStyle(fontSize: 18, color: Colors.white),
+                
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 30),
 
-              // Settings Section
-              ListTile(
-                leading: const Icon(Icons.notifications, color: Colors.green),
-                title: const Text(
-                  'Notifications',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                trailing: const Icon(Icons.arrow_forward_ios, color: Colors.grey),
-                onTap: () {
-                  // Navigate to notifications settings
-                },
-              ),
-              const Divider(),
-
+              // Feature Options
               ListTile(
                 leading: const Icon(Icons.lock, color: Colors.green),
                 title: const Text(
-                  'Privacy',
+                  'Change Password',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                trailing: const Icon(Icons.arrow_forward_ios, color: Colors.grey),
+                trailing:
+                    const Icon(Icons.arrow_forward_ios, color: Colors.grey),
                 onTap: () {
-                  // Navigate to privacy settings
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ChangePasswordScreen()),
+                  );
                 },
               ),
               const Divider(),
 
               ListTile(
-                leading: const Icon(Icons.language, color: Colors.green),
+                leading: const Icon(Icons.sports_soccer, color: Colors.green),
                 title: const Text(
-                  'Language',
+                  'Opponent Finder',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                trailing: const Icon(Icons.arrow_forward_ios, color: Colors.grey),
+                trailing:
+                    const Icon(Icons.arrow_forward_ios, color: Colors.grey),
                 onTap: () {
-                  // Navigate to language settings
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const OpponentFinderScreen()),
+                  );
                 },
               ),
               const Divider(),
 
-              // Logout Button
+              ListTile(
+                leading: const Icon(Icons.history, color: Colors.green),
+                title: const Text(
+                  'Booking History',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                trailing:
+                    const Icon(Icons.arrow_forward_ios, color: Colors.grey),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const BookingHistoryScreen()),
+                  );
+                },
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.payment, color: Colors.green),
+                title: const Text(
+                  'My Payments',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                trailing:
+                    const Icon(Icons.arrow_forward_ios, color: Colors.grey),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const MyPaymentsScreen()),
+                  );
+                },
+              ),
+              const Divider(),
+
               const SizedBox(height: 40),
+
+              // Logout Button
               ElevatedButton(
                 onPressed: () async {
                   final prefs = await SharedPreferences.getInstance();
-                  await prefs.remove('auth_token'); // Remove the saved token
-
-                  // Optionally clear everything if needed:
-                  // await prefs.clear();
-
-                  // Navigate to login screen and remove all previous routes
-                  Navigator.pushNamedAndRemoveUntil(context, '/signin', (route) => false);
+                  await prefs.remove('auth_token');
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, '/signin', (route) => false);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
-                  padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 60, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
@@ -162,7 +197,6 @@ class ProfileScreen extends StatelessWidget {
                 child: const Text(
                   'Logout',
                   style: TextStyle(fontSize: 18, color: Colors.white),
-                  
                 ),
               ),
             ],

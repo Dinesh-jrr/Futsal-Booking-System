@@ -102,7 +102,7 @@ class _BookingHistoryState extends State<BookingHistory> {
       appBar: AppBar(
         title: const Text('My Bookings'),
         centerTitle: true,
-        backgroundColor: AppColors.primary,
+        backgroundColor: Colors.green,
         automaticallyImplyLeading: false,
       ),
       body: ListView(

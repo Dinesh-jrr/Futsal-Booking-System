@@ -66,7 +66,7 @@ class _NotificationPageState extends State<NotificationPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Notifications"),
+        title: const Text("Notifications",),
         actions: [
           if (unreadCount > 0)
             Padding(
@@ -83,6 +83,7 @@ class _NotificationPageState extends State<NotificationPage> {
               ),
             )
         ],
+        backgroundColor: Colors.green,
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())

@@ -11,7 +11,8 @@ import 'package:player/presentation/Main_Pages/HomePage/book_now.dart';
 class FutsalDetailScreen extends StatefulWidget {
   final String futsalId;
 
-  const FutsalDetailScreen({Key? key, required this.futsalId}) : super(key: key);
+  const FutsalDetailScreen({Key? key, required this.futsalId})
+      : super(key: key);
 
   @override
   State<FutsalDetailScreen> createState() => _FutsalDetailScreenState();
@@ -75,11 +76,12 @@ class _FutsalDetailScreenState extends State<FutsalDetailScreen> {
 
   Future<void> fetchBookedSlotsForDay() async {
     try {
-      final formattedDate = "${_selectedDay.year}-\${_selectedDay.month.toString().padLeft(2, '0')}-\${_selectedDay.day.toString().padLeft(2, '0')}";
+      final formattedDate =
+          "${_selectedDay.year}-${_selectedDay.month.toString().padLeft(2, '0')}-${_selectedDay.day.toString().padLeft(2, '0')}";
       final response = await http.get(
-        Uri.parse('${AppConfig.baseUrl}/api/bookedslots/${widget.futsalId}/$formattedDate'),
+        Uri.parse(
+            '${AppConfig.baseUrl}/api/bookedslots/${widget.futsalId}/$formattedDate'),
       );
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
@@ -110,7 +112,8 @@ class _FutsalDetailScreenState extends State<FutsalDetailScreen> {
                       title: Row(
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.arrow_back, color: Colors.white),
+                            icon: const Icon(Icons.arrow_back,
+                                color: Colors.white),
                             onPressed: () => Navigator.pop(context),
                           ),
                           Expanded(
@@ -124,7 +127,8 @@ class _FutsalDetailScreenState extends State<FutsalDetailScreen> {
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.favorite_border, color: Colors.white),
+                            icon: const Icon(Icons.favorite_border,
+                                color: Colors.white),
                             onPressed: () {},
                           ),
                           IconButton(
@@ -167,8 +171,10 @@ class _FutsalDetailScreenState extends State<FutsalDetailScreen> {
                       images[index],
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => const Center(
-                        child: Icon(Icons.broken_image, size: 120, color: Colors.grey),
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Center(
+                        child: Icon(Icons.broken_image,
+                            size: 120, color: Colors.grey),
                       ),
                     );
                   },
@@ -191,7 +197,8 @@ class _FutsalDetailScreenState extends State<FutsalDetailScreen> {
           const SizedBox(height: 8),
           RatingBarIndicator(
             rating: 4.5,
-            itemBuilder: (context, _) => const Icon(Icons.star, color: Colors.amber),
+            itemBuilder: (context, _) =>
+                const Icon(Icons.star, color: Colors.amber),
             itemCount: 5,
             itemSize: 24,
           ),
@@ -206,9 +213,11 @@ class _FutsalDetailScreenState extends State<FutsalDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('About', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text('About',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          Text(description, style: TextStyle(color: Colors.grey[600], height: 1.5)),
+          Text(description,
+              style: TextStyle(color: Colors.grey[600], height: 1.5)),
         ],
       ),
     );
@@ -228,8 +237,10 @@ class _FutsalDetailScreenState extends State<FutsalDetailScreen> {
         fetchBookedSlotsForDay();
       },
       calendarStyle: const CalendarStyle(
-        selectedDecoration: BoxDecoration(color: Colors.green, shape: BoxShape.circle),
-        todayDecoration: BoxDecoration(color: Colors.greenAccent, shape: BoxShape.circle),
+        selectedDecoration:
+            BoxDecoration(color: Colors.green, shape: BoxShape.circle),
+        todayDecoration:
+            BoxDecoration(color: Colors.greenAccent, shape: BoxShape.circle),
       ),
     );
   }
@@ -240,7 +251,8 @@ class _FutsalDetailScreenState extends State<FutsalDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Available Time Slots', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text('Available Time Slots',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -249,19 +261,41 @@ class _FutsalDetailScreenState extends State<FutsalDetailScreen> {
               final isBooked = bookedSlots.contains(time);
               final isSelected = _selectedTimeSlot == time;
 
-              return InkWell(
-                onTap: isBooked ? null : () => setState(() => _selectedTimeSlot = time),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: isBooked ? Colors.grey[300] : (isSelected ? Colors.green : Colors.white),
-                    border: Border.all(color: isBooked ? Colors.grey : Colors.green),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    time,
-                    style: TextStyle(
-                      color: isBooked ? Colors.grey : (isSelected ? Colors.white : Colors.green),
+              return AbsorbPointer(
+                absorbing: isBooked,
+                child: Opacity(
+                  opacity: isBooked ? 0.5 : 1.0,
+                  child: InkWell(
+                    onTap: () => setState(() => _selectedTimeSlot = time),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isBooked
+                            ? Colors.grey[300]
+                            : (isSelected ? Colors.green : Colors.white),
+                        border: Border.all(
+                            color: isBooked ? Colors.red : Colors.green),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            time,
+                            style: TextStyle(
+                              color: isBooked
+                                  ? Colors.red
+                                  : (isSelected ? Colors.white : Colors.green),
+                            ),
+                          ),
+                          if (isBooked) ...[
+                            const SizedBox(width: 6),
+                            const Icon(Icons.lock,
+                                size: 16, color: Colors.red),
+                          ]
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -292,13 +326,16 @@ class _FutsalDetailScreenState extends State<FutsalDetailScreen> {
                   ),
                 ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: _selectedTimeSlot == null ? Colors.grey : AppColors.primary,
+          backgroundColor:
+              _selectedTimeSlot == null ? Colors.grey : AppColors.primary,
           padding: const EdgeInsets.symmetric(vertical: 24.0),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
         ),
         child: const Text(
           "Book Now",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(
+              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
     );
