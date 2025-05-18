@@ -1,4 +1,8 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
+import 'package:player/presentation/Main_Pages/Chats/chat_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class BookingDetails extends StatelessWidget {
@@ -50,12 +54,14 @@ class BookingDetails extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.sports_soccer, size: 32, color: Colors.teal),
+                      const Icon(Icons.sports_soccer,
+                          size: 32, color: Colors.teal),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          booking['futsalName'] ?? 'Futsal Match',
-                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                          booking['futsalId']?['futsalName'] ?? 'Futsal Match',
+                          style: const TextStyle(
+                              fontSize: 22, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
@@ -63,11 +69,13 @@ class BookingDetails extends StatelessWidget {
                   const SizedBox(height: 20),
                   Row(
                     children: [
-                      const Icon(Icons.calendar_today, size: 20, color: Colors.grey),
+                      const Icon(Icons.calendar_today,
+                          size: 20, color: Colors.grey),
                       const SizedBox(width: 8),
                       Text(formattedDate, style: const TextStyle(fontSize: 16)),
                       const SizedBox(width: 20),
-                      const Icon(Icons.access_time, size: 20, color: Colors.grey),
+                      const Icon(Icons.access_time,
+                          size: 20, color: Colors.grey),
                       const SizedBox(width: 8),
                       Text(booking['selectedTimeSlot'] ?? 'N/A',
                           style: const TextStyle(fontSize: 16)),
@@ -79,7 +87,8 @@ class BookingDetails extends StatelessWidget {
                     children: [
                       Chip(
                         avatar: Icon(statusIcon, color: Colors.white, size: 18),
-                        label: Text(status, style: const TextStyle(color: Colors.white)),
+                        label: Text(status,
+                            style: const TextStyle(color: Colors.white)),
                         backgroundColor: statusColor,
                       ),
                       if (showCancel)
@@ -87,10 +96,12 @@ class BookingDetails extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 10),
                           ),
                           icon: const Icon(Icons.cancel, size: 18),
-                          label: const Text('Cancel', style: TextStyle(fontSize: 14)),
+                          label: const Text('Cancel',
+                              style: TextStyle(fontSize: 14)),
                           onPressed: () {
                             showDialog(
                               context: context,
@@ -107,9 +118,11 @@ class BookingDetails extends StatelessWidget {
                                     onPressed: () {
                                       Navigator.pop(context);
                                       // TODO: Trigger cancel logic
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
                                         const SnackBar(
-                                            content: Text('Booking cancelled successfully')),
+                                            content: Text(
+                                                'Booking cancelled successfully')),
                                       );
                                     },
                                     child: const Text('Yes, Cancel'),
@@ -145,7 +158,8 @@ class BookingDetails extends StatelessWidget {
                   SizedBox(height: 10),
                   Text(
                     'This is a friendly futsal match. Be on time and bring your futsal shoes. The venue will provide bibs and water. Make sure to warm up before the game!',
-                    style: TextStyle(fontSize: 15, color: Colors.black87, height: 1.4),
+                    style: TextStyle(
+                        fontSize: 15, color: Colors.black87, height: 1.4),
                   ),
                 ],
               ),
@@ -165,24 +179,53 @@ class BookingDetails extends StatelessWidget {
                 children: [
                   // Message Button
                   ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Theme.of(context).primaryColor,
-                      side: BorderSide(color: Theme.of(context).primaryColor),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    ),
-                    icon: const Icon(Icons.message),
-                    label: const Text(
-                      'Send Message',
-                      style: TextStyle(fontSize: 15),
-                    ),
-                    onPressed: () {
-                      // TODO: Navigate to chat screen
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Navigate to chat screen')),
-                      );
-                    },
-                  ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Theme.of(context).primaryColor,
+                        side: BorderSide(color: Theme.of(context).primaryColor),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
+                      ),
+                      icon: const Icon(Icons.message),
+                      label: const Text(
+                        'Send Message',
+                        style: TextStyle(fontSize: 15),
+                      ),
+                      onPressed: () async {
+                        final futsal = booking['futsalId'];
+                        final owner = futsal != null ? futsal['ownerId'] : null;
+
+                        if (owner == null || owner['_id'] == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Owner not found')),
+                          );
+                          return;
+                        }
+
+                        final prefs = await SharedPreferences.getInstance();
+                        final currentUserId = prefs.getString('user_id');
+
+                        if (currentUserId == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('User ID not found')),
+                          );
+                          return;
+                        }
+
+                        final ownerId = owner['_id'];
+                        final ownerName = owner['name'] ?? 'Owner';
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatScreen(
+                              playerId: currentUserId,
+                              receiverId: ownerId,
+                              receiverName: ownerName,
+                            ),
+                          ),
+                        );
+                      }),
 
                   // Location Button
                   ElevatedButton.icon(
@@ -190,7 +233,8 @@ class BookingDetails extends StatelessWidget {
                       backgroundColor: Colors.white,
                       foregroundColor: Theme.of(context).primaryColor,
                       side: BorderSide(color: Theme.of(context).primaryColor),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
                     ),
                     icon: const Icon(Icons.location_on),
                     label: const Text(
@@ -209,7 +253,8 @@ class BookingDetails extends StatelessWidget {
                         await launchUrl(Uri.parse(googleMapsUrl));
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Location not available')),
+                          const SnackBar(
+                              content: Text('Location not available')),
                         );
                       }
                     },
