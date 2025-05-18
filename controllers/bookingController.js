@@ -55,7 +55,13 @@ exports.createBooking = async (req, res) => {
 exports.getUserBookings = async (req, res) => {
   try {
     const userId = req.params.userId;
-    const userBookings = await Booking.find({ userId });
+
+    // Populate futsalId and then populate ownerId inside it
+    const userBookings = await Booking.find({ userId })
+      .populate({
+        path: 'futsalId',
+        populate: { path: 'ownerId', select: 'name email _id' }, // include owner
+      });
 
     res.status(200).json({
       message: 'User bookings retrieved successfully!',
@@ -68,6 +74,7 @@ exports.getUserBookings = async (req, res) => {
     });
   }
 };
+
 
 // ✅ Get all bookings for a futsal owner
 exports.getOwnerBookings = async (req, res) => {
