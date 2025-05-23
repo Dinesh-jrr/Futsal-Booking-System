@@ -122,6 +122,32 @@ exports.loginUser = async (req, res) => {
   }
 };
 
+// Reset password
+exports.resetPassword = async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+
+  try {
+    const record = await EmailOtp.findOne({ email, otp });
+    if (!record) return res.status(400).json({ message: 'Invalid or expired OTP' });
+
+    if (Date.now() > record.expiresAt) {
+      await EmailOtp.deleteOne({ _id: record._id });
+      return res.status(400).json({ message: 'OTP expired' });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+    await EmailOtp.deleteOne({ _id: record._id });
+
+    res.status(200).json({ message: 'Password reset successful' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 // Controller function to fetch user details by userId
 exports.getUserDetails = async (req, res) => {
   try {
@@ -164,65 +190,41 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-// Forgot password
-exports.forgotPassword = async (req, res) => {
-  const { email } = req.body;
+// // Forgot password
+// exports.forgotPassword = async (req, res) => {
+//   const { email } = req.body;
 
-  try {
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: 'User not found' });
+//   try {
+//     const user = await User.findOne({ email });
+//     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+//     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+//     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-    await EmailOtp.deleteMany({ email });
-    await EmailOtp.create({ email, otp, expiresAt });
+//     await EmailOtp.deleteMany({ email });
+//     await EmailOtp.create({ email, otp, expiresAt });
 
-    const transporter = nodemailer.createTransport({
-      service: 'Gmail',
-      auth: {
-        user: 'your_email@gmail.com',
-        pass: 'fnwu dytl gzqv jlqz',
-      },
-    });
+//     const transporter = nodemailer.createTransport({
+//       service: 'Gmail',
+//       auth: {
+//         user: 'your_email@gmail.com',
+//         pass: 'fnwu dytl gzqv jlqz',
+//       },
+//     });
 
-    await transporter.sendMail({
-      to: email,
-      subject: 'Your OTP for Password Reset',
-      html: `<h2>Your OTP is ${otp}</h2><p>It is valid for 10 minutes.</p>`,
-    });
+//     await transporter.sendMail({
+//       to: email,
+//       subject: 'Your OTP for Password Reset',
+//       html: `<h2>Your OTP is ${otp}</h2><p>It is valid for 10 minutes.</p>`,
+//     });
 
-    res.status(200).json({ message: 'OTP sent to email' });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
+//     res.status(200).json({ message: 'OTP sent to email' });
+//   } catch (error) {
+//     res.status(500).json({ message: 'Server error', error: error.message });
+//   }
+// };
 
-// Reset password
-exports.resetPassword = async (req, res) => {
-  const { email, otp, newPassword } = req.body;
 
-  try {
-    const record = await EmailOtp.findOne({ email, otp });
-    if (!record) return res.status(400).json({ message: 'Invalid or expired OTP' });
-
-    if (Date.now() > record.expiresAt) {
-      await EmailOtp.deleteOne({ _id: record._id });
-      return res.status(400).json({ message: 'OTP expired' });
-    }
-
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: 'User not found' });
-
-    user.password = await bcrypt.hash(newPassword, 10);
-    await user.save();
-    await EmailOtp.deleteOne({ _id: record._id });
-
-    res.status(200).json({ message: 'Password reset successful' });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
 
 //send otp
 exports.sendOtpToEmail = async (req, res) => {

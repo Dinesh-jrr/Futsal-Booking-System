@@ -7,7 +7,7 @@ const matchRequestSchema = new mongoose.Schema({
   location: { type: String }, // Optional
   status: { type: String, enum: ['pending', 'matched', 'cancelled'], default: 'pending' },
   matchedWith: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now ,expires:86400}
 });
 
 module.exports = mongoose.model('MatchRequest', matchRequestSchema);

@@ -11,6 +11,7 @@ exports.createPayment = async (req, res) => {
       booking,
       transactionUuid,
       amount,
+      totalAmount,
       status,
       paymentGateway
     } = req.body;
@@ -29,6 +30,7 @@ exports.createPayment = async (req, res) => {
       booking,
       transactionUuid,
       amount,
+      totalAmount,
       status: status || "Pending",
       paymentGateway: paymentGateway || "eSewa"
     });
@@ -136,4 +138,27 @@ exports.getPaymentsByOwner = async (req, res) => {
   }
 };
   
+
+// Get all payments made by a specific user
+exports.getPaymentsByUser = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    const payments = await Payment.find({ user: userId })
+      .populate("booking", "futsalName selectedDay selectedTimeSlot")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      message: "Payments fetched successfully",
+      payments,
+    });
+  } catch (error) {
+    console.error("Error fetching user payments:", error);
+    res.status(500).json({
+      message: "Failed to fetch user payments",
+      error: error.message,
+    });
+  }
+};
+
   

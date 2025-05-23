@@ -18,22 +18,22 @@ const protect = require('../middleware/authMiddleware.js');
 
 const router = express.Router();
 
+// ✅ Static routes first
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.get('/me', protect(), getCurrentUser);
 router.get('/allUsers', getAllUsers);
 router.get('/email/:email', getUserByEmail);
 router.get('/search-email', searchUsersByEmail);
-router.get('/:userId',getUserDetails);
 
-router.post('/forgot-password', forgotPassword);
-router.post('/reset-password', resetPassword);
-router.put("/change-password/:userId", changePassword);
-
-// ✅ Add this route for verifying email during registration
+// router.post('/forgot-password', forgotPassword);
+router.post('/password/reset', resetPassword);
 router.post('/verify-email-otp', verifyEmailOtp);
-router.post('/send-otp', sendOtpToEmail);
-router.put('/profile/:userId',updateUserProfile);
+router.post('/otp/send', sendOtpToEmail);
+router.put('/change-password/:userId', changePassword);
+router.put('/profile/:userId', updateUserProfile);
 
+// ⛔️ This MUST be last
+router.get('/:userId', getUserDetails);
 
 module.exports = router;

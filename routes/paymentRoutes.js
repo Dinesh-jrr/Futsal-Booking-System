@@ -14,5 +14,7 @@ router.get("/getAllPayments", paymentController.getAllPayments);
 router.get("/owner/:ownerId", paymentController.getPaymentsByOwner);
 
 // router.get('/payments', paymentController.getAllPayments);
+router.get('/user/:userId', paymentController.getPaymentsByUser);
+
 
 module.exports = router;

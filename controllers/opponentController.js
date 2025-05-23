@@ -12,6 +12,18 @@ exports.opponentFind = async (req, res) => {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const todayRequestCount = await MatchRequest.countDocuments({
+      userId,
+      createdAt: { $gte: startOfDay }
+    });
+
+    if (todayRequestCount >= 3) {
+      return res.status(429).json({ message: "Daily request limit reached (3 per day)." });
+    }
+
     // Try to match with any of the preferred time slots
     for (let slot of preferredTimeSlots) {
       const existingMatch = await MatchRequest.findOne({
@@ -112,3 +124,24 @@ exports.deleteRequest= async (req, res) => {
   }
 };
 
+
+
+exports.getRequestsByUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({ message: 'Missing userId parameter' });
+    }
+
+    const requests = await MatchRequest.find({ userId }).sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      requests,
+    });
+  } catch (error) {
+    console.error("❌ Error fetching user requests:", error);
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
