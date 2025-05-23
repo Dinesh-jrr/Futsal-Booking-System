@@ -96,7 +96,6 @@ class BookNow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double totalCost = 10; // Example total cost
     double advancePayment = totalCost * 0.2;
 
     return Scaffold(
@@ -182,7 +181,7 @@ class BookNow extends StatelessWidget {
           children: [
             Text('Total Cost: NPR ${totalCost.toStringAsFixed(2)}', style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 8),
-            Text('Advance Payment (1%): NPR ${advancePayment.toStringAsFixed(2)}', style: const TextStyle(fontSize: 16)),
+            Text('Advance Payment (20%): NPR ${advancePayment.toStringAsFixed(2)}', style: const TextStyle(fontSize: 16)),
           ],
         ),
       ),

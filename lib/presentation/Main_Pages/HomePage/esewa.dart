@@ -173,6 +173,7 @@ class Esewa {
         "booking": bookingId,
         "transactionUuid": result.refId,
         "amount": advancePayment,
+        "totalAmount": totalCost,
         "status": "Pending",
         "paymentGateway": "eSewa",
       }),

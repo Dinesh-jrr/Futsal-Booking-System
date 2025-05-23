@@ -3,14 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:player/core/config/constants.dart';
 import 'package:player/presentation/Main_Pages/Notifications/notification_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:player/core/theme/app_colors.dart';
 import '../HomePage/futsal_detail_screen.dart';
 import '../../Main_Pages/OppoentFinder/opponent_finder_page.dart'; // Add this import
 
+String userName = '';
+String? profilePic;
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
   @override
   State<HomePage> createState() => _HomePageState();
 }
@@ -24,7 +27,16 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _loadUserInfo();
     fetchFutsals();
+  }
+
+  Future<void> _loadUserInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userName = prefs.getString('user_name') ?? "User";
+      profilePic = prefs.getString('profile_pic');
+    });
   }
 
   Future<void> fetchFutsals() async {
@@ -88,16 +100,24 @@ class _HomePageState extends State<HomePage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Row(
+                        Row(
                           children: [
                             CircleAvatar(
+                              radius: 22,
                               backgroundColor: Colors.white,
-                              child: Icon(Icons.person, color: Colors.green),
+                              backgroundImage:
+                                  (profilePic != null && profilePic!.isNotEmpty)
+                                      ? NetworkImage(profilePic!)
+                                      : null,
+                              child: (profilePic == null || profilePic!.isEmpty)
+                                  ? const Icon(Icons.person,
+                                      color: Colors.green)
+                                  : null,
                             ),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             Text(
-                              "Hello, Dinesh!",
-                              style: TextStyle(
+                              "Hello, $userName!",
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -110,7 +130,11 @@ class _HomePageState extends State<HomePage> {
                               color: Colors.white),
                           iconSize: 40.0,
                           onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context)=>const NotificationPage()));
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const NotificationPage()));
                           },
                         ),
                       ],

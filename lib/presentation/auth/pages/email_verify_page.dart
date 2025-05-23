@@ -76,7 +76,7 @@ class _VerifyEmailOtpPageState extends State<VerifyEmailOtpPage> {
   Future<void> _resendOtp() async {
     if (!_canResend) return;
 
-    final url = Uri.parse('${AppConfig.baseUrl}/api/users/send-otp');
+    final url = Uri.parse('${AppConfig.baseUrl}/api/users/otp/send');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -206,7 +206,7 @@ class _VerifyEmailOtpPageState extends State<VerifyEmailOtpPage> {
                       ? "Resend OTP"
                       : "Resend in $_secondsRemaining sec",
                   style: TextStyle(
-                    color: _canResend ? Colors.blue : Colors.grey,
+                    color: _canResend ? Colors.green : Colors.grey,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

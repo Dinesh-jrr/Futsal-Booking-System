@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:player/core/config/constants.dart';
+import 'package:player/presentation/auth/pages/signin.dart';
 
 class VerifyOtpPage extends StatefulWidget {
   final String email;
@@ -33,7 +34,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
     setState(() => isLoading = true);
 
     final response = await http.post(
-      Uri.parse('${AppConfig.baseUrl}/api/users/reset-password'),
+      Uri.parse('${AppConfig.baseUrl}/api/users/password/reset'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'email': widget.email,
@@ -50,7 +51,10 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
       );
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) {
-          Navigator.pushReplacementNamed(context, '/login');
+          Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(builder: (context) => const SignIn()),
+);
         }
       });
     } else {

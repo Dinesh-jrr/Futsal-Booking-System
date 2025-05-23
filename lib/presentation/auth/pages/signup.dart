@@ -78,7 +78,7 @@ class _SignUpState extends State<SignUp> {
   Future<void> _handleSignUp(BuildContext context) async {
     if (_formKey.currentState?.validate() ?? false) {
       final email = _emailController.text.trim();
-      final url = Uri.parse('${AppConfig.baseUrl}/users/register');
+      final url = Uri.parse('${AppConfig.baseUrl}/api/users/register');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -88,9 +88,15 @@ class _SignUpState extends State<SignUp> {
           'phoneNumber': _phoneController.text,
           'password': _passwordController.text,
         }),
+        
       );
-
-      final decoded = json.decode(response.body);
+      print("STATUS: ${response.statusCode}");
+print("BODY: ${response.body}");
+print("HEADERS: ${response.headers}");
+      
+      if (response.headers['content-type']?.contains('application/json') == true) {
+  final decoded = json.decode(response.body);
+  print(decoded);
 
       if (response.statusCode == 201) {
         final prefs = await SharedPreferences.getInstance();
@@ -98,7 +104,7 @@ class _SignUpState extends State<SignUp> {
         await prefs.setString('verifying_email', email);
 
         final otpResponse = await http.post(
-          Uri.parse('${AppConfig.baseUrl}/api/users/send-otp'),
+          Uri.parse('${AppConfig.baseUrl}/api/users/otp/send'),
           headers: {'Content-Type': 'application/json'},
           body: json.encode({'email': email}),
         );
@@ -134,7 +140,7 @@ class _SignUpState extends State<SignUp> {
         await prefs.setString('verifying_email', email);
 
         await http.post(
-          Uri.parse('${AppConfig.baseUrl}/api/users/send-otp'),
+          Uri.parse('${AppConfig.baseUrl}/api/users/otp/send'),
           headers: {'Content-Type': 'application/json'},
           body: json.encode({'email': email}),
         );
@@ -164,6 +170,7 @@ class _SignUpState extends State<SignUp> {
         );
       }
     }
+  }
   }
 
   @override

@@ -116,11 +116,11 @@ class _NotificationPageState extends State<NotificationPage> {
                                     tooltip: 'Mark as Read',
                                     onPressed: () => markAsRead(notif['_id']),
                                   ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete, color: Colors.red),
-                                  tooltip: 'Delete',
-                                  onPressed: () => deleteNotification(notif['_id']),
-                                ),
+                                // IconButton(
+                                //   icon: const Icon(Icons.delete, color: Colors.red),
+                                //   tooltip: 'Delete',
+                                //   onPressed: () => deleteNotification(notif['_id']),
+                                // ),
                               ],
                             ),
                           ),

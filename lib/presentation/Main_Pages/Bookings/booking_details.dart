@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:player/core/theme/app_colors.dart';
 import 'package:player/presentation/Main_Pages/Chats/chat_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -26,8 +27,7 @@ class BookingDetails extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Booking Details'),
-        backgroundColor: Colors.teal,
-        centerTitle: true,
+        backgroundColor:Colors.green,
       ),
       backgroundColor: const Color(0xFFF4F4F4),
       body: SingleChildScrollView(

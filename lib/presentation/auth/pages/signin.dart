@@ -52,6 +52,7 @@ class _SignInState extends State<SignIn> {
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('auth_token', token);
           await prefs.setString('user_id', responseBody['user']['id']);
+          await prefs.setString('user_name', responseBody['user']['name']);
           await prefs.setBool('isLoggedIn', true);
           final fcmToken = await FirebaseMessaging.instance.getToken();
           if (fcmToken != null) {

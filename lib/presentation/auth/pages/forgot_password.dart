@@ -33,7 +33,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       isLoading = true;
     });
 
-    final url = Uri.parse('${AppConfig.baseUrl}/api/users/forgot-password');
+    final url = Uri.parse('${AppConfig.baseUrl}/api/users/otp/send');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
